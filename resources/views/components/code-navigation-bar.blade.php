@@ -15,7 +15,7 @@
         </div>
         <a class="btn btn-ghost text-xl">Coding Editor</a>
     </div>
-    
+
     {{-- for big screen --}}
     <div class="navbar-center hidden lg:flex">
         <ul class="menu menu-horizontal px-1">
@@ -23,7 +23,15 @@
             <li><a href="{{ url('code-editor') }}">Code Editor</a></li>
         </ul>
     </div>
-    <div class="navbar-end">
-        <a class="btn" href="{{ url('home') }}">Log out</a>
-    </div>
+
+    <form method="POST" action="{{ url('/logout') }}" class="navbar-end flex gap-3">
+        @csrf
+        @if (Auth::check())
+            <p>Welcome, {{ auth()->user()->name }}</p>
+        @endif
+        <button type="submit" class="btn">
+
+            Logout
+        </button>
+    </form>
 </div>

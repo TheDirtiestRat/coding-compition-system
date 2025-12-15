@@ -17,6 +17,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+
+            // the user type
+            $table->string('user_type')->default('user');
+
             $table->rememberToken();
             $table->timestamps();
         });
@@ -45,5 +49,9 @@ return new class extends Migration
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+
+        // Schema::table('users', function (Blueprint $table) {
+        //     $table->dropColumn('user_type');
+        // });
     }
 };

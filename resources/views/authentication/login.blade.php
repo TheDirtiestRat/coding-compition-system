@@ -17,30 +17,38 @@
         <h1 class="mx-auto text-4xl">Coding Compition</h1>
 
         {{-- login form --}}
-        <fieldset class="fieldset bg-base-200 border-base-300 rounded-xl w-xs border p-4 mx-auto">
-            <legend class="fieldset-legend text-2xl">Login</legend>
+        <form method="POST" action="{{ url('/login') }}">
+            @csrf
+            <fieldset class="fieldset bg-base-200 border-base-300 rounded-xl w-xs shadow border p-4 mx-auto">
+                <legend class="fieldset-legend text-2xl">Login</legend>
+                {{-- alert --}}
+                @if (session('error'))
+                    <div id="alert_container" class="w-full flex-col gap-1">
+                        <div role="alert" id="alert_error" class="alert alert-error">
+                            <span>{{ session('error') }}.</span>
+                        </div>
+                    </div>
+                @endif
 
-            {{-- alert --}}
-            <div id="alert_container" class="w-full flex-col gap-1">
-                <div role="alert" id="alert_error" class="alert alert-error">
-                    <span>Login Authentication  Failed.</span>
+                <label class="label">Username</label>
+                <input type="text" class="input" name="username" placeholder="Username" />
+                @error('username')
+                    <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
+                @enderror
+
+                <label class="label">Password</label>
+                <input type="password" class="input" name="password" placeholder="Password" />
+                @error('password')
+                    <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
+                @enderror
+
+                <button type="submit" class="btn btn-neutral mt-4 w-full">Login</button>
+
+                <div class="flex flex-row justify-center mt-3">
+                    <a href="{{ url('/') }}" class="link">Go Home</a>
                 </div>
-            </div>
-
-            <label class="label">Email</label>
-            <input type="email" class="input" placeholder="Email" />
-
-            <label class="label">Password</label>
-            <input type="password" class="input" placeholder="Password" />
-
-            <a href="{{ url('code-problems') }}" class="w-full">
-                <button class="btn btn-neutral mt-4 w-full">Login</button>
-            </a>
-
-            <div class="flex flex-row justify-center">
-                <a href="{{ url('/') }}" class="link">Go Home</a>
-            </div>
-        </fieldset>
+            </fieldset>
+        </form>
     </div>
 </body>
 

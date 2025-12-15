@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        // adding this
+        'user_type',
     ];
 
     /**
@@ -44,5 +46,21 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function candidates()
+    {
+        return $this->hasMany(\App\Models\Candidates::class);
+    }
+
+    // Optional: Add helper methods
+    public function isAdmin()
+    {
+        return $this->user_type === 'admin';
+    }
+
+    public function isUser()
+    {
+        return $this->user_type === 'user';
     }
 }
