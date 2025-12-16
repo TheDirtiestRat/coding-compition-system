@@ -7,6 +7,7 @@ use App\Http\Controllers\CodeCheckerController;
 use App\Http\Controllers\CompilerController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CandidateController;
 
 Route::get('/', function () {
     return view('pages.home');
@@ -29,16 +30,17 @@ Route::middleware(['auth', 'is.admin'])->group(function () {
     Route::post('/admin/add-candidate', [AdminController::class, 'add_candidate']);
     Route::post('/admin/update-candidate', [AdminController::class, 'update_candidate']);
     Route::delete('/admin/delete-candidate/{candidate_id}', [AdminController::class, 'delete_candidate']);
+
+    Route::get('/admin/api/get-challenge-details/{id}', [AdminController::class, 'get_challenge_details']);
+    Route::post('/admin/create-challenge', [AdminController::class, 'create_challenge']);
+    Route::post('/admin/update-challenge', [AdminController::class, 'update_challenge']);
+    Route::delete('/admin/delete-challenge/{id}', [AdminController::class, 'delete_challenge']);
 });
 
 // user side pages
 Route::middleware('auth')->group(function () {
-    Route::get('/code-editor', function () {
-        return view('pages.code-editor');
-    });
-    Route::get('/code-problems', function () {
-        return view('pages.code-problems');
-    });
+    Route::get('/code-editor', [CandidateController::class, 'open_code_editor']);
+    Route::get('/code-problems', [CandidateController::class, 'code_problems']);
 
     // to run server side code on my server device
     Route::post('/verify-code-challenge', [CodeCheckerController::class, 'checkCodedText']);

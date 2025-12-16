@@ -11,7 +11,7 @@
         </div>
     </div>
     <div class="flex md:flex-row flex-col-reverse h-auto w-full gap-3">
-        <div class="card bg-base-300 border border-gray-500 flex flex-col">
+        <div class="card bg-base-300 flex flex-col">
             {{-- <div class="card bg-base-300 rounded-box shadow border border-gray-500"> --}}
             {{-- top --}}
             <div class="card bg-base-300 rounded-t-2xl basis-auto grid grid-cols-4 gap-2 p-2">
@@ -40,12 +40,12 @@
             </div>
         </div>
         <div class="flex w-full flex-col h-full">
-            <div class="card bg-base-300 rounded-box h-[300px] border border-gray-500 p-3">
+            <div class="card bg-base-300 rounded-box h-[300px] shadow p-3">
                 Problem Description
             </div>
             <div class="divider divider-start">Code Output</div>
             <div id="code_output_area"
-                class="card bg-base-300 rounded-box h-[300px] w-full border border-gray-500 p-3 text-wrap break-all">
+                class="card bg-base-300 rounded-box h-[300px] w-full shadow p-3 text-wrap break-all">
                 This is where the output of the code will be.
             </div>
         </div>

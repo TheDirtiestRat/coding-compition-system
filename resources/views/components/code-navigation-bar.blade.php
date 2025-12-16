@@ -1,4 +1,4 @@
-<div class="navbar bg-base-300 shadow border border-gray-500 rounded-xl">
+<div class="navbar bg-base-300 shadow rounded-xl">
     {{-- for small screen --}}
     <div class="navbar-start">
         <div class="dropdown">

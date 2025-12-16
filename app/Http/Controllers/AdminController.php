@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Candidates;
 use App\Models\Challenges;
 use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
@@ -101,5 +102,90 @@ class AdminController extends Controller
         $challenges = Challenges::latest()->get();
 
         return view('admin.challenges', compact('challenges'));
+    }
+
+    public function get_challenge_details($id)
+    {
+        $challenge = Challenges::where('id', "=", $id)->get();
+        // $result = $challenge->to->toJson(JSON_PRETTY_PRINT);
+        return response()->json($challenge);
+    }
+
+    public function create_challenge(Request $request)
+    {
+        $validatedData = $request->validate([
+            // 'challenge_id' => 'required|exists:challenges,id',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'difficulty' => 'required',
+            'points' => 'required',
+            'file_answer_key' => 'required',
+        ]);
+
+        try {
+            // Save answer key file
+            $path = "";
+            if ($request->hasFile('file_answer_key')) {
+                $answer_key_file = $request->file('file_answer_key');
+                $filename = uniqid('answer_key_' . trim($validatedData['title'])) . '.' . $answer_key_file->getClientOriginalExtension();
+                $path = $answer_key_file->storeAs('master-files', $filename, 'local');
+            }
+
+            $challenge = Challenges::create([
+                'title' => $validatedData['title'],
+                'description' => $validatedData['description'],
+                'difficulty' => $validatedData['difficulty'],
+                'points' => $validatedData['points'],
+                'challege_key_file_path' => $path,
+            ]);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error creating the Challenge: ' . $e->getMessage())->withInput();
+        }
+
+        return redirect('/admin/challenges')->with('success', 'A Challenge is added!');
+    }
+
+    public function update_challenge(Request $request)
+    {
+        $validatedData = $request->validate([
+            'challenge_id' => 'required|exists:challenges,id',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'difficulty' => 'required',
+            'points' => 'required',
+            // 'file_answer_key' => 'required',
+        ]);
+
+        try {
+            $challenge = Challenges::findOrFail($validatedData['challenge_id']);
+
+            $challenge->update([
+                'title' => $validatedData['title'],
+                'description' => $validatedData['description'],
+                'difficulty' => $validatedData['difficulty'],
+                'points' => $validatedData['points'],
+            ]);
+        } catch (\Exception $e) {
+            return redirect('/admin/challenges')->with('error', 'Error updating the Challenge: ' . $e->getMessage());
+        }
+
+        return redirect('/admin/challenges')->with('success', 'A Challenge is updated successfully!');
+    }
+
+    public function delete_challenge(string $id)
+    {
+        $challenge = Challenges::where('id', $id)->first();
+
+        // Delete the candidate record
+        Challenges::destroy($id);
+
+
+        // deletets the uploaded files
+        if (Storage::disk('local')->exists('master-files/' . $challenge->challege_key_file_path)) {
+            Storage::disk('local')->delete('master-files/' . $challenge->challege_key_file_path);
+        }
+
+        // Redirect back with a success message
+        return redirect('/admin/challenges')->with('success', 'A Challenge is deleted successfully.');
     }
 }
