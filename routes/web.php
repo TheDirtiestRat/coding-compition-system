@@ -40,10 +40,13 @@ Route::middleware(['auth', 'is.admin'])->group(function () {
 // user side pages
 Route::middleware('auth')->group(function () {
     Route::get('/code-editor', [CandidateController::class, 'open_code_editor']);
+    Route::get('/code-editor/{challenge_id}', [CandidateController::class, 'open_code_editor']);
     Route::get('/code-problems', [CandidateController::class, 'code_problems']);
 
+    Route::post('/api/verify-code-challenge', [CandidateController::class, 'verifySubmittedCode']);
+    Route::get('/api/get-challenge-details/{id}', [CandidateController::class, 'get_challenge_details']);
     // to run server side code on my server device
-    Route::post('/verify-code-challenge', [CodeCheckerController::class, 'checkCodedText']);
+    // Route::post('/api/verify-code-challenge', [CodeCheckerController::class, 'checkCodedText']);
     Route::post('/run-python-code', [CompilerController::class, 'run_python_code'])->middleware('web');
     Route::post('/run-java-code', [CompilerController::class, 'run_java_code'])->middleware('web');
 });

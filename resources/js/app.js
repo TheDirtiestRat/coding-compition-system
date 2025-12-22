@@ -103,13 +103,14 @@ function runClientCode(code) {
 }
 
 // code verify function
-function verify_code(code) {
+function verify_code(code, id) {
     const outputAlert = document.getElementById("alert_container");
     const outputAlertError = document.getElementById("alert_error");
     const outputAlertSuccess = document.getElementById("alert_success");
+    const challenge_id = id;
     const submittedCode = code;
 
-    fetch("/verify-code-challenge", {
+    fetch("/api/verify-code-challenge", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -119,27 +120,40 @@ function verify_code(code) {
                 .getAttribute("content"),
         },
         body: JSON.stringify({
+            challenge_id: challenge_id,
             submitted_text: submittedCode,
         }),
     })
-        .then((response) => response.json())
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then((data) => {
-            console.log(data);
-            outputAlert.classList.remove("hidden")
-            outputAlert.classList.add("flex")
+            // console.log(data);
+            outputAlert.classList.remove("hidden");
+            outputAlert.classList.add("flex");
             if (data.match) {
                 // alert("Code Verified!");
-                const spanAlertSuccess = document.getElementById("success_alert_text");
-                outputAlertError.classList.add("hidden")
-                outputAlertSuccess.classList.remove("hidden")
-                spanAlertSuccess.innerText = "Code Verified! " + data.message
+                const spanAlertSuccess =
+                    document.getElementById("success_alert_text");
+                outputAlertError.classList.add("hidden");
+                outputAlertSuccess.classList.remove("hidden");
+                spanAlertSuccess.innerText = "Code Verified! " + data.message;
             } else {
                 // alert("Verification Failed.");
-                outputAlertSuccess.classList.add("hidden")
-                outputAlertError.classList.remove("hidden")
+                outputAlertSuccess.classList.add("hidden");
+                outputAlertError.classList.remove("hidden");
             }
         })
-        .catch((error) => console.error("Error:", error));
+        .catch((error) => {
+            console.error("Error:", error);
+            outputAlert.classList.remove("hidden");
+            outputAlert.classList.add("flex");
+            outputAlertSuccess.classList.add("hidden");
+            outputAlertError.classList.remove("hidden");
+        });
 }
 
 // --- Main DOM Content Loaded Handler ---
@@ -211,14 +225,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // run the code verify button
-    document.getElementById("check_code_btn")?.addEventListener("click", () => {
-        if (!editorInstance) {
-            console.error("Monaco Editor not initialized.");
-            return;
-        }
-        const code = editorInstance.getValue();
-        verify_code(code);
-    });
+    document
+        .getElementById("check_code_btn")
+        ?.addEventListener("click", (event) => {
+            if (!editorInstance) {
+                console.error("Monaco Editor not initialized.");
+                return;
+            }
+            const code = editorInstance.getValue();
+
+            verify_code(code, event.target.value);
+        });
 
     console.log(`Initial Setup: ${currentLanguage} - ${currentTheme}`);
 });

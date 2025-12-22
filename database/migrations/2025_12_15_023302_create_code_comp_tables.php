@@ -29,6 +29,15 @@ return new class extends Migration
             $table->text('challege_key_file_path')->nullable(false);
             $table->timestamps();
         });
+
+        Schema::create('solved_challenges', function (Blueprint $table) {
+            $table->id();
+            
+            $table->foreignId('candidate_id')->constrained('candidates')->onDelete('cascade');
+            $table->foreignId('challenge_id')->constrained('challenges')->onDelete('cascade');
+
+            $table->timestamps();
+        });
     }
 
     /**
@@ -38,5 +47,6 @@ return new class extends Migration
     {
         Schema::dropIfExists('candidates');
         Schema::dropIfExists('challenges');
+        Schema::dropIfExists('solved_challenges');
     }
 };

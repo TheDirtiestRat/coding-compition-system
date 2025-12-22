@@ -32,22 +32,22 @@ class DatabaseSeeder extends Seeder
             'password' => 'user',
         ]);
 
-        Candidates::factory(10)->create();
+        Candidates::factory(5)->create();
 
         Challenges::factory()->create([
-            'title' => "First Challenge",
-            'description' => "Your goal is to create a Hello world program using python script.",
-            'points' => 50,
+            'title' => "Challenge A",
+            'description' => 'Your goal is to create a "Hello world" program using Java script.',
+            'points' => 10,
             'difficulty' => 'easy',
-            'challege_key_file_path' => "first_challenge_answer_key.txt",
+            'challege_key_file_path' => "master-files/JavaA.txt",
         ]);
 
-         Challenges::factory()->create([
-            'title' => "Java Challenge",
-            'description' => "Your goal is to create a Hello world program using Java script.",
-            'points' => 50,
+        Challenges::factory()->create([
+            'title' => "Challenge B",
+            'description' => 'Create a program using Java script that adds value a = 10 and b = 5 and would show the sum of 15 Output: "The sum of A and B is = 15".',
+            'points' => 15,
             'difficulty' => 'easy',
-            'challege_key_file_path' => "java_challenge_answer_key.txt",
+            'challege_key_file_path' => "master-files/JavaB.txt",
         ]);
     }
 }

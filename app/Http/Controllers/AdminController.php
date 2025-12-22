@@ -127,7 +127,8 @@ class AdminController extends Controller
             $path = "";
             if ($request->hasFile('file_answer_key')) {
                 $answer_key_file = $request->file('file_answer_key');
-                $filename = uniqid('answer_key_' . trim($validatedData['title'])) . '.' . $answer_key_file->getClientOriginalExtension();
+                $filename = strtolower(str_replace(' ', '', $validatedData['title'])) . '.' . $answer_key_file->getClientOriginalExtension();
+                // $filename = uniqid('answer_key_' . trim($validatedData['title'])) . '.' . $answer_key_file->getClientOriginalExtension();
                 $path = $answer_key_file->storeAs('master-files', $filename, 'local');
             }
 

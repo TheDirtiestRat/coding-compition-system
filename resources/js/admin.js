@@ -1,17 +1,21 @@
 function show_alert(message = "") {
     const modal_message_elem = document.getElementById("alert_modal_message");
-    modal_message_elem.innerText = message
+    modal_message_elem.innerText = message;
     alert_modal_1.showModal();
 }
 
 function accept_modal() {
     const modal_accept_btn = document.getElementById("accept_alert_btn");
 
-    return new Promise(resolve => {
-        modal_accept_btn.addEventListener('click', () => {
-            resolve()
-        }, {once: true})
-    })
+    return new Promise((resolve) => {
+        modal_accept_btn.addEventListener(
+            "click",
+            () => {
+                resolve();
+            },
+            { once: true }
+        );
+    });
 }
 
 function validate_form(form_id, validate_message = "") {
@@ -24,19 +28,64 @@ function validate_form(form_id, validate_message = "") {
             // show the modal to make sure to submit the form
             console.log("Ask if they want to submit.");
 
-            show_alert(validate_message)
+            show_alert(validate_message);
 
             // if they click yes then proceed to submit
-            await accept_modal()
+            await accept_modal();
+
+            event.target.reset();
             event.target.submit();
         });
     });
 }
 
+function verify_code_another(code, id) {
+    const outputAlert = document.getElementById("alert_container");
+    const outputAlertError = document.getElementById("alert_error");
+    const outputAlertSuccess = document.getElementById("alert_success");
+    const challenge_id = id;
+    const submittedCode = code;
 
+    fetch("/verify-code-challenge", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            // Important for Laravel POST requests
+            "X-CSRF-TOKEN": document
+                .querySelector('meta[name="csrf-token"]')
+                .getAttribute("content"),
+        },
+        body: JSON.stringify({
+            challenge_id: challenge_id,
+            submitted_text: submittedCode,
+        }),
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log(data);
+            outputAlert.classList.remove("hidden");
+            outputAlert.classList.add("flex");
+            if (data.match) {
+                // alert("Code Verified!");
+                const spanAlertSuccess =
+                    document.getElementById("success_alert_text");
+                outputAlertError.classList.add("hidden");
+                outputAlertSuccess.classList.remove("hidden");
+                spanAlertSuccess.innerText = "Code Verified! " + data.message;
+            } else {
+                // alert("Verification Failed.");
+                outputAlertSuccess.classList.add("hidden");
+                outputAlertError.classList.remove("hidden");
+            }
+        })
+        .catch((error) => console.error("Error:", error));
+}
 
 document.addEventListener("DOMContentLoaded", () => {
-    validate_form("candidate_delete_form", "Are you sure you wanna delete this User?");
+    validate_form(
+        "candidate_delete_form",
+        "Are you sure you wanna delete this User?"
+    );
 });
 
 // function edit_candidate(user_id, name, username) {
