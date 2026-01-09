@@ -12,7 +12,17 @@ class AdminController extends Controller
 {
     public function dashboard()
     {
-        return view('admin.dashbaord');
+        // gets the list of candidates with their scores
+        $candidates = Candidates::with('user')->latest()->get();
+        // $candidates;
+
+        // sample sql commands
+        /* select candidates.fullname, sum(challenges.points) as total_points from solved_challenges
+            -> join candidates on solved_challenges.candidate_id = candidates.id
+            -> join challenges on solved_challenges.challenge_id = challenges.id
+            -> group by candidates.fullname; */
+        
+        return view('admin.dashbaord', compact('candidates'));
     }
 
     public function candidates()
