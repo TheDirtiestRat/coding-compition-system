@@ -91,7 +91,7 @@
                             <th>ID</th>
                             <th>Name</th>
                             <th>Username</th>
-                            <th>Points</th>
+                            <th>Group</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -101,7 +101,11 @@
                                 <th>{{ $candidate->id }}</th>
                                 <td>{{ $candidate->fullname }}</td>
                                 <td>{{ optional($candidate->user)->name }}</td>
-                                <td>{{ 32342 }}</td>
+                                <td>
+                                    <p class="badge badge-primary badge-soft">
+                                        {{ $candidate->group }}
+                                    </p>
+                                </td>
                                 <td class="flex flex-row items-center justify-center gap-2">
                                     <button class="btn btn-xs"
                                         onclick="edit_candidate('{{ $candidate->id }}','{{ $candidate->fullname }}','{{ optional($candidate->user)->name }}')">Edit</button>
