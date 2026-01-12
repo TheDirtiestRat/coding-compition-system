@@ -8,6 +8,8 @@ use App\Http\Controllers\CompilerController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CandidateController;
+use App\Http\Controllers\AdminCountdownController;
+use App\Http\Controllers\CountdownController;
 
 Route::get('/', function () {
     return view('pages.home');
@@ -20,6 +22,9 @@ Route::get('/home', function () {
 Route::get('/login', [AuthenticationController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthenticationController::class, 'loginUser']);
 Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logout');
+
+// Countdown
+Route::get('/countdown', [CountdownController::class, 'show']);
 
 // admin side pages
 Route::middleware(['auth', 'is.admin'])->group(function () {
@@ -35,6 +40,10 @@ Route::middleware(['auth', 'is.admin'])->group(function () {
     Route::post('/admin/create-challenge', [AdminController::class, 'create_challenge']);
     Route::post('/admin/update-challenge', [AdminController::class, 'update_challenge']);
     Route::delete('/admin/delete-challenge/{id}', [AdminController::class, 'delete_challenge']);
+
+    Route::post('/admin/countdown/start', [AdminCountdownController::class, 'start']);
+    Route::post('/admin/countdown/pause', [AdminCountdownController::class, 'pause']);
+    Route::post('/admin/countdown/reset', [AdminCountdownController::class, 'reset']);
 });
 
 // user side pages
