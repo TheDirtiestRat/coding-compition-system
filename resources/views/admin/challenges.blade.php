@@ -24,16 +24,17 @@
                 </div>
             @endif
         </div>
-    @endif  
+    @endif
     <div class="flex flex-row gap-3 w-full">
         {{-- forms --}}
-        <div class="basis-full bg-base-100 rounded-xl p-3">
+        <div class="basis-[90%] bg-base-100 rounded-xl p-3">
             <form method="POST" action="{{ url('/admin/create-challenge') }}" id="challenge_form"
                 enctype="multipart/form-data">
                 @csrf
                 {{-- form --}}
                 <fieldset class="fieldset">
-                    <input type="text" class="input input-sm" name="challenge_id" id="challenge_id"
+                    <legend class="fieldset-legend">Challenge ID</legend>
+                    <input type="text" class="input" name="challenge_id" id="challenge_id"
                         placeholder="Challenge Id" readonly />
                     <legend class="fieldset-legend">Challenge Title</legend>
                     <input type="text" class="input w-full" name="title" id="title" placeholder="Type here" />
@@ -44,7 +45,7 @@
 
                     <div class="flex flex-row gap-3">
                         <fieldset class="fieldset w-full">
-                            <legend class="fieldset-legend">Equevalent Points</legend>
+                            <legend class="fieldset-legend">Equivalent Points</legend>
                             <input type="number" class="input w-full" name="points" id="points"
                                 placeholder="Type here" />
                         </fieldset>
@@ -60,36 +61,36 @@
                     </div>
 
                     <fieldset class="fieldset w-full">
-                        <legend class="fieldset-legend">Answer Key file</legend>
+                        <legend class="fieldset-legend">Answer Key File</legend>
                         <input type="file" class="file-input w-full file-input-ghost" name="file_answer_key" />
                         <label class="label">Max size 2MB</label>
                     </fieldset>
                     <div class="divider"></div>
-                    <button type="submit" id="challenge_submit_btn" class="btn btn-soft">Add Challenge</button>
+                    <button type="submit" id="challenge_submit_btn" class="btn btn-primary">Add Challenge</button>
                 </fieldset>
             </form>
         </div>
         {{-- challenge list --}}
-        <div class="basis-full bg-base-100 rounded-xl p-3">
+        <div class="basis-full bg-base-100 rounded-xl overflow-hidden p-3">
             <table class="table table-zebra">
                 <!-- head -->
-                <thead>
-                    <tr>
-                        <th></th>
+                <thead class="bg-slate-700/50">
+                    <tr class="text-center text-neutral-200">
+                        <th>ID</th>
                         <th>Title</th>
                         <th>Difficulty</th>
                         <th>Points</th>
-                        <th></th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($challenges as $challenge)
-                        <tr>
+                        <tr class="text-center">
                             <th>{{ $challenge->id }}</th>
                             <td>{{ $challenge->title }}</td>
                             <td>{{ $challenge->difficulty }}</td>
                             <td>{{ $challenge->points }}</td>
-                            <td class=" flex flex-row gap-2">
+                            <td class="flex flex-row items-center justify-center gap-2">
                                 <button class="btn btn-xs" onclick="edit_challenge({{ $challenge->id }})">Edit</button>
                                 <form action="{{ url('/admin/delete-challenge/' . $challenge->id) }}"
                                     class="challenge_delete_form" method="POST">

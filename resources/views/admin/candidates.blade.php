@@ -27,15 +27,15 @@
     @endif
 
     <div class="flex flex-row gap-3 w-full">
-        <div class="tabs tabs-lift w-[350px]">
-            <input type="radio" name="my_tabs_3" class="tab" aria-label="Add Candidate" checked="checked" />
+        <div class="tabs tabs-lift w-[450px]">
+            <input type="radio" name="my_tabs_3" class="tab font-medium" aria-label="Add Candidate" checked="checked" />
             <div class="tab-content bg-base-100 border-base-300 p-3">
                 {{-- for adding new candidates --}}
                 <span class="text-2xl font-bold">Add new Candidate</span>
                 <form method="POST" action="{{ url('/admin/add-candidate') }}">
                     @csrf
                     {{-- form --}}
-                    <fieldset class="fieldset">
+                    <fieldset class="fieldset mt-2">
                         <legend class="fieldset-legend">Candidates name?</legend>
                         <input type="text" class="input" name="candidate_name" placeholder="Type here" />
                         {{-- <p class="label">Optional</p> --}}
@@ -45,21 +45,22 @@
                         <legend class="fieldset-legend">Candidates password to use?</legend>
                         <input type="text" class="input" name="user_password" placeholder="Type here" />
                         <div class="divider"></div>
-                        <button class="btn btn-soft">Add Candidate</button>
+                        <button class="btn btn-primary">Add Candidate</button>
                     </fieldset>
                 </form>
             </div>
 
-            <input type="radio" name="my_tabs_3" id="edit_tabs" class="tab" aria-label="Edit Candidate" />
+            <input type="radio" name="my_tabs_3" id="edit_tabs" class="tab font-medium" aria-label="Edit Candidate" />
             <div class="tab-content bg-base-100 border-base-300 p-3">
                 {{-- for editing candidates details --}}
-                <span class="text-2xl font-bold">Edit Candidate details</span>
+                <span class="text-2xl font-bold">Edit Candidate</span>
                 <form method="POST" action="{{ url('/admin/update-candidate') }}">
                     @csrf
                     {{-- form --}}
-                    <fieldset class="fieldset">
-                        <input type="text" class="input input-sm" name="candidate_id" id="candidate_id"
-                            placeholder="User Id" readonly />
+                    <fieldset class="fieldset mt-2">
+                        <legend class="fieldset-legend text-md">Candidate ID: </legend>
+                        <input type="text" class="input" name="candidate_id" id="candidate_id"
+                            placeholder="User Id" readonly disabled />
                         <legend class="fieldset-legend">New name?</legend>
                         <input type="text" class="input" name="edit_name" id="edit_name" placeholder="Type here" />
                         {{-- <p class="label">Optional</p> --}}
@@ -71,7 +72,7 @@
                         <input type="text" class="input" name="edit_user_password" id="edit_user_password"
                             placeholder="Type here" />
                         <div class="divider"></div>
-                        <button class="btn btn-soft">Update details</button>
+                        <button class="btn btn-primary">Update Details</button>
                     </fieldset>
                 </form>
             </div>
@@ -85,23 +86,27 @@
             <div class="overflow-x-auto">
                 <table class="table table-zebra">
                     <!-- head -->
-                    <thead>
+                    <thead class="bg-slate-700/50 text-neutral-200 text-center">
                         <tr>
-                            <th></th>
+                            <th>ID</th>
                             <th>Name</th>
                             <th>Username</th>
-                            <th>Points</th>
-                            <th></th>
+                            <th>Group</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($candidates as $candidate)
-                            <tr>
+                            <tr class="text-center">
                                 <th>{{ $candidate->id }}</th>
                                 <td>{{ $candidate->fullname }}</td>
                                 <td>{{ optional($candidate->user)->name }}</td>
-                                <td>{{ 32342 }}</td>
-                                <td class=" flex flex-row gap-2">
+                                <td>
+                                    <p class="badge badge-primary badge-soft">
+                                        {{ $candidate->group }}
+                                    </p>
+                                </td>
+                                <td class="flex flex-row items-center justify-center gap-2">
                                     <button class="btn btn-xs"
                                         onclick="edit_candidate('{{ $candidate->id }}','{{ $candidate->fullname }}','{{ optional($candidate->user)->name }}')">Edit</button>
                                     <form action="{{ url('/admin/delete-candidate/' . $candidate->id) }}"

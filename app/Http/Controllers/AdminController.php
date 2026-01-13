@@ -6,22 +6,44 @@ use Illuminate\Http\Request;
 use App\Models\Candidates;
 use App\Models\Challenges;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
     public function dashboard()
     {
-        // gets the list of candidates with their scores
-        $candidates = Candidates::with('user')->latest()->get();
-        // $candidates;
+        // gets the list of candidates with their total points
+        $candidates = Candidates::leftJoin('solved_challenges', 'candidates.id', '=', 'solved_challenges.candidate_id')
+            ->leftJoin('challenges', 'solved_challenges.challenge_id', '=', 'challenges.id')
+            ->select(
+                'candidates.*',
+                DB::raw('COALESCE(SUM(points), 0) as total_points'),
+            )
+            ->groupBy('candidates.id')
+            ->orderByDesc('total_points')
+            ->get();
 
-        // sample sql commands
-        /* select candidates.fullname, sum(challenges.points) as total_points from solved_challenges
-            -> join candidates on solved_challenges.candidate_id = candidates.id
-            -> join challenges on solved_challenges.challenge_id = challenges.id
-            -> group by candidates.fullname; */
-        
+        $previousPoints = null;
+        $currentRank = 0;
+        $actualCount = 0;
+
+        $rankedCandidates = $candidates->sortByDesc('total_points')
+            ->values()
+            ->map(function ($candidate) use (&$previousPoints, &$currentRank, &$actualCount) {
+                $actualCount++;
+
+                // If points are different from the last person, update the rank to the current count
+                if ($candidate->total_points !== $previousPoints) {
+                    $currentRank = $actualCount;
+                }
+
+                $candidate->rank = $currentRank;
+                $previousPoints = $candidate->total_points;
+
+                return $candidate;
+            });
+
         return view('admin.dashbaord', compact('candidates'));
     }
 

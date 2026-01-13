@@ -22,6 +22,7 @@
         @yield('code-content')
     </div>
 
+    @include('components.countdown-display')
 </body>
 
 </html>
