@@ -44,6 +44,9 @@ Route::middleware(['auth', 'is.admin'])->group(function () {
     Route::post('/admin/countdown/start', [AdminCountdownController::class, 'start']);
     Route::post('/admin/countdown/pause', [AdminCountdownController::class, 'pause']);
     Route::post('/admin/countdown/reset', [AdminCountdownController::class, 'reset']);
+    Route::get('/admin/countdown', function () {
+        return view('pages.countdown');
+    });
 });
 
 // user side pages
@@ -58,4 +61,8 @@ Route::middleware('auth')->group(function () {
     // Route::post('/api/verify-code-challenge', [CodeCheckerController::class, 'checkCodedText']);
     Route::post('/run-python-code', [CompilerController::class, 'run_python_code'])->middleware('web');
     Route::post('/run-java-code', [CompilerController::class, 'run_java_code'])->middleware('web');
+
+    Route::get('/competition-ended', function () {
+        return view('pages.competition-ended');
+    });
 });
