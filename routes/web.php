@@ -44,6 +44,9 @@ Route::middleware(['auth', 'is.admin'])->group(function () {
     Route::post('/admin/countdown/start', [AdminCountdownController::class, 'start']);
     Route::post('/admin/countdown/pause', [AdminCountdownController::class, 'pause']);
     Route::post('/admin/countdown/reset', [AdminCountdownController::class, 'reset']);
+    Route::get('/admin/countdown', function () {
+        return view('pages.countdown');
+    });
 });
 
 // user side pages
