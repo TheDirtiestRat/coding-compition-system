@@ -7,7 +7,6 @@
     document.addEventListener("DOMContentLoaded", () => {
         let rafId = null;
         let endTime = null;
-        let isPaused = false;
 
         const countdownDisplay = document.getElementById("countdownDisplay");
         countdownDisplay.hidden = true; // Hide countdown by default
@@ -37,22 +36,57 @@
             return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
         }
 
+        function displayPaused(remainingTimeInMs) {
+            const remainingTimeInTimeStr
+                = convertNumberToTimeString(remainingTimeInMs)
+            endTime = null;
+            countdown.innerText = remainingTimeInTimeStr;
+            countdownDisplay.hidden = false;
+            tick();
+        }
+
+        function startCountdown(endTimeInMs) {
+            endTime = endTimeInMs;
+            countdownDisplay.hidden = false;
+
+            tick();
+        }
+
+        function resetCountdown() {
+            endTime = null;
+            countdownDisplay.hidden = true;
+
+            tick();
+        }
+
         // auto-sync on page load
         fetch('/countdown')
             .then(res => res.json())
             .then(data => {
                 if (data.endTime) {
-                    endTime = data.endTime;
-                    countdownDisplay.hidden = false;
-
-                    tick();
+                    startCountdown(data.endTime)
                 } else if (data.remainingMs) {
-                    const remainingTime = convertNumberToTimeString(data.remainingMs - 1000)
-                    isPaused = !!remainingTime;
-                    countdown.innerText = remainingTime;
-                    countdownDisplay.hidden = false;
-                    tick();
+                    displayPaused(data.remainingMs)
                 }
             });
+
+        Echo.channel('countdown')
+            .listen('CountdownEvent', (e) => {
+                switch (e.type) {
+                    case 'paused':
+                        displayPaused(e.data.remainingMs)
+                        break;
+                    case 'start':
+                        startCountdown(e.data.endTime)
+                        break;
+                    case 'resumed':
+                        startCountdown(e.data.endTime)
+                        break;
+                    case 'reset':
+                        resetCountdown()
+                        break;
+                }
+            });
+
     });
 </script>

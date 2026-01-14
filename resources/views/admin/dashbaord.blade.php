@@ -186,7 +186,7 @@
                     startStopButton.innerText = "Pause";
                     tick();
                 } else if (data.remainingMs) {
-                    const remainingTime = convertNumberToTimeString(data.remainingMs - 1000)
+                    const remainingTime = convertNumberToTimeString(data.remainingMs)
                     countdown.innerText = remainingTime;
                     isPaused = !!remainingTime;
                     hideInputs(true);

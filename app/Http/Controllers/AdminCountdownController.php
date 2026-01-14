@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\CountdownEvent;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -20,9 +21,16 @@ class AdminCountdownController extends Controller
         }
 
         $endTime = Carbon::now()->addMilliseconds($durationMs);
+        $endTimeInMs = $endTime->timestamp * 1000;
 
-        Cache::put('competition_end_time', $endTime->timestamp * 1000);
+        Cache::put('competition_end_time', $endTimeInMs);
         Cache::forget('competition_remaining_ms');
+
+        if (Cache::has('competition_remaining_ms')) {
+            broadcast(new CountdownEvent("resume", ["endTime" => $endTimeInMs]));
+        } else {
+            broadcast(new CountdownEvent("start", ["endTime" => $endTimeInMs]));
+        }
 
         return response()->json([
             'endTime' => $endTime->timestamp * 1000,
@@ -42,6 +50,8 @@ class AdminCountdownController extends Controller
         Cache::forget('competition_end_time');
         Cache::put('competition_remaining_ms', $remaining);
 
+        broadcast(new CountdownEvent("paused", ["remainingMs" => $remaining]));
+
         return response()->json([
             'remainingMs' => $remaining,
         ]);
@@ -52,6 +62,7 @@ class AdminCountdownController extends Controller
         Cache::forget('competition_end_time');
         Cache::forget('competition_remaining_ms');
 
+        broadcast(new CountdownEvent("reset"));
         return response()->json(['status' => 'reset']);
     }
 }
