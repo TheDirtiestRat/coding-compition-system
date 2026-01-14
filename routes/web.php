@@ -58,4 +58,8 @@ Route::middleware('auth')->group(function () {
     // Route::post('/api/verify-code-challenge', [CodeCheckerController::class, 'checkCodedText']);
     Route::post('/run-python-code', [CompilerController::class, 'run_python_code'])->middleware('web');
     Route::post('/run-java-code', [CompilerController::class, 'run_java_code'])->middleware('web');
+
+    Route::get('/competition-ended', function () {
+        return view('pages.competition-ended');
+    });
 });
