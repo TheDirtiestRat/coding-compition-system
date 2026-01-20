@@ -11,6 +11,9 @@ use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\AdminCountdownController;
 use App\Http\Controllers\CountdownController;
 
+use Illuminate\Support\Facades\DB;
+
+
 Route::get('/', function () {
     return view('pages.home');
 });
@@ -44,6 +47,8 @@ Route::middleware(['auth', 'is.admin'])->group(function () {
     Route::post('/admin/countdown/start', [AdminCountdownController::class, 'start']);
     Route::post('/admin/countdown/pause', [AdminCountdownController::class, 'pause']);
     Route::post('/admin/countdown/reset', [AdminCountdownController::class, 'reset']);
+
+    // the counting down page
     Route::get('/admin/countdown', function () {
         return view('pages.countdown');
     });
@@ -51,17 +56,22 @@ Route::middleware(['auth', 'is.admin'])->group(function () {
 
 // user side pages
 Route::middleware('auth')->group(function () {
-    Route::get('/code-editor', [CandidateController::class, 'open_code_editor']);
-    Route::get('/code-editor/{challenge_id}', [CandidateController::class, 'open_code_editor']);
+
     Route::get('/code-problems', [CandidateController::class, 'code_problems']);
 
-    Route::post('/api/verify-code-challenge', [CandidateController::class, 'verifySubmittedCode']);
-    Route::get('/api/get-challenge-details/{id}', [CandidateController::class, 'get_challenge_details']);
-    // to run server side code on my server device
-    // Route::post('/api/verify-code-challenge', [CodeCheckerController::class, 'checkCodedText']);
-    Route::post('/run-python-code', [CompilerController::class, 'run_python_code'])->middleware('web');
-    Route::post('/run-java-code', [CompilerController::class, 'run_java_code'])->middleware('web');
+    Route::middleware(['timer_stop'])->group(function () {
+        Route::get('/code-editor', [CandidateController::class, 'open_code_editor']);
+        Route::get('/code-editor/{challenge_id}', [CandidateController::class, 'open_code_editor']);
 
+        Route::post('/api/verify-code-challenge', [CandidateController::class, 'verifySubmittedCode']);
+        Route::get('/api/get-challenge-details/{id}', [CandidateController::class, 'get_challenge_details']);
+        // to run server side code on my server device
+        // Route::post('/api/verify-code-challenge', [CodeCheckerController::class, 'checkCodedText']);
+        Route::post('/run-python-code', [CompilerController::class, 'run_python_code'])->middleware('web');
+        Route::post('/run-java-code', [CompilerController::class, 'run_java_code'])->middleware('web');
+    });
+
+    // when the count down is finished the end screen will appear
     Route::get('/competition-ended', function () {
         return view('pages.competition-ended');
     });

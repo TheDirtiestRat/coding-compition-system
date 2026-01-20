@@ -56,7 +56,10 @@
             endTime = null;
             countdownDisplay.hidden = true;
 
+            // redirects to the end page
             window.location.href = "/competition-ended";
+
+
             tick();
         }
 

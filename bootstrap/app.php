@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AdminMiddleware;
+// use App\Http\Middleware\IsTimerStop;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,6 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // Register the middleware with a short alias for use in routes
         $middleware->alias([
             'is.admin' => AdminMiddleware::class,
+            // 'is.timer.stop' => IsTimerStop::class,
+            'timer_stop' => \App\Http\Middleware\IsTimerStop::class,
             // ... any other aliases you have ...
         ]);
     })

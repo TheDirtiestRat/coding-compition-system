@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
+use Illuminate\Support\Facades\DB;
+
 class AdminCountdownController extends Controller
 {
     public function start(Request $request)
@@ -31,6 +33,11 @@ class AdminCountdownController extends Controller
         } else {
             broadcast(new CountdownEvent("start", ["endTime" => $endTimeInMs]));
         }
+
+        // start the compition
+        DB::table('options')
+            ->where('option_name', "start_compition")
+            ->update(['option_value' => '1']);
 
         return response()->json([
             'endTime' => $endTime->timestamp * 1000,
@@ -61,6 +68,11 @@ class AdminCountdownController extends Controller
     {
         Cache::forget('competition_end_time');
         Cache::forget('competition_remaining_ms');
+
+        // stop the compition
+        DB::table('options')
+            ->where('option_name', "start_compition")
+            ->update(['option_value' => '0']);
 
         broadcast(new CountdownEvent("reset"));
         return response()->json(['status' => 'reset']);

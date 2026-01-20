@@ -8,6 +8,8 @@ use App\Models\Challenges;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
+use Illuminate\Support\Facades\DB;
+
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
@@ -30,6 +32,13 @@ class DatabaseSeeder extends Seeder
             'name' => 'User',
             'email' => 'user@example.com',
             'password' => 'user',
+        ]);
+
+        // insert option values
+        DB::table('options')->insert([
+            'option_name' => 'start_compition',
+            'option_datatype' => 'boolean',
+            'option_value' => '0'
         ]);
 
         Candidates::factory(5)->create();

@@ -2,7 +2,12 @@ import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
 
-import monacoEditorEsmPlugin from 'vite-plugin-monaco-editor-esm'; 
+// import monacoEditorEsmPlugin from 'vite-plugin-monaco-editor-esm';
+
+import monacoEditorPluginModule from 'vite-plugin-monaco-editor';
+
+// Handle the "is not a function" error by checking for .default
+const monacoEditorPlugin = monacoEditorPluginModule.default || monacoEditorPluginModule;
 
 export default defineConfig({
     plugins: [
@@ -11,11 +16,14 @@ export default defineConfig({
             refresh: true,
         }),
         tailwindcss(),
-        monacoEditorEsmPlugin({
-            // Optional: configure CDN for workers if needed, e.g., for production
-            // monacoEditor: {
-            //     publicPath: '/build/', // Or '/assets/' if using default Laravel setup
-            // },
+        monacoEditorPlugin({
+            languageWorkers: ['editorWorkerService', 'typescript', 'json', 'html']
         }),
+        // monacoEditorEsmPlugin({
+        //     // Optional: configure CDN for workers if needed, e.g., for production
+        //     // monacoEditor: {
+        //     //     publicPath: '/build/', // Or '/assets/' if using default Laravel setup
+        //     // },
+        // }),
     ],
 });

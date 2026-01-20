@@ -38,6 +38,16 @@ return new class extends Migration
 
             $table->timestamps();
         });
+
+        Schema::create('options', function (Blueprint $table) {
+            $table->id();
+            
+            $table->string('option_name')->default('option_1');
+            $table->enum("option_datatype", ['int', 'float', 'boolean', 'text'])->default('boolean');
+            $table->text('option_value');
+
+            $table->timestamps();
+        });
     }
 
     /**
