@@ -52,6 +52,10 @@ Route::middleware(['auth', 'is.admin'])->group(function () {
     Route::get('/admin/countdown', function () {
         return view('pages.countdown');
     });
+
+    Route::get('/admin/submissions', function () {
+        return view('admin.submissions');
+    });
 });
 
 // user side pages
