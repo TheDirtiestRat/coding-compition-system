@@ -34,6 +34,7 @@ Route::middleware(['auth', 'is.admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
     Route::get('/admin/candidates', [AdminController::class, 'candidates']);
     Route::get('/admin/challenges', [AdminController::class, 'challenges']);
+    Route::get('/admin/submissions', [AdminController::class, 'submissions']);
 
     Route::post('/admin/add-candidate', [AdminController::class, 'add_candidate']);
     Route::post('/admin/update-candidate', [AdminController::class, 'update_candidate']);
@@ -51,10 +52,6 @@ Route::middleware(['auth', 'is.admin'])->group(function () {
     // the counting down page
     Route::get('/admin/countdown', function () {
         return view('pages.countdown');
-    });
-
-    Route::get('/admin/submissions', function () {
-        return view('admin.submissions');
     });
 });
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Candidates;
 use App\Models\Challenges;
+use App\Models\Submissions;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -52,6 +53,13 @@ class AdminController extends Controller
         $candidates = Candidates::with('user')->latest()->get();
 
         return view('admin.candidates', compact('candidates'));
+    }
+
+    public function submissions()
+    {
+        $submissions = Submissions::where('is_score_submitted', '=', 0)->latest()->get();
+
+        return view('admin.submissions', compact('submissions'));
     }
 
     public function add_candidate(Request $request)
