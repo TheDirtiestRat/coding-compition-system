@@ -39,33 +39,32 @@
             </div>
         </div>
 
-        {{-- Submitted Code --}}
+        {{-- Submission Container --}}
         <div class="basis-full flex flex-col bg-base-100 rounded-xl p-3 gap-4">
             <div>
                 <div class="flex flex-row justify-between items-center">
-                    <p class="text-2xl">Candidate Name</p>
-                    <p class="text-sm">Submitted Date</p>
+                    <p id="candidateName" class="text-2xl">Candidate Name</p>
+                    <p id="submittedAt" class="text-sm">Submitted Date</p>
                 </div>
-                <p class="">Challenge Name</p>
+                <p id="challengeTitle" class="">Challenge Title</p>
             </div>
 
             <!-- Code Container -->
             <div class="bg-gray-900 h-full rounded-lg p-4">
                 <div class="flex flex-row justify-between items-center mb-3">
-                    <p class="text-gray-400 text-sm font-mono">Java</p>
-                    <button class="btn btn-sm btn-ghost">Copy Code</button>
+                    <p id="codeLanguage" class="text-gray-400 text-sm font-mono">Java</p>
+                    <button id="copyCodeButton" class="btn btn-sm btn-ghost">Copy Code</button>
                 </div>
                 <pre class="text-gray-100 text-sm font-mono overflow-x-auto">
-                                        <code></code>
-                                   </pre>
-
+                        <code id="codeDisplay"></code>
+                    </pre>
             </div>
 
             <!-- Submit Input and Button -->
             <div class="space-x-4">
                 <label for="score">Score: </label>
-                <input type="number" name="score" id="score" min="0" class="input input-sm max-w-32">
-                <button type="button" class="btn btn-sm btn-primary">Submit</button>
+                <input id="scoreInput" type="number" name="score" min="0" class="input input-sm max-w-32">
+                <button id="submitButton" type="button" class="btn btn-sm btn-primary">Submit</button>
             </div>
         </div>
     </div>
@@ -73,6 +72,30 @@
 
 @section('admin-scripts')
     <script>
-        console.log(editorInstance)
+        async function view_submission(submission_id) {
+            const candidateNameEl = document.getElementById("candidateName");
+            const challengeTitleEl = document.getElementById("challengeTitle");
+            const submittedAtEl = document.getElementById("submittedAt");
+            // const codeLanguageEl = document.getElementById("codeLanguage");
+            // const copyCodeButton = document.getElementById("copyCodeButton");
+            const codeDisplay = document.getElementById("codeDisplay");
+            const scoreInputEl = document.getElementById("scoreInput");
+
+            const res = await fetch(`/admin/api/submissions/${submission_id}`)
+            if (!res.ok) {
+                alert("Failed to display submission.")
+                return;
+            }
+
+            const { submission } = await res.json();
+            if (!submission) {
+                alert("Failed to display submission.")
+                return;
+            }
+
+            candidateNameEl.innerText = submission.candidate_name;
+            challengeTitleEl.innerText = submission.challenge_title;
+            submittedAtEl.innerText = submission.submitted_at;
+        }
     </script>
 @endsection

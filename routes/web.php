@@ -10,7 +10,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\AdminCountdownController;
 use App\Http\Controllers\CountdownController;
-
+use App\Http\Controllers\SubmissionsController;
 use Illuminate\Support\Facades\DB;
 
 
@@ -48,6 +48,8 @@ Route::middleware(['auth', 'is.admin'])->group(function () {
     Route::post('/admin/countdown/start', [AdminCountdownController::class, 'start']);
     Route::post('/admin/countdown/pause', [AdminCountdownController::class, 'pause']);
     Route::post('/admin/countdown/reset', [AdminCountdownController::class, 'reset']);
+
+    Route::get('/admin/api/submissions/{id}', [SubmissionsController::class, 'show']);
 
     // the counting down page
     Route::get('/admin/countdown', function () {
