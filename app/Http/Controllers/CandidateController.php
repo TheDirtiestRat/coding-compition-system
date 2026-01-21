@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Challenges;
 use App\Models\Candidates;
 use App\Models\SolvedChallenges;
+use App\Models\Submissions;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -16,7 +17,7 @@ class CandidateController extends Controller
     {
         $challenges = Challenges::latest()->get();
 
-        return  response()->json($challenges);
+        return response()->json($challenges);
     }
 
     public function get_challenge_details($id)
@@ -32,20 +33,20 @@ class CandidateController extends Controller
     {
         $user = Auth::user();
         $candidate = Candidates::where('user_id', '=', $user->id)->first();
-        
-        $solvedChallengeIds = $candidate 
+
+        $solvedChallengeIds = $candidate
             ? SolvedChallenges::where('candidate_id', '=', $candidate->id)->pluck('challenge_id')->toArray()
             : [];
 
         $easy_challenges = Challenges::where("difficulty", "=", 'easy')->latest()->get()
             ->map(fn($challenge) => $challenge->setAttribute('is_solved', in_array($challenge->id, $solvedChallengeIds)));
-        
+
         $medium_challenges = Challenges::where("difficulty", "=", 'medium')->latest()->get()
             ->map(fn($challenge) => $challenge->setAttribute('is_solved', in_array($challenge->id, $solvedChallengeIds)));
-        
+
         $hard_challenges = Challenges::where("difficulty", "=", 'hard')->latest()->get()
             ->map(fn($challenge) => $challenge->setAttribute('is_solved', in_array($challenge->id, $solvedChallengeIds)));
-        
+
         $challenges = Challenges::where("difficulty", "=", 'challenge')->latest()->get()
             ->map(fn($challenge) => $challenge->setAttribute('is_solved', in_array($challenge->id, $solvedChallengeIds)));
 
@@ -119,71 +120,46 @@ class CandidateController extends Controller
         // return true;
     }
 
-    public function verifySubmittedCode(Request $request)
+    public function submitCodeForReview(Request $request)
     {
-        // 1. Validation
-        $request->validate([
-            'challenge_id'   => 'required|string',
-            // 'challenge_id'   => 'required|exists:challenges,id', // Ensure ID actually exists in DB
-            'submitted_text' => 'required|string',
-        ]);
+        // Get candidate
+        $user = Auth::user();
+        $candidate = Candidates::where('user_id', '=', $user->id)->first();
 
-        // 2. Retrieve Challenge from Database
+        $request->validate([
+            'challenge_id' => 'required|string',
+            'code' => 'required|string',
+        ]);
         $challenge_id = $request->input('challenge_id');
         $challenge = Challenges::find($challenge_id);
 
-        if (!$challenge) {
+        if (!isset($candidate)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Candidate not found.'
+            ], 404);
+        }
+
+        if (!isset($challenge)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Challenge not found.'
             ], 404);
         }
 
-        // wrong spelling challenge
-        $masterPath = $challenge->challege_key_file_path;
-        // $masterPath = 'master-files/test.txt';
-        $submittedText = $request->input('submitted_text');
-
-        // 3. Check Storage
-        if (!Storage::disk('local')->exists($masterPath)) {
-            Log::error("Master file missing: {$masterPath}");
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Internal server error: Answer key missing.'
-            ], 500);
-        }
-
-        $expectedText = Storage::disk('local')->get($masterPath);
-        $submittedText = $request->input('submitted_text');
-
-        // 4. Normalization Logic
-        $normalize = function ($text) {
-            $text = trim($text);
-            // Replace all whitespace (tabs, newlines, multiple spaces) with a single space
-            return preg_replace('/\s+/', ' ', $text);
-        };
-
-        // 5. Comparison
-        if ($normalize($submittedText) === $normalize($expectedText)) {
-
-            // in here where we set the score when the code match.
-            $add_score_points = $this->addScorePoints($challenge_id);
-            $response = json_decode($add_score_points->getContent(), true);
-
-            if ($add_score_points) {
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Congratulations! The code matches. '.$response['message'],
-                    'match' => true
-                ], 200);
-            }
-        }
+        Submissions::upsert(
+            [
+                'candidate_id' => $candidate->id,
+                'challenge_id' => $challenge_id,
+                'code' => $request->input('code')
+            ],
+            uniqueBy: ['candidate_id', 'challenge_id'],
+            update: ['code']
+        );
 
         return response()->json([
-            'status' => 'fail',
-            'message' => 'The submitted text does not match. the path: ',
-            // 'data' => $challenge->challege_key_file_path,
-            'match' => false
+            'status' => 'success',
+            'message' => 'Code submitted successfully. Awaiting review...',
         ], 200);
     }
 

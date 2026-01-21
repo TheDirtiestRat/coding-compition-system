@@ -64,7 +64,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/code-editor', [CandidateController::class, 'open_code_editor']);
         Route::get('/code-editor/{challenge_id}', [CandidateController::class, 'open_code_editor']);
 
-        Route::post('/api/verify-code-challenge', [CandidateController::class, 'verifySubmittedCode']);
+        Route::post('/api/submit-code-for-review', [CandidateController::class, 'submitCodeForReview']);
+
+        # Deprecated // Route::post('/api/verify-code-challenge', [CandidateController::class, 'verifySubmittedCode']);
         Route::get('/api/get-challenge-details/{id}', [CandidateController::class, 'get_challenge_details']);
         // to run server side code on my server device
         // Route::post('/api/verify-code-challenge', [CodeCheckerController::class, 'checkCodedText']);

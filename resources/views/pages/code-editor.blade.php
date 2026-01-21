@@ -34,7 +34,7 @@
                 </select>
                 {{-- run the code --}}
                 <button id="run_code_btn" class="btn btn-sm btn-primary">Run Code</button>
-                <button id="check_code_btn" class="btn btn-sm btn-secondary" @isset($details)value="{{ $details[0]->id }}"@endisset>Vefify Code</button>
+                <button id="submit_code_btn" class="btn btn-sm btn-secondary" @isset($details)value="{{ $details[0]->id }}"@endisset>Submit Code</button>
             </div>
             {{-- editor --}}
             <div id="monaco-editor-container" class="basis-auto w-auto lg:w-[600px] h-[600px]"></div>
