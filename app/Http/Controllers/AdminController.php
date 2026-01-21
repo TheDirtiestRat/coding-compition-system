@@ -57,7 +57,21 @@ class AdminController extends Controller
 
     public function submissions()
     {
-        $submissions = Submissions::where('is_score_submitted', '=', 0)->latest()->get();
+        $submissions = Submissions::where('is_score_submitted', '=', 0)
+            ->join('challenges', 'submissions.challenge_id', '=', 'challenges.id')
+            ->join('candidates', 'submissions.candidate_id', '=', 'candidates.id')
+            ->select(
+                'submissions.id',
+                'submissions.updated_at as submitted_at',
+                'candidates.fullname as candidate_name',
+                'challenges.title as challenge_title',
+                'challenges.description as challenge_description',
+                'challenges.points as max_points',
+                'challenges.difficulty as challenge_difficulty',
+                'challenges.challege_key_file_path as solution_file_path',
+            )
+            ->orderByDesc('submitted_at')
+            ->get();
 
         return view('admin.submissions', compact('submissions'));
     }

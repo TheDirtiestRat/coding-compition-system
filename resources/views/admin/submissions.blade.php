@@ -33,8 +33,8 @@
 
             <!-- List Container -->
             <div class="flex flex-col gap-2 h-[500px] overflow-y-auto">
-                @foreach (array_fill(0, 20, "hellfasfasfso") as $challenge)
-                    @include("components.submission", [$challenge])
+                @foreach ($submissions as $submission)
+                    @include("components.submission", [$submission])
                 @endforeach
             </div>
         </div>
