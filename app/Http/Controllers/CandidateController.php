@@ -69,10 +69,16 @@ class CandidateController extends Controller
      */
     public function open_code_editor(string $challenge_id = "-1")
     {
+        $user = Auth::user();
+        $candidate = Candidates::where('user_id', $user->id)->first();
+
         if ($challenge_id >= 0) {
-            $details =
-                Challenges::leftJoin('submissions', 'submissions.challenge_id', '=', 'challenges.id')
-                    ->selectRaw("
+            $details = Challenges::query()
+                ->leftJoin('submissions', function ($join) use ($candidate) {
+                    $join->on('submissions.challenge_id', '=', 'challenges.id')
+                        ->where('submissions.candidate_id', '=', $candidate->id);
+                })
+                ->selectRaw("
                         challenges.*,
                         submissions.score,
                         CASE
@@ -81,8 +87,28 @@ class CandidateController extends Controller
                             ELSE 'not_started'
                         END AS status
                     ")
-                    ->where('challenges.id', "=", $challenge_id)
-                    ->get();
+                ->where('challenges.id', "=", $challenge_id)
+                ->get()
+                ->first();
+
+            $next_challenge_id = Challenges::query()
+                ->leftJoin('submissions', function ($join) use ($candidate) {
+                    $join->on('submissions.challenge_id', '=', 'challenges.id')
+                        ->where('submissions.candidate_id', '=', $candidate->id);
+                })
+                ->whereNull('submissions.id') // NOT STARTED
+                ->orderByRaw("
+                    CASE challenges.difficulty
+                        WHEN 'easy' THEN 1
+                        WHEN 'medium' THEN 2
+                        WHEN 'hard' THEN 3
+                        ELSE 4
+                    END
+                ")
+                ->orderBy('challenges.id', 'asc')
+                ->value('challenges.id');
+
+
             return view('pages.code-editor', compact('details'));
         }
 

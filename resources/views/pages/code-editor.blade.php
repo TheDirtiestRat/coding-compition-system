@@ -16,7 +16,7 @@
         </div>
     </div>
 
-    @if ($details[0]->status === "submitted")
+    @if ($details->status === "submitted")
         <div role="alert" class="fixed bottom-4 left-4 z-50 max-w-sm alert alert-info shadow-lg flex items-center gap-3">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -53,7 +53,7 @@
                         Run
                     </button>
                     <button id="submit_code_btn" class="btn btn-sm btn-secondary" @isset($details)
-                    value="{{ $details[0]->id }}" @endisset>
+                    value="{{ $details->id }}" @endisset>
                         Submit
                     </button>
                 </div>
@@ -71,30 +71,35 @@
         {{-- RIGHT: Problem & Output --}}
         <div class="flex flex-col w-full gap-4">
             {{-- Next challenge --}}
-            <div class="flex justify-end">
-                <button class="btn btn-sm btn-outline rounded-xl">
-                    Next Challenge →
-                </button>
-            </div>
+            @isset($details->next_challenge_id)
+                <div class="flex justify-end">
+                    <a href="{{ url('/code-editor/' . $details->next_challenge_id) }}">
+                        <button class="btn btn-sm btn-outline rounded-xl">
+                            Next Challenge →
+                        </button>
+                    </a>
+                </div>
+            @endisset
+
 
             {{-- Problem details --}}
             <div class="card bg-base-300 shadow-lg p-4 space-y-2">
                 @isset($details)
                     <div class="flex items-center justify-between">
                         <h2 class="text-2xl font-bold">
-                            {{ $details[0]->title }}
+                            {{ $details->title }}
                         </h2>
                         <span class="badge badge-outline">
-                            {{ ucfirst($details[0]->difficulty) }}
+                            {{ ucfirst($details->difficulty) }}
                         </span>
                     </div>
 
                     <p class="text-sm text-base-content/70">
-                        Points: {{ $details[0]->points }}
+                        Points: {{ $details->points }}
                     </p>
 
                     <div class="prose max-w-none text-base-content">
-                        {!! nl2br(e($details[0]->description)) !!}
+                        {!! nl2br(e($details->description)) !!}
                     </div>
                 @else
                     <span class="text-base-content/60">
