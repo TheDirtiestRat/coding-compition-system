@@ -20,13 +20,11 @@ function init_code_editor(language, theme) {
         // Create the editor instance ONCE
         editorInstance = monaco.editor.create(container, {
             value: `class Main {
-        public static void main(String[] args) {
-            // Example usage of the method
-            for(char letters = 'A'; letters <='E'; letters++){
-                System.out.print(letters +"  ");
-            }
-        }
-    }`,
+                         public static void main(String[] args) {
+                            // Example usage of the method
+                            
+                        }
+                    }`,
             language: language,
             automaticLayout: true,
             theme: theme,
