@@ -70,7 +70,7 @@ class CandidateController extends Controller
         return view('pages.code-editor');
     }
 
-    public function submitCodeForReview(Request $request)
+    public function submit_code_for_review(Request $request)
     {
         // Get candidate
         $user = Auth::user();

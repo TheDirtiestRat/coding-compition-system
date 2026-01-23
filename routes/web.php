@@ -66,7 +66,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/code-editor', [CandidateController::class, 'open_code_editor']);
         Route::get('/code-editor/{challenge_id}', [CandidateController::class, 'open_code_editor']);
 
-        Route::post('/api/submit-code-for-review', [CandidateController::class, 'submitCodeForReview']);
+        Route::post('/api/submit-code-for-review', [CandidateController::class, 'submit_code_for_review']);
 
         # Deprecated // Route::post('/api/verify-code-challenge', [CandidateController::class, 'verifySubmittedCode']);
         Route::get('/api/get-challenge-details/{id}', [CandidateController::class, 'get_challenge_details']);
