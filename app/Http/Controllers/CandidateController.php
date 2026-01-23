@@ -32,28 +32,36 @@ class CandidateController extends Controller
     public function code_problems()
     {
         $user = Auth::user();
-        $candidate = Candidates::where('user_id', '=', $user->id)->first();
+        $candidate = Candidates::where('user_id', $user->id)->first();
 
-        $solvedChallengeIds = $candidate
-            ? Submissions::where('candidate_id', '=', $candidate->id)->pluck('challenge_id')->toArray()
-            : [];
+        $baseQuery = fn($difficulty) =>
+            Challenges::where('challenges.difficulty', $difficulty)
+                ->leftJoin('submissions', function ($join) use ($candidate) {
+                    $join->on('submissions.challenge_id', '=', 'challenges.id')
+                        ->where('submissions.candidate_id', '=', $candidate->id);
+                })
+                ->selectRaw("
+                    challenges.*,
+                    submissions.score,
+                    CASE
+                        WHEN submissions.is_score_submitted = 1 THEN 'reviewed'
+                        WHEN submissions.id IS NOT NULL THEN 'submitted'
+                        ELSE 'not_started'
+                    END AS status
+                ")
+                ->get();
 
-        // TODO: There should be two attributes: "is_submitted" and "is_solved"
-        $easy_challenges = Challenges::where("difficulty", "=", 'easy')->latest()->get()
-            ->map(fn($challenge) => $challenge->setAttribute('is_solved', in_array($challenge->id, $solvedChallengeIds)));
+        $easy_challenges = $baseQuery('easy');
+        $medium_challenges = $baseQuery('medium');
+        $hard_challenges = $baseQuery('hard');
+        $challenges = $baseQuery('challenge');
 
-        $medium_challenges = Challenges::where("difficulty", "=", 'medium')->latest()->get()
-            ->map(fn($challenge) => $challenge->setAttribute('is_solved', in_array($challenge->id, $solvedChallengeIds)));
-
-        $hard_challenges = Challenges::where("difficulty", "=", 'hard')->latest()->get()
-            ->map(fn($challenge) => $challenge->setAttribute('is_solved', in_array($challenge->id, $solvedChallengeIds)));
-
-        $challenges = Challenges::where("difficulty", "=", 'challenge')->latest()->get()
-            ->map(fn($challenge) => $challenge->setAttribute('is_solved', in_array($challenge->id, $solvedChallengeIds)));
-
-        // dd($easy_challenges);
-
-        return view('pages.code-problems', compact('challenges', 'easy_challenges', 'medium_challenges', 'hard_challenges'));
+        return view('pages.code-problems', compact(
+            'challenges',
+            'easy_challenges',
+            'medium_challenges',
+            'hard_challenges'
+        ));
     }
 
     /**
@@ -70,7 +78,7 @@ class CandidateController extends Controller
         return view('pages.code-editor');
     }
 
-    public function submit_code_for_review(Request $request)
+    public function submitCodeForReview(Request $request)
     {
         // Get candidate
         $user = Auth::user();
