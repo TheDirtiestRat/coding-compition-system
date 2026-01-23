@@ -15,6 +15,7 @@ class SubmissionsController extends Controller
             ->select(
                 'submissions.id',
                 'submissions.updated_at as submitted_at',
+                'submissions.code',
                 'candidates.fullname as candidate_name',
                 'challenges.title as challenge_title',
                 'challenges.description as challenge_description',

@@ -40,39 +40,20 @@
         </div>
 
         {{-- Submission Container --}}
-        <div class="basis-full flex flex-col bg-base-100 rounded-xl p-3 gap-4">
-            <div>
-                <div class="flex flex-row justify-between items-center">
-                    <p id="candidateName" class="text-2xl">Candidate Name</p>
-                    <p id="submittedAt" class="text-sm">Submitted Date</p>
-                </div>
-                <p id="challengeTitle" class="">Challenge Title</p>
-            </div>
-
-            <!-- Code Container -->
-            <div class="bg-gray-900 h-full rounded-lg p-4">
-                <div class="flex flex-row justify-between items-center mb-3">
-                    <p id="codeLanguage" class="text-gray-400 text-sm font-mono">Java</p>
-                    <button id="copyCodeButton" class="btn btn-sm btn-ghost">Copy Code</button>
-                </div>
-                <pre class="text-gray-100 text-sm font-mono overflow-x-auto">
-                        <code id="codeDisplay"></code>
-                    </pre>
-            </div>
-
-            <!-- Submit Input and Button -->
-            <div class="space-x-4">
-                <label for="score">Score: </label>
-                <input id="scoreInput" type="number" name="score" min="0" class="input input-sm max-w-32">
-                <button id="submitButton" type="button" class="btn btn-sm btn-primary">Submit</button>
-            </div>
-        </div>
+        @include("components.submission-placeholder")
+        @include("components.submission-display")
     </div>
 @endsection
 
 @section('admin-scripts')
     <script>
+        let codeLanguage;
+        let editorInstance;
+
         async function view_submission(submission_id) {
+            const submissionDisplayContainer = document.getElementById("submissionDisplayContainer");
+            const submissionPlaceholderContainer = document.getElementById("submissionPlaceholderContainer");
+
             const candidateNameEl = document.getElementById("candidateName");
             const challengeTitleEl = document.getElementById("challengeTitle");
             const submittedAtEl = document.getElementById("submittedAt");
@@ -96,6 +77,62 @@
             candidateNameEl.innerText = submission.candidate_name;
             challengeTitleEl.innerText = submission.challenge_title;
             submittedAtEl.innerText = submission.submitted_at;
+            editorInstance.setValue(submission.code);
+
+            submissionDisplayContainer.hidden = false;
+            submissionPlaceholderContainer.hidden = true;
         }
+
+        function initCodeEditor() {
+            const container = document.getElementById("monacoEditorContainer");
+
+            if (!container) return;
+
+            editorInstance = monaco.editor.create(container, {
+                // TODO: Add language column in Challenges table
+                langage: codeLanguage ?? 'java',
+                automaticLayout: true,
+                theme: 'vs-dark',
+                minimap: { enabled: false },
+                fontSize: 14,
+                readOnly: true
+            });
+
+            // Listen for window resize events to update editor layout
+            window.addEventListener("resize", () => {
+                editorInstance.layout();
+            });
+        }
+
+        function handleRunningCode() {
+            if (!editorInstance) {
+                console.error("Monaco Editor not initialized.");
+                return;
+            }
+
+            const code = editorInstance.getValue();
+
+            console.log(`Running the code... in ${codeLanguage}`);
+
+            switch (currentLanguage) {
+                case "java":
+                    runServerCode(code, "/run-java-code");
+                    break;
+                case "python":
+                    runServerCode(code, "/run-python-code");
+                    break;
+                case "javascript":
+                case "typescript":
+                    runClientCode(code);
+                    break;
+                default:
+                    runServerCode(code, "/run-generic-code");
+                    console.log("Sending code to a generic server endpoint...");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initCodeEditor();
+        });
     </script>
 @endsection
