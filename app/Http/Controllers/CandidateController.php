@@ -116,6 +116,17 @@ class CandidateController extends Controller
             ], 404);
         }
 
+        $existingSubmission = Submissions::where('candidate_id', $candidate->id)
+            ->where('challenge_id', $challenge_id)
+            ->first();
+
+        if ($existingSubmission?->is_score_submitted) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'This submission has already been reviewed and can no longer be modified.',
+            ], 409);
+        }
+
         Submissions::upsert(
             [
                 'candidate_id' => $candidate->id,
