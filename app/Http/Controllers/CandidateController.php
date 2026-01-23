@@ -35,9 +35,10 @@ class CandidateController extends Controller
         $candidate = Candidates::where('user_id', '=', $user->id)->first();
 
         $solvedChallengeIds = $candidate
-            ? SolvedChallenges::where('candidate_id', '=', $candidate->id)->pluck('challenge_id')->toArray()
+            ? Submissions::where('candidate_id', '=', $candidate->id)->pluck('challenge_id')->toArray()
             : [];
 
+        // TODO: There should be two attributes: "is_submitted" and "is_solved"
         $easy_challenges = Challenges::where("difficulty", "=", 'easy')->latest()->get()
             ->map(fn($challenge) => $challenge->setAttribute('is_solved', in_array($challenge->id, $solvedChallengeIds)));
 
@@ -67,57 +68,6 @@ class CandidateController extends Controller
         }
 
         return view('pages.code-editor');
-    }
-
-    public function addScorePoints(string $challenge_id)
-    {
-        // get the user by the candidate details
-        $user = Auth::user();
-        $candidate = Candidates::where('user_id', '=', $user->id)->first();
-
-        // // check the user first
-        if (!$candidate) {
-            return response()->json([
-                'status' => 'fail',
-                'message' => "Can't find this candidate (You must be anuthorize user.)",
-                // 'data' => $challenge->challege_key_file_path,
-                'match' => false
-            ], 200);
-            // return back()->with('error', 'Can't find this candidate (You must be anuthorize user.)');
-            // return false;
-        }
-
-        $challenge = Challenges::find($challenge_id);
-        $solved_challenge = SolvedChallenges::where('candidate_id', '=', $candidate->id)
-            ->where('challenge_id', '=', $challenge->id)
-            ->first();
-        // $solved_challenge = SolvedChallenges::where('candidate_id', '=', $candidate->id)->where('challenge_id', '=', $challenge->id)->first();
-
-        // // check first if the challenge is solve by the candidate first
-        if ($solved_challenge) {
-            return response()->json([
-                'status' => 'fail',
-                'message' => 'You have already solved this challenge.',
-                // 'data' => $challenge->challege_key_file_path,
-                'match' => false
-            ], 200);
-            // return back()->with('info','You have already solved this challenge.');
-            // return false;
-        }
-
-        // // insert it in the dateabase
-        $solved = SolvedChallenges::create([
-            'candidate_id' => $candidate->id,
-            'challenge_id' => $challenge->id,
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Score is added.',
-            'data' => $solved_challenge,
-            'match' => true
-        ], 200);
-        // return true;
     }
 
     public function submitCodeForReview(Request $request)

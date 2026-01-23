@@ -30,15 +30,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('solved_challenges', function (Blueprint $table) {
-            $table->id();
-
-            $table->foreignId('candidate_id')->constrained('candidates')->onDelete('cascade');
-            $table->foreignId('challenge_id')->constrained('challenges')->onDelete('cascade');
-
-            $table->timestamps();
-        });
-
         Schema::create('submissions', function (Blueprint $table) {
             $table->id();
 
@@ -71,6 +62,6 @@ return new class extends Migration
     {
         Schema::dropIfExists('candidates');
         Schema::dropIfExists('challenges');
-        Schema::dropIfExists('solved_challenges');
+        Schema::dropIfExists('submissions');
     }
 };

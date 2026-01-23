@@ -15,14 +15,14 @@ class AdminController extends Controller
     public function dashboard()
     {
         // gets the list of candidates with their total points
-        $candidates = Candidates::leftJoin('solved_challenges', 'candidates.id', '=', 'solved_challenges.candidate_id')
-            ->leftJoin('challenges', 'solved_challenges.challenge_id', '=', 'challenges.id')
+        $candidates =
+            Candidates::leftJoin('submissions', 'candidates.id', '=', 'submissions.candidate_id')
             ->select(
                 'candidates.*',
-                DB::raw('COALESCE(SUM(points), 0) as total_points'),
+                DB::raw('COALESCE(SUM(score), 0) as total_score'),
             )
             ->groupBy('candidates.id')
-            ->orderByDesc('total_points')
+            ->orderByDesc('total_score')
             ->get();
 
         $previousPoints = null;

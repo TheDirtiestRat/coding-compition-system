@@ -50,7 +50,7 @@
                                 <th>{{ $candidate->rank }}</th>
                             @endif
                             <td>{{ $candidate->fullname }}</td>
-                            <td>{{ $candidate->total_points }}</td>
+                            <td>{{ $candidate->total_score }}</td>
                             <td>
                                 <p class="badge badge-primary badge-soft">{{ $candidate->group }}</p>
                             </td>
