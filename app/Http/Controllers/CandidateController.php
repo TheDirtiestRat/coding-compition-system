@@ -70,8 +70,19 @@ class CandidateController extends Controller
     public function open_code_editor(string $challenge_id = "-1")
     {
         if ($challenge_id >= 0) {
-            $details = Challenges::select(['id', 'title', 'description', 'difficulty', 'points'])->where('id', "=", $challenge_id)->get();
-            // dd($details);
+            $details =
+                Challenges::leftJoin('submissions', 'submissions.challenge_id', '=', 'challenges.id')
+                    ->selectRaw("
+                        challenges.*,
+                        submissions.score,
+                        CASE
+                            WHEN submissions.is_score_submitted = 1 THEN 'reviewed'
+                            WHEN submissions.id IS NOT NULL THEN 'submitted'
+                            ELSE 'not_started'
+                        END AS status
+                    ")
+                    ->where('challenges.id', "=", $challenge_id)
+                    ->get();
             return view('pages.code-editor', compact('details'));
         }
 
