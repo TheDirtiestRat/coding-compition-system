@@ -26,28 +26,66 @@
         </div>
     @endif
 
+
     <div class="flex flex-row gap-3 w-full">
-        <!-- Submissions List -->
-        <div class="basis-1/2 max-h-screen bg-base-100 rounded-xl p-3">
-            <p class="mb-2 text-2xl font-medium text-center">Submissions</p>
-
-            <!-- List Container -->
-            <div class="flex flex-col gap-2 h-[500px] overflow-y-auto">
-                @foreach ($submissions as $submission)
-                    @include("components.submission", [$submission])
-                @endforeach
-            </div>
-        </div>
-
         {{-- Submission Container --}}
         @include("components.submission-placeholder")
         @include("components.submission-display")
+        {{-- Code Solution --}}
+        <div id="codeSolutionContainer" class="basis-full flex flex-col bg-base-100 rounded-xl p-3 gap-4">
+            <div>
+                <p id="candidateName" class="text-2xl">Challenge Code Solution</p>
+            </div>
+
+            <!-- Code Container -->
+            <div class="bg-gray-900 h-full rounded-lg p-4">
+                <div class="flex flex-row justify-between items-center mb-3">
+                    <p id="codeLanguage" class="text-gray-400 text-sm font-mono">Java</p>
+                </div>
+                <div id="monacoEditorContainer2" class="w-full h-[500px]"></div>
+            </div>
+        </div>
+    </div>
+    <!-- Scores Section -->
+    <div id="scoresSection" hidden class="basis-full max-h-screen bg-base-100 rounded-xl mt-3 p-3">
+        <!-- Hidden inputs -->
+        <input id="submissionId" hidden type="number" name="candidateId">
+        <!-- Submit Input and Button -->
+        <form onsubmit="submitScore(event)">
+            @csrf
+
+            <label class="font-semibold">
+                Score
+
+            </label>
+
+            <input id="scoreInput" type="number" name="score" class="input input-sm max-w-32" required />
+            <span id="maxPointsLabel" class="text-lg">
+                max: —
+            </span>
+            <button type="submit" class="btn btn-sm btn-primary ml-4">
+                Submit
+            </button>
+        </form>
+    </div>
+
+    <!-- Submissions List -->
+    <div class="basis-full max-h-screen bg-base-100 rounded-xl mt-3 p-3">
+        <p class="mb-2 text-2xl font-medium text-center">Submissions</p>
+
+        <!-- List Container -->
+        <div class="grid grid-cols-2 gap-2 h-[500px] overflow-y-auto">
+            @foreach ($submissions as $submission)
+                @include("components.submission", [$submission])
+            @endforeach
+        </div>
     </div>
 @endsection
 
 @section('admin-scripts')
     <script>
         let codeLanguage;
+        let solutionEditorInstance;
         let editorInstance;
 
         let currentMaxPoints;
@@ -84,15 +122,19 @@
             submittedAtEl.innerText = submission.submitted_at;
             codeLanguageEl.innerText = submission.challenge_language;
             editorInstance.setValue(submission.code);
-
+            solutionEditorInstance.setValue(submission.code_solution);
 
             currentSubmissionId = submission.id;
             currentMaxPoints = submission.max_points;
             maxPointsLabelEl.innerText = ` / ${currentMaxPoints}`;
 
             monaco.editor.setModelLanguage(editorInstance.getModel(), submission.challenge_language);
+            monaco.editor.setModelLanguage(solutionEditorInstance.getModel(), submission.challenge_language);
+
             submissionDisplayContainer.hidden = false;
             submissionPlaceholderContainer.hidden = true;
+
+            document.getElementById("scoresSection").hidden = false;
 
             if (submission.is_score_submitted) {
                 document.getElementById("scoreInput").disabled = true;
@@ -147,11 +189,20 @@
 
         function initCodeEditor() {
             const container = document.getElementById("monacoEditorContainer");
+            const container2 = document.getElementById("monacoEditorContainer2");
 
             if (!container) return;
 
             editorInstance = monaco.editor.create(container, {
-                // TODO: Add language column in Challenges table
+                language: 'java',
+                automaticLayout: true,
+                theme: 'vs-dark',
+                minimap: { enabled: false },
+                fontSize: 14,
+                readOnly: true
+            });
+
+            solutionEditorInstance = monaco.editor.create(container2, {
                 language: 'java',
                 automaticLayout: true,
                 theme: 'vs-dark',
@@ -163,9 +214,11 @@
             // Listen for window resize events to update editor layout
             window.addEventListener("resize", () => {
                 editorInstance.layout();
+                solutionEditorInstance.layout();
             });
         }
 
+        // TODO: MAKE THIS RUN
         function handleRunningCode() {
             if (!editorInstance) {
                 console.error("Monaco Editor not initialized.");
