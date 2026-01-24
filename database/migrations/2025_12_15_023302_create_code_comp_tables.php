@@ -25,8 +25,8 @@ return new class extends Migration
             $table->text("description");
             $table->float("points")->default(100);
             $table->enum("difficulty", ['easy', 'medium', 'hard', 'challenge'])->default('easy');
-
-            $table->text('challege_key_file_path')->nullable(false);
+            $table->enum("language", ["java", "python"])->default("java");
+            $table->text('code_solution')->nullable(false);
             $table->timestamps();
         });
 
