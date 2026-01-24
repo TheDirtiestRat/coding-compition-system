@@ -41,8 +41,7 @@ Route::middleware(['auth', 'is.admin'])->group(function () {
     Route::delete('/admin/delete-candidate/{candidate_id}', [AdminController::class, 'delete_candidate']);
 
     Route::get('/admin/api/get-challenge-details/{id}', [AdminController::class, 'get_challenge_details']);
-    Route::post('/admin/create-challenge', [AdminController::class, 'create_challenge']);
-    Route::post('/admin/update-challenge', [AdminController::class, 'update_challenge']);
+    Route::post('/admin/save-challenge', [AdminController::class, 'save_challenge']);
     Route::delete('/admin/delete-challenge/{id}', [AdminController::class, 'delete_challenge']);
 
     Route::post('/admin/countdown/start', [AdminCountdownController::class, 'start']);
