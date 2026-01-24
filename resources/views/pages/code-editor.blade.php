@@ -71,9 +71,9 @@
         {{-- RIGHT: Problem & Output --}}
         <div class="flex flex-col w-full gap-4">
             {{-- Next challenge --}}
-            @isset($details->next_challenge_id)
+            @isset($next_challenge_id)
                 <div class="flex justify-end">
-                    <a href="{{ url('/code-editor/' . $details->next_challenge_id) }}">
+                    <a href="{{ url('/code-editor/' . $next_challenge_id) }}">
                         <button class="btn btn-sm btn-outline rounded-xl">
                             Next Challenge →
                         </button>

@@ -96,20 +96,21 @@ class CandidateController extends Controller
                     $join->on('submissions.challenge_id', '=', 'challenges.id')
                         ->where('submissions.candidate_id', '=', $candidate->id);
                 })
+                ->whereNot('challenges.id', '=', $challenge_id)
                 ->whereNull('submissions.id') // NOT STARTED
                 ->orderByRaw("
                     CASE challenges.difficulty
                         WHEN 'easy' THEN 1
                         WHEN 'medium' THEN 2
                         WHEN 'hard' THEN 3
+                        WHEN 'challenge' THEN 4
                         ELSE 4
                     END
                 ")
                 ->orderBy('challenges.id', 'asc')
                 ->value('challenges.id');
 
-
-            return view('pages.code-editor', compact('details'));
+            return view('pages.code-editor', compact('details', 'next_challenge_id'));
         }
 
         return view('pages.code-editor');
