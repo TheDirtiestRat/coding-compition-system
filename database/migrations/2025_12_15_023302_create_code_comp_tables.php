@@ -25,23 +25,28 @@ return new class extends Migration
             $table->text("description");
             $table->float("points")->default(100);
             $table->enum("difficulty", ['easy', 'medium', 'hard', 'challenge'])->default('easy');
-
-            $table->text('challege_key_file_path')->nullable(false);
+            $table->enum("language", ["java", "python"])->default("java");
+            $table->text('code_solution')->nullable(false);
             $table->timestamps();
         });
 
-        Schema::create('solved_challenges', function (Blueprint $table) {
+        Schema::create('submissions', function (Blueprint $table) {
             $table->id();
-            
+
             $table->foreignId('candidate_id')->constrained('candidates')->onDelete('cascade');
             $table->foreignId('challenge_id')->constrained('challenges')->onDelete('cascade');
+            $table->float('score')->default(0);
+            $table->text('code');
+            $table->boolean('is_score_submitted')->default(0);
+
+            $table->unique(['candidate_id', 'challenge_id']);
 
             $table->timestamps();
         });
 
         Schema::create('options', function (Blueprint $table) {
             $table->id();
-            
+
             $table->string('option_name')->default('option_1');
             $table->enum("option_datatype", ['int', 'float', 'boolean', 'text'])->default('boolean');
             $table->text('option_value');
@@ -57,6 +62,6 @@ return new class extends Migration
     {
         Schema::dropIfExists('candidates');
         Schema::dropIfExists('challenges');
-        Schema::dropIfExists('solved_challenges');
+        Schema::dropIfExists('submissions');
     }
 };

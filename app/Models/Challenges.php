@@ -12,9 +12,9 @@ class Challenges extends Model
     protected $fillable = [
         'title',
         'description',
-        'points',
         'difficulty',
-
-        'challege_key_file_path',
+        'language',
+        'points',
+        'code_solution',
     ];
 }

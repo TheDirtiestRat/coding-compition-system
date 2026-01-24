@@ -100,15 +100,14 @@ function runClientCode(code) {
     }
 }
 
-// code verify function
-function verify_code(code, id) {
+function submitCodeForReview(code, id) {
     const outputAlert = document.getElementById("alert_container");
     const outputAlertError = document.getElementById("alert_error");
     const outputAlertSuccess = document.getElementById("alert_success");
     const challenge_id = id;
     const submittedCode = code;
 
-    fetch("/api/verify-code-challenge", {
+    fetch("/api/submit-code-for-review", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -119,31 +118,26 @@ function verify_code(code, id) {
         },
         body: JSON.stringify({
             challenge_id: challenge_id,
-            submitted_text: submittedCode,
+            code: submittedCode,
         }),
     })
         .then((response) => {
             if (!response.ok) {
+                outputAlertSuccess.classList.add("hidden");
+                outputAlertError.classList.remove("hidden");
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
         .then((data) => {
-            // console.log(data);
+            // Tell the user that code was submitted successfully
             outputAlert.classList.remove("hidden");
             outputAlert.classList.add("flex");
-            if (data.match) {
-                // alert("Code Verified!");
-                const spanAlertSuccess =
-                    document.getElementById("success_alert_text");
-                outputAlertError.classList.add("hidden");
-                outputAlertSuccess.classList.remove("hidden");
-                spanAlertSuccess.innerText = "Code Verified! " + data.message;
-            } else {
-                // alert("Verification Failed.");
-                outputAlertSuccess.classList.add("hidden");
-                outputAlertError.classList.remove("hidden");
-            }
+            const spanAlertSuccess =
+                document.getElementById("success_alert_text");
+            outputAlertError.classList.add("hidden");
+            outputAlertSuccess.classList.remove("hidden");
+            spanAlertSuccess.innerText = data.message;
         })
         .catch((error) => {
             console.error("Error:", error);
@@ -176,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Update editor language without destroying the instance
             monaco.editor.setModelLanguage(
                 editorInstance.getModel(),
-                currentLanguage
+                currentLanguage,
             );
             console.log(`Language changed to: ${currentLanguage}`);
         }
@@ -222,9 +216,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // run the code verify button
+    // run the code submit button
     document
-        .getElementById("check_code_btn")
+        .getElementById("submit_code_btn")
         ?.addEventListener("click", (event) => {
             if (!editorInstance) {
                 console.error("Monaco Editor not initialized.");
@@ -232,7 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             const code = editorInstance.getValue();
 
-            verify_code(code, event.target.value);
+            submitCodeForReview(code, event.target.value);
         });
 
     console.log(`Initial Setup: ${currentLanguage} - ${currentTheme}`);
