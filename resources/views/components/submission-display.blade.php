@@ -11,16 +11,28 @@
     <div class="bg-gray-900 h-full rounded-lg p-4">
         <div class="flex flex-row justify-between items-center mb-3">
             <p id="codeLanguage" class="text-gray-400 text-sm font-mono">Java</p>
-            <button id="copyCodeButton" class="btn btn-sm btn-ghost">Copy Code</button>
+            <button id="copyCodeButton" onclick="copyCode()" class="btn btn-sm btn-ghost">Copy Code</button>
         </div>
         <div id="monacoEditorContainer" class="w-full h-[400px]"></div>
     </div>
 
+    <!-- Hidden inputs -->
+    <input id="submissionId" hidden type="number" name="candidateId">
     <!-- Submit Input and Button -->
-    <div class="space-x-4">
-        <label for="score">Score: </label>
-        <input id="scoreInput" type="number" name="score" min="0" class="input input-sm max-w-32">
-        <input id="scoreInput" type="number" name="score" min="0" class="input input-sm max-w-32">
-        <button id="submitButton" type="button" class="btn btn-sm btn-primary">Submit</button>
-    </div>
+    <form onsubmit="submitScore(event)">
+        @csrf
+
+        <label class="font-semibold">
+            Score
+
+        </label>
+
+        <input id="scoreInput" type="number" name="score" class="input input-sm max-w-32" required />
+        <span id="maxPointsLabel" class="text-lg">
+            max: —
+        </span>
+        <button type="submit" class="btn btn-sm btn-primary ml-4">
+            Submit
+        </button>
+    </form>
 </div>

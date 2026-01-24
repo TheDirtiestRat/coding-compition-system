@@ -49,6 +49,7 @@ Route::middleware(['auth', 'is.admin'])->group(function () {
     Route::post('/admin/countdown/reset', [AdminCountdownController::class, 'reset']);
 
     Route::get('/admin/api/submissions/{id}', [SubmissionsController::class, 'show']);
+    Route::post('/admin/api/submissions/{id}/submit-score', [SubmissionsController::class, 'submit_score']);
 
     // the counting down page
     Route::get('/admin/countdown', function () {

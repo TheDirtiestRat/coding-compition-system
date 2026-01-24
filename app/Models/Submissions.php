@@ -20,4 +20,9 @@ class Submissions extends Model
         'code',
         'is_score_submitted'
     ];
+
+    public function challenge()
+    {
+        return $this->belongsTo(Challenges::class, 'challenge_id');
+    }
 }

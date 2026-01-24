@@ -50,17 +50,21 @@
         let codeLanguage;
         let editorInstance;
 
+        let currentMaxPoints;
+        let currentSubmissionId;
+
         async function view_submission(submission_id) {
             const submissionDisplayContainer = document.getElementById("submissionDisplayContainer");
             const submissionPlaceholderContainer = document.getElementById("submissionPlaceholderContainer");
 
             const candidateNameEl = document.getElementById("candidateName");
+            const submissionIdEl = document.getElementById("submissionId");
             const challengeTitleEl = document.getElementById("challengeTitle");
             const submittedAtEl = document.getElementById("submittedAt");
-            // const codeLanguageEl = document.getElementById("codeLanguage");
-            // const copyCodeButton = document.getElementById("copyCodeButton");
+            const codeLanguageEl = document.getElementById("codeLanguage");
             const codeDisplay = document.getElementById("codeDisplay");
             const scoreInputEl = document.getElementById("scoreInput");
+            const maxPointsLabelEl = document.getElementById("maxPointsLabel");
 
             const res = await fetch(`/admin/api/submissions/${submission_id}`)
             if (!res.ok) {
@@ -75,12 +79,70 @@
             }
 
             candidateNameEl.innerText = submission.candidate_name;
+            submissionId.value = submission.id;
             challengeTitleEl.innerText = submission.challenge_title;
             submittedAtEl.innerText = submission.submitted_at;
+            codeLanguageEl.innerText = submission.challenge_language;
             editorInstance.setValue(submission.code);
 
+
+            currentSubmissionId = submission.id;
+            currentMaxPoints = submission.max_points;
+            maxPointsLabelEl.innerText = ` / ${currentMaxPoints}`;
+
+            monaco.editor.setModelLanguage(editorInstance.getModel(), submission.challenge_language);
             submissionDisplayContainer.hidden = false;
             submissionPlaceholderContainer.hidden = true;
+
+            if (submission.is_score_submitted) {
+                document.getElementById("scoreInput").disabled = true;
+                document.getElementById("submitButton").disabled = true;
+            }
+        }
+
+        function copyCode() {
+            const code = editorInstance.getValue();
+            navigator.clipboard.writeText(code);
+            alert("Code copied")
+        }
+
+        async function submitScore(event) {
+            event.preventDefault();
+
+            const scoreInput = document.getElementById("scoreInput");
+            const score = Number(scoreInput.value);
+
+            if (Number.isNaN(score)) {
+                alert("Score must be a number");
+                return;
+            }
+
+            if (score < 0 || score > currentMaxPoints) {
+                alert(`Score must be between 0 and ${currentMaxPoints}`);
+                scoreInput.focus();
+                return;
+            }
+
+            const res = await fetch(
+                `/admin/api/submissions/${currentSubmissionId}/submit-score`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document
+                            .querySelector('meta[name="csrf-token"]')
+                            .content,
+                    },
+                    body: JSON.stringify({ score }),
+                }
+            );
+
+            if (!res.ok) {
+                alert("Failed to submit score");
+                return;
+            }
+
+            window.location.reload();
         }
 
         function initCodeEditor() {
@@ -90,7 +152,7 @@
 
             editorInstance = monaco.editor.create(container, {
                 // TODO: Add language column in Challenges table
-                langage: codeLanguage ?? 'java',
+                language: 'java',
                 automaticLayout: true,
                 theme: 'vs-dark',
                 minimap: { enabled: false },
