@@ -76,6 +76,27 @@ class AdminController extends Controller
         return view('admin.submissions', compact('submissions'));
     }
 
+    public function submissions_api()
+    {
+        $submissions = Submissions::where('is_score_submitted', '=', 0)
+            ->join('challenges', 'submissions.challenge_id', '=', 'challenges.id')
+            ->join('candidates', 'submissions.candidate_id', '=', 'candidates.id')
+            ->select(
+                'submissions.id',
+                'submissions.updated_at as submitted_at',
+                'candidates.fullname as candidate_name',
+                'challenges.title as challenge_title',
+                'challenges.points as max_points',
+                'challenges.difficulty as challenge_difficulty',
+                'challenges.language as challenge_language',
+            )
+            ->orderByDesc('submitted_at')
+            ->get();
+
+        return response()->json(['submission' => $submissions]);
+        // return view('admin.submissions', compact('submissions'));
+    }
+
     public function add_candidate(Request $request)
     {
         $validatedData = $request->validate([

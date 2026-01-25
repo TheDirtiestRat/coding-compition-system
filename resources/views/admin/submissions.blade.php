@@ -66,17 +66,18 @@
             <button class="btn btn-sm btn-primary ml-4">Submit</button>
         </form>
 
-        <div id="code_output_area" class="basis-full bg-gray-300 p-3 rounded-xl w-full font-mono">Code Output:</div>
+        <div id="code_output_area" class="basis-full bg-gray-400 p-3 rounded-xl w-full font-mono">Code Output:</div>
     </div>
 
     {{-- Submissions --}}
     <div class="bg-base-100 rounded-xl mt-3 p-3">
         <p class="text-2xl font-medium text-center mb-2">Submissions</p>
-
-        <div id="codeSubmissionListElem" class="grid grid-cols-2 gap-2 h-[500px] overflow-y-auto">
-            @foreach ($submissions as $submission)
-                @include('components.submission', [$submission])
-            @endforeach
+        <div class="h-[400px] overflow-y-auto">
+            <div id="codeSubmissionListElem" class="grid grid-cols-2 gap-2">
+                @foreach ($submissions as $submission)
+                    @include('components.submission', [$submission])
+                @endforeach
+            </div>
         </div>
     </div>
 @endsection
@@ -261,6 +262,27 @@
                 }
             }
 
+            // generate the submission list
+            function getSubmissionList(submissions = []) {
+                const submissionListArea = document.getElementById('codeSubmissionListElem')
+                submissionListArea.innerHTML = '';
+
+                console.log(submissions);
+                submissions.submission.forEach((submission) => {
+                    let subElement = `<div
+                        onclick="view_submission('${submission.id}')"
+                        class="bg-base-300 h-fit rounded-md p-3 hover:bg-base-200 hover:cursor-grab">
+                        <div class="flex flex-row justify-between items-center">
+                            <p class="text-sm">${submission.candidate_name}</p>
+                            <p class="badge badge-xs badge-primary">${submission.challenge_difficulty}</p>
+                        </div>
+                        <p class="">${submission.challenge_title}</p>
+                        <p class="mt-2 text-xs">${submission.submitted_at}</p>
+                    </div>`
+                    submissionListArea.insertAdjacentHTML('beforeend', subElement);
+                });
+            }
+
             // -----------------------------
             // Init
             // -----------------------------
@@ -272,6 +294,20 @@
                     })
                 });
             document.addEventListener('DOMContentLoaded', initEditors);
+
+            // refresh the submission list
+            setInterval(async () => {
+                try {
+                    const res = await fetch(`/admin/api/submissions_list`);
+                    if (!res.ok) throw new Error('Failed to fetch submissions');
+
+                    const submissions = await res.json();
+                    getSubmissionList(submissions);
+                    // console.log(submissions);
+                } catch (error) {
+                    console.error('Error fetching submissions:', error);
+                }
+            }, 3000);
 
         })();
     </script>

@@ -48,6 +48,7 @@ Route::middleware(['auth', 'is.admin'])->group(function () {
     Route::post('/admin/countdown/pause', [AdminCountdownController::class, 'pause']);
     Route::post('/admin/countdown/reset', [AdminCountdownController::class, 'reset']);
 
+    Route::get('/admin/api/submissions_list', [AdminController::class, 'submissions_api']);
     Route::get('/admin/api/submissions/{id}', [SubmissionsController::class, 'show']);
     Route::post('/admin/api/submissions/{id}/submit-score', [SubmissionsController::class, 'submit_score']);
 
