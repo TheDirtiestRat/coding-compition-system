@@ -14,11 +14,14 @@
 
             <div class="flex flex-col items-center justify-center gap-4">
                 <div id="timeInputContainer" class="space-x-4 flex flex-row gap-2">
-                    <input type="number" class="input min-w-24" name="" id="hourInput" placeholder="Hour" min="0" max="23">
+                    <input type="number" class="input min-w-24" name="" id="hourInput" placeholder="Hour"
+                        min="0" max="23">
 
-                    <input type="number" class="input min-w-24" name="" id="minInput" placeholder="Minute" min="0" max="59">
+                    <input type="number" class="input min-w-24" name="" id="minInput" placeholder="Minute"
+                        min="0" max="59">
 
-                    <input type="number" class="input min-w-24" name="" id="secInput" placeholder="Second" min="0" max="59">
+                    <input type="number" class="input min-w-24" name="" id="secInput" placeholder="Second"
+                        min="0" max="59">
                 </div>
 
                 <div class="space-x-4">
@@ -30,24 +33,31 @@
             </div>
         </div>
 
-        <div class="basis-full bg-base-100 rounded-xl p-3 h-80 overflow-y-scroll">
+        <div class="basis-full bg-base-100 rounded-xl p-3 h-80 overflow-y-auto">
             <table class="table table-zebra">
                 <!-- head -->
-                <thead class="bg-slate-700/50 text-center text-neutral-200">
+                <thead class=" text-center text-neutral-200">
                     <tr>
-                        <th>Ranking</th>
-                        <th>Name</th>
-                        <th>Points</th>
-                        <th>Group</th>
+                        <th class="bg-slate-700/50 rounded-tl-xl">Ranking</th>
+                        <th class="bg-slate-700/50">Name</th>
+                        <th class="bg-slate-700/50">Points</th>
+                        <th class="bg-slate-700/50 rounded-tr-xl">Group</th>
                     </tr>
                 </thead>
                 <tbody>
+                    {{-- genereates the rank --}}
+                    @php
+                        $rank = 0;
+                    @endphp
                     @foreach ($candidates as $candidate)
+                        @php
+                            $rank += 1;
+                        @endphp
                         <tr class="text-center">
-                            @if ($candidate->total_points == 0)
+                            @if ($candidate->total_score == 0)
                                 <th class="text-neutral-400 font-light">N/A</th>
                             @else
-                                <th>{{ $candidate->rank }}</th>
+                                <th>{{ $rank }}</th>
                             @endif
                             <td>{{ $candidate->fullname }}</td>
                             <td>{{ $candidate->total_score }}</td>
@@ -97,13 +107,15 @@
             if (!durationMs) return;
 
             fetch('/admin/countdown/start', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                },
-                body: JSON.stringify({ duration_ms: durationMs }),
-            })
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                    body: JSON.stringify({
+                        duration_ms: durationMs
+                    }),
+                })
                 .then(res => res.json())
                 .then(data => {
                     endTime = data.endTime;
@@ -115,11 +127,11 @@
 
         function pauseCountdown() {
             fetch('/admin/countdown/pause', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                },
-            })
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                })
                 .then(() => {
                     cancelAnimationFrame(rafId);
                     endTime = null;

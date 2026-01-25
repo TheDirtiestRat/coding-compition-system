@@ -16,10 +16,10 @@
         </div>
     </div>
 
-    @if ($details->status === "submitted")
+    @if ($details->status === 'submitted')
         <div role="alert" class="fixed bottom-4 left-4 z-50 max-w-sm alert alert-info shadow-lg flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
@@ -35,35 +35,34 @@
 
     <div class="flex flex-col-reverse md:flex-row h-full w-full gap-4">
         {{-- LEFT: Editor --}}
-        <div class="card bg-base-300 basis-full shadow-lg flex flex-col overflow-hidden">
+        <div class="card bg-base-300 basis-full shadow flex flex-col overflow-hidden">
             {{-- Toolbar --}}
-            <div class="flex items-center gap-2 p-3 bg-base-200 border-b border-base-content/10">
-                <select class="select select-sm select-bordered" id="theme-selector">
+            <div class="flex flex-row flex-nowrap items-center gap-2 p-3 bg-base-300 rounded-xl">
+                <select class="select select-sm select-bordered basis-full" id="theme-selector">
                     <option value="vs-light">Light</option>
                     <option value="vs-dark" selected>Dark</option>
                 </select>
 
-                <select class="select select-sm select-bordered" id="language-selector">
+                <select class="select select-sm select-bordered basis-full" id="language-selector">
                     <option value="java" selected>Java</option>
                     <option value="python">Python</option>
                 </select>
 
-                <div class="ml-auto flex gap-2">
-                    <button id="run_code_btn" class="btn btn-sm btn-primary">
-                        Run
-                    </button>
-                    <button id="submit_code_btn" class="btn btn-sm btn-secondary" @isset($details)
+                <button id="run_code_btn" class="btn btn-sm btn-primary w-[200px]">
+                    Run
+                </button>
+                <button id="submit_code_btn" class="btn btn-sm btn-secondary w-[200px]"
+                    @isset($details)
                     value="{{ $details->id }}" @endisset>
-                        Submit
-                    </button>
-                </div>
+                    Submit
+                </button>
             </div>
 
             {{-- Editor --}}
-            <div id="monaco-editor-container" class="w-full h-[600px] bg-base-100"></div>
+            <div id="monaco-editor-container" class="w-full h-[500px] bg-base-100"></div>
 
             {{-- Footer --}}
-            <div class="px-3 py-2 text-sm text-base-content/60 bg-base-200 border-t border-base-content/10">
+            <div class="px-3 p-2 text-sm text-base-content/60 bg-base-300 rounded-b-xl">
                 Write your solution here. Use <kbd class="kbd kbd-sm">Run</kbd> to test before submitting.
             </div>
         </div>

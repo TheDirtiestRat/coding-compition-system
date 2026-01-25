@@ -3,14 +3,14 @@
 <div class="basis-full bg-base-100 rounded-xl overflow-hidden p-3">
     <table class="table table-zebra">
         <!-- head -->
-        <thead class="bg-slate-700/50">
+        <thead class="">
             <tr class="text-center text-neutral-200">
-                <th>ID</th>
-                <th>Title</th>
-                <th>Difficulty</th>
-                <th>Language</th>
-                <th>Points</th>
-                <th>Actions</th>
+                <th class="bg-slate-700/50 rounded-tl-xl">ID</th>
+                <th class="bg-slate-700/50">Title</th>
+                <th class="bg-slate-700/50">Difficulty</th>
+                <th class="bg-slate-700/50">Language</th>
+                <th class="bg-slate-700/50">Points</th>
+                <th class="bg-slate-700/50 rounded-tr-xl">Actions</th>
             </tr>
         </thead>
         <tbody>

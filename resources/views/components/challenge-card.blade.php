@@ -29,7 +29,7 @@
     };
 @endphp
 
-<div class="card {{ $statusStyles['card'] }} rounded-box h-auto shadow p-4 flex flex-col gap-2">
+<div class=" {{ $statusStyles['card'] }} rounded-2xl h-auto shadow p-4 flex flex-col gap-2">
     {{-- Header --}}
     <div class="flex justify-between items-start">
         <div>

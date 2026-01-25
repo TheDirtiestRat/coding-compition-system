@@ -78,7 +78,18 @@
             </div>
 
             {{-- Code Solution --}}
-            <div id="submissionDisplayContainer" class="basis-full flex flex-col bg-base-100 rounded-xl p-3 gap-4">
+            <div id="submissionDisplayContainer" class="basis-full flex flex-col h-full shadow rounded-xl">
+                <div class="basis-full bg-base-100 p-2 flex flex-row gap-3 w-full items-center rounded-t-xl px-3">
+                    <span class="text-xl basis-full">Challenge Code Solution</span>
+                    <p id="codeLanguage" class="text-gray-400 font-mono">Java</p>
+                    <button onclick="copyCode()" class="btn btn-sm btn-base-100 btn-ghost rounded-xl">Copy Code</button>
+                </div>
+                <div id="monacoEditorContainer" class="w-full h-[480px]"></div>
+                <div class="basis-auto bg-base-100 p-2 px-3 h-full rounded-b-xl">
+                    <p class="text-gray-400">Edit the code here ma Rigga!</p>
+                </div>
+            </div>
+            {{-- <div id="submissionDisplayContainer" class="basis-full flex flex-col bg-base-100 rounded-xl p-3 gap-4">
                 <div>
                     <p id="candidateName" class="text-2xl">Challenge Code Solution</p>
                 </div>
@@ -91,7 +102,7 @@
                     </div>
                     <div id="monacoEditorContainer" class="w-full h-[480px]"></div>
                 </div>
-            </div>
+            </div> --}}
         </div>
         <x-challenge-list :challenges="$challenges" />
     </div>

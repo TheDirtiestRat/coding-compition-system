@@ -16,15 +16,17 @@ let currentTheme;
 function init_code_editor(language, theme) {
     const container = document.getElementById("monaco-editor-container");
 
+    const codevalue = 
+    `class Main {
+    public static void main(String[] args) {
+        // Java Code here ...
+    }
+}`
+
     if (container) {
         // Create the editor instance ONCE
         editorInstance = monaco.editor.create(container, {
-            value: `class Main {
-                         public static void main(String[] args) {
-                            // Example usage of the method
-                            
-                        }
-                    }`,
+            value: codevalue,
             language: language,
             automaticLayout: true,
             theme: theme,
@@ -232,174 +234,4 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log(`Initial Setup: ${currentLanguage} - ${currentTheme}`);
 });
 
-// import "./bootstrap";
-// import * as monaco from "monaco-editor";
 
-// // Declare the editor instance variable in a scope accessible by the button handler
-// let editorInstance;
-
-// function setup_code_editor(language, theme) {
-//     const container = document.getElementById("monaco-editor-container");
-
-//     if (container) {
-//         editorInstance = monaco.editor.create(container, {
-//             // Assign the instance
-//             value: 'print("Hello, Laravel with Python!")\nprint(1 + 2)',
-//             language: language,
-//             automaticLayout: true,
-//             theme: theme,
-//         });
-
-//         // Listen for resize events to update layout
-//         window.addEventListener("resize", () => {
-//             editorInstance.layout();
-//         });
-//     }
-// }
-
-// document.addEventListener("DOMContentLoaded", () => {
-//     let newLanguage;
-//     let newTheme;
-//     const languageSelectorElement =
-//         document.querySelector("#language-selector");
-//     const themeSelectorElement = document.querySelector("#theme-selector");
-
-//     newLanguage = languageSelectorElement.value
-//     newTheme = themeSelectorElement.value
-
-//     languageSelectorElement.addEventListener("change", function (event) {
-//         // 3. Define the action to take when the value changes
-//         newLanguage = event.target.value;
-//         // console.log(`The element's value has changed to: ${newLanguage}`);
-//         setup_code_editor(newLanguage, newTheme);
-//     });
-//     themeSelectorElement.addEventListener("change", function (event) {
-//         // 3. Define the action to take when the value changes
-//         newTheme = event.target.value;
-//         // console.log(`The element's value has changed to: ${newTheme}`);
-//     });
-
-//     // Add click listener to the run button
-//     document.getElementById("run_code_btn")?.addEventListener("click", () => {
-//         if (editorInstance) {
-//             // run the code base on the language
-//             console.log("running the code... in " + newLanguage);
-//             switch (newLanguage) {
-//                 case "java":
-//                     runServerCode(editorInstance.getValue(), "/run-java-code");
-//                     console.log("sending code to java server...");
-//                     break;
-//                 case "python":
-//                     runServerCode(
-//                         editorInstance.getValue(),
-//                         "/run-python-code"
-//                     );
-//                     console.log("sending code to python server...");
-//                     break;
-//                 // ... more case statements ...
-//                 default:
-//                     runClientCode(editorInstance.getValue());
-//                     console.log("sending code...");
-//             }
-//         }
-//     });
-
-//     setup_code_editor(newLanguage, newTheme);
-//     console.log("the current: " + newLanguage + " - " + newTheme);
-// });
-
-// async function runServerCode(code, url_code_api = "/run-python-code") {
-//     const outputArea = document.getElementById("code_output_area");
-//     outputArea.textContent = "Running Python code on server...";
-
-//     try {
-//         const response = await fetch(url_code_api, {
-//             // <-- Changed endpoint URL
-//             method: "POST",
-//             headers: {
-//                 "Content-Type": "application/json",
-//                 "X-CSRF-TOKEN": document
-//                     .querySelector('meta[name="csrf-token"]')
-//                     .getAttribute("content"),
-//             },
-//             body: JSON.stringify({ code: code }),
-//         });
-
-//         const data = await response.json();
-
-//         if (response.ok) {
-//             outputArea.textContent = `Python Output:\n${data.output}`;
-//         } else {
-//             // Handle server-side errors (e.g., syntax errors in Python)
-//             outputArea.textContent = `Server Error:\n${data.error}`;
-//         }
-//     } catch (error) {
-//         // Handle network or fetch errors
-//         outputArea.textContent = `Network Error: ${error.message}`;
-//     }
-// }
-
-// function runClientCode(code) {
-//     const outputArea = document.getElementById("code_output_area");
-//     try {
-//         // Use a function constructor for slightly safer execution than eval()
-//         // Capture the return value or anything logged to the console
-//         const scriptFunction = new Function(code);
-//         const result = scriptFunction();
-
-//         outputArea.textContent = `Execution Successful. Returned: ${
-//             result || "None"
-//         }`;
-//     } catch (error) {
-//         outputArea.textContent = `Execution Error: ${error.message}`;
-//         console.error(error);
-//     }
-// }
-
-// // New function to handle server-side execution via Fetch API
-// // async function runServerPythonCode(code) {
-// //     const outputArea = document.getElementById("code_output_area");
-// //     outputArea.textContent = "Running Python code on server...";
-
-// //     try {
-// //         const response = await fetch("/run-python-code", {
-// //             // <-- Changed endpoint URL
-// //             method: "POST",
-// //             headers: {
-// //                 "Content-Type": "application/json",
-// //                 "X-CSRF-TOKEN": document
-// //                     .querySelector('meta[name="csrf-token"]')
-// //                     .getAttribute("content"),
-// //             },
-// //             body: JSON.stringify({ code: code }),
-// //         });
-
-// //         const data = await response.json();
-
-// //         if (response.ok) {
-// //             outputArea.textContent = `Python Output:\n${data.output}`;
-// //         } else {
-// //             // Handle server-side errors (e.g., syntax errors in Python)
-// //             outputArea.textContent = `Server Error:\n${data.error}`;
-// //         }
-// //     } catch (error) {
-// //         // Handle network or fetch errors
-// //         outputArea.textContent = `Network Error: ${error.message}`;
-// //     }
-// // }
-
-// // good for security run this if server is in docker
-// // New function to handle server-side execution via Fetch API for secure Python endpoint
-// // async function runServerPythonCode(code) {
-// //     // ... (logic to display 'Running Python code on server...') ...
-// //     try {
-// //         // <-- Target the secure endpoint URL
-// //         const response = await fetch("/run-python-code-secure", {
-// //             // ... (headers including CSRF token) ...
-// //             body: JSON.stringify({ code: code }),
-// //         });
-// //         // ... (logic to handle response/error) ...
-// //     } catch (error) {
-// //         // ... (handle network or fetch errors) ...
-// //     }
-// // }
