@@ -13,11 +13,11 @@
 </head>
 
 <body>
-    <div class="p-3 container flex flex-col gap-3 mx-auto relative">
+    <div class="p-3 container w-[800px] flex flex-col gap-3 mx-auto relative">
         {{-- home navigation bar --}}
         <div class="navbar bg-base-100 shadow rounded-xl border border-gray-500 sticky top-0 z-10">
             <div class="flex-1">
-                <a class="btn btn-ghost text-xl">The Hunger Games</a>
+                <a class="btn btn-ghost text-xl">The Hunger Games (Coding Compitetion)</a>
             </div>
             <div class="flex-none">
                 <ul class="menu menu-horizontal px-1">
@@ -28,7 +28,7 @@
                             <summary>Authenticate</summary>
                             <ul class="bg-base-100 rounded-t-none p-2">
                                 <li><a href="{{ url('login') }}">Login</a></li>
-                                <li><a>Sign up</a></li>
+                                {{-- <li><a>Sign up</a></li> --}}
                             </ul>
                         </details>
                     </li>
@@ -44,8 +44,7 @@
                 <div class="max-w-md">
                     <h1 class="mb-5 text-5xl font-bold">Hello there</h1>
                     <p class="mb-5">
-                        Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda excepturi exercitationem
-                        quasi. In deleniti eaque aut repudiandae et a id nisi.
+                        Provide a sample text 
                     </p>
                     <button class="btn">Get Started</button>
                 </div>

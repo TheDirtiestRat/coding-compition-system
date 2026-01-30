@@ -1,4 +1,4 @@
-<div class="navbar bg-base-300 shadow rounded-xl">
+<div class="navbar bg-base-300 shadow rounded-xl px-3">
     {{-- for small screen --}}
     <div class="navbar-start">
         <div class="dropdown">
@@ -29,8 +29,7 @@
         @if (Auth::check())
             <p>Welcome, {{ auth()->user()->name }}</p>
         @endif
-        <button type="submit" class="btn">
-
+        <button type="submit" class="btn btn-soft rounded-xl">
             Logout
         </button>
     </form>

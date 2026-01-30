@@ -35,7 +35,7 @@
 
     <div class="flex flex-col-reverse md:flex-row h-full w-full gap-4">
         {{-- LEFT: Editor --}}
-        <div class="card bg-base-300 basis-full shadow flex flex-col overflow-hidden">
+        <div class="card rounded-2xl bg-base-300 basis-full shadow flex flex-col overflow-hidden">
             {{-- Toolbar --}}
             <div class="flex flex-row flex-nowrap items-center gap-2 p-3 bg-base-300 rounded-xl">
                 <select class="select select-sm select-bordered basis-full" id="theme-selector">
@@ -51,7 +51,7 @@
                 <button id="run_code_btn" class="btn btn-sm btn-primary w-[200px]">
                     Run
                 </button>
-                <button id="submit_code_btn" class="btn btn-sm btn-secondary w-[200px]"
+                <button id="submit_code_btn" class="btn rounded-tr-xl btn-sm btn-secondary w-[200px]"
                     @isset($details)
                     value="{{ $details->id }}" @endisset>
                     Submit
@@ -68,34 +68,37 @@
         </div>
 
         {{-- RIGHT: Problem & Output --}}
-        <div class="flex flex-col w-full gap-4">
-            {{-- Next challenge --}}
-            @isset($next_challenge_id)
-                <div class="flex justify-end">
-                    <a href="{{ url('/code-editor/' . $next_challenge_id) }}">
-                        <button class="btn btn-sm btn-outline rounded-xl">
-                            Next Challenge →
-                        </button>
-                    </a>
-                </div>
-            @endisset
-
-
+        <div class="flex flex-col w-full gap-1">
             {{-- Problem details --}}
-            <div class="card bg-base-300 shadow-lg p-4 space-y-2">
+            <div class="card rounded-2xl bg-base-300 shadow-lg p-4 space-y-2">
                 @isset($details)
                     <div class="flex items-center justify-between">
                         <h2 class="text-2xl font-bold">
                             {{ $details->title }}
                         </h2>
+                        
+                        {{-- Next challenge --}}
+                        @isset($next_challenge_id)
+                            <div class="flex justify-end">
+                                <a href="{{ url('/code-editor/' . $next_challenge_id) }}">
+                                    <button class="btn btn-sm btn-soft rounded-xl">
+                                        Next Challenge →
+                                    </button>
+                                </a>
+                            </div>
+                        @endisset
+                    </div>
+
+                    <div class="flex items-center w-full flex-row gap-3">
+                        <p class="text-sm text-base-content/70 text-nowrap">
+                            Points: {{ $details->points }}
+                        </p>
+                        <div class="divider basis-full"></div>
                         <span class="badge badge-outline">
                             {{ ucfirst($details->difficulty) }}
                         </span>
                     </div>
 
-                    <p class="text-sm text-base-content/70">
-                        Points: {{ $details->points }}
-                    </p>
 
                     <div class="prose max-w-none text-base-content">
                         {!! nl2br(e($details->description)) !!}
@@ -110,9 +113,7 @@
             {{-- Output --}}
             <div class="divider">Code Output</div>
 
-            <div id="code_output_area"
-                class="card bg-base-300 shadow-lg p-3 font-mono text-sm whitespace-pre-wrap break-all min-h-[120px]">
-                This is where the output of the code will be.
+            <div id="code_output_area" class="card rounded-2xl bg-base-300 shadow-lg p-4 font-mono text-sm whitespace-pre-wrap break-all h-full overflow-y-auto max-h-[400px]">This is where the output of the code will be.
             </div>
         </div>
     </div>
