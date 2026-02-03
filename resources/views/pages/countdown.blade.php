@@ -13,10 +13,12 @@
 </head>
 
 <body class="w-screen h-screen flex justify-center items-center">
-    <h3 id="countdown"
-        class="text-[200px] font-mono font-semibold text-center underline decoration-2 decoration-indigo-400 decoration-double">
-        00:00:00
-    </h3>
+    <div class="flex flex-col">
+        <p id="countdown" class="text-[200px] font-semibold text-center p-0 leading-tight">
+            00:00:00
+        </p>
+        <p class="p-0 text-center">Compitetion Ends in ...</p>
+    </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -47,8 +49,7 @@
             }
 
             function displayPaused(remainingTimeInMs) {
-                const remainingTimeInTimeStr
-                    = convertNumberToTimeString(remainingTimeInMs)
+                const remainingTimeInTimeStr = convertNumberToTimeString(remainingTimeInMs)
                 endTime = null;
                 countdown.innerText = remainingTimeInTimeStr;
                 tick();

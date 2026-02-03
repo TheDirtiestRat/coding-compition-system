@@ -56,11 +56,30 @@ class CandidateController extends Controller
         $hard_challenges = $baseQuery('hard');
         $challenges = $baseQuery('challenge');
 
+        $unsolved_challenge_id = Challenges::query()
+                ->leftJoin('submissions', function ($join) use ($candidate) {
+                    $join->on('submissions.challenge_id', '=', 'challenges.id')
+                        ->where('submissions.candidate_id', '=', $candidate->id);
+                })
+                ->whereNull('submissions.id') // NOT STARTED
+                ->orderByRaw("
+                    CASE challenges.difficulty
+                        WHEN 'easy' THEN 1
+                        WHEN 'medium' THEN 2
+                        WHEN 'hard' THEN 3
+                        WHEN 'challenge' THEN 4
+                        ELSE 4
+                    END
+                ")
+                ->orderBy('challenges.id', 'asc')
+                ->value('challenges.id');
+
         return view('pages.code-problems', compact(
             'challenges',
             'easy_challenges',
             'medium_challenges',
-            'hard_challenges'
+            'hard_challenges',
+            'unsolved_challenge_id'
         ));
     }
 

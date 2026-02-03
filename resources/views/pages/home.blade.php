@@ -13,7 +13,7 @@
 </head>
 
 <body>
-    <div class="p-3 container w-[800px] flex flex-col gap-3 mx-auto relative">
+    <div class="p-3 container flex flex-col gap-3 mx-auto relative">
         {{-- home navigation bar --}}
         <div class="navbar bg-base-100 shadow rounded-xl border border-gray-500 sticky top-0 z-10">
             <div class="flex-1">
@@ -26,7 +26,7 @@
                     <li>
                         <details>
                             <summary>Authenticate</summary>
-                            <ul class="bg-base-100 rounded-t-none p-2">
+                            <ul class="bg-base-100 rounded-t-none shadow p-2">
                                 <li><a href="{{ url('login') }}">Login</a></li>
                                 {{-- <li><a>Sign up</a></li> --}}
                             </ul>

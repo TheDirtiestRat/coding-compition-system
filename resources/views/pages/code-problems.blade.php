@@ -1,7 +1,7 @@
 @extends('layouts.code-editor')
 
 @section('code-content')
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 w-full gap-3">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 place-content-center gap-3">
         <div class="divider col-span-full">Easy Problems</div>
         @foreach ($easy_challenges as $challenge)
             <x-challenge-card :challenge="$challenge" />

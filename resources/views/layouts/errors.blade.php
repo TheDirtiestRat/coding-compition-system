@@ -13,10 +13,10 @@
 </head>
 
 <body>
-    <div class="bg-gray-300 p-4 h-screen w-screen flex justify-center items-center">
-        <div class="flex flex-col gap-2 justify-center ">
+    <div class="p-4 h-screen w-screen flex justify-center items-center">
+        <div class="flex flex-col gap-3 justify-center">
             @yield('error-content')
-            <a href="{{ url()->previous() }}" class="text-center">Go Back</a>
+            <a href="{{ url()->previous() }}" class="text-center btn rounded-xl">Go Back</a>
         </div>
     </div>
 </body>
