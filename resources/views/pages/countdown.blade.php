@@ -94,6 +94,43 @@
                     }
                 });
 
+            // get the current time
+            function getCurrentTime() {
+                return fetch('/admin/timer/get_timer', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        },
+                        body: JSON.stringify({}),
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        curTime = data;
+                        return data;
+                    });
+            }
+
+            setInterval(async () => {
+                const timer = await getCurrentTime();
+                let countdownTimer = timer['curTimeInMils'];
+                let endTime = timer['endTimeInMils'];
+
+                // console.log({
+                //     "curr" : countdownTimer,
+                //     "end" : endTime,
+                //     "time?" : timer['isTime'],
+                // });
+
+                const remaining = Math.max(0, endTime - countdownTimer) * 1000;
+                // console.log(remaining);
+
+                if (timer['isTime'] == false) {
+                    countdown.innerText = convertNumberToTimeString(remaining);
+                } else {
+                    countdown.innerText = "Time!!"
+                }
+            }, 1000);
         });
     </script>
 </body>

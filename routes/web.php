@@ -48,6 +48,10 @@ Route::middleware(['auth', 'is.admin'])->group(function () {
     Route::post('/admin/countdown/pause', [AdminCountdownController::class, 'pause']);
     Route::post('/admin/countdown/reset', [AdminCountdownController::class, 'reset']);
 
+    // for the timer countdown not using backround process (not safe but low overhead)
+    Route::post('/admin/timer/set_timer', [AdminCountdownController::class, 'set_timer']);
+    Route::post('/admin/timer/get_timer', [AdminCountdownController::class, 'get_timer']);
+
     Route::get('/admin/api/submissions_list', [AdminController::class, 'submissions_api']);
     Route::get('/admin/api/submissions/{id}', [SubmissionsController::class, 'show']);
     Route::post('/admin/api/submissions/{id}/submit-score', [SubmissionsController::class, 'submit_score']);
@@ -77,6 +81,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/run-java-code', [CompilerController::class, 'run_java_code'])->middleware('web');
     });
 
+    Route::post('/timer/get_timer', [AdminCountdownController::class, 'get_timer']);
     // when the count down is finished the end screen will appear
     Route::get('/competition-ended', function () {
         return view('pages.competition-ended');

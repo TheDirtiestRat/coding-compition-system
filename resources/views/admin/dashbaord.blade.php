@@ -25,10 +25,11 @@
                 </div>
 
                 <div class="space-x-4">
+                    <button id="getTimerBtn" class="btn btn-primary btn-lg" type="button">Get</button>
                     <button id="startStopButton" class="btn btn-primary btn-lg" type="button"
-                        onclick="startOrPauseCountdown()">Start</button>
+                        onclick="setCurrentTimer()">Start</button>
                     <button class="btn btn-secondary btn-soft btn-lg" type="button"
-                        onclick="resetCountdown()">Reset</button>
+                        onclick="resetCountdowns()">Reset</button>
                 </div>
             </div>
         </div>
@@ -78,6 +79,9 @@
         let endTime = null;
         let isPaused = false;
 
+        let curTime = null;
+
+        const getTimerBtn = document.getElementById("getTimerBtn");
         const countdown = document.getElementById("countdown");
         const startStopButton = document.getElementById("startStopButton");
 
@@ -94,11 +98,78 @@
             }
         }
 
-        function startCountdown() {
+        function convertNumberToTimeString(time) {
+            const totalSeconds = Math.floor(time / 1000);
+            const hours = Math.floor(totalSeconds / 3600) || 0;
+            const minutes = Math.floor((totalSeconds % 3600) / 60) || 0;
+            const seconds = totalSeconds % 60 || 0;
+
+            return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+        }
+
+        // get the current time
+        function getCurrentTime() {
+            return fetch('/admin/timer/get_timer', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+                body: JSON.stringify({}),
+            })
+            .then(res => res.json())
+            .then(data => {
+                curTime = data;
+                return data;
+            });
+        }
+
+        setInterval(async () => {
+            const timer = await getCurrentTime();
+            let countdownTimer = timer['curTimeInMils'];
+            let endTime = timer['endTimeInMils'];
+
+            // console.log({
+            //     "curr" : countdownTimer,
+            //     "end" : endTime,
+            //     "time?" : timer['isTime'],
+            // });
+
+            const remaining = Math.max(0, endTime - countdownTimer) * 1000;
+            // console.log(remaining);
+
+            if (timer['isTime'] == false) {
+                countdown.innerText = convertNumberToTimeString(remaining);
+            }else {
+                countdown.innerText = "Time!!"
+            }
+        }, 1000);
+        
+        function setCurrentTimer() {
             const hours = Number(hourInput.value) || 0;
             const minutes = Number(minuteInput.value) || 0;
             const seconds = Number(secondInput.value) || 0;
 
+            fetch('/admin/timer/set_timer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                    body: JSON.stringify({
+                        // values that we can use
+                        setHours: hours,
+                        setMinutes: minutes,
+                        setSeconds: seconds
+                    }),
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log(data);
+                });
+        }
+
+        function startCountdown() {
             const durationMs =
                 hours * 3600000 +
                 minutes * 60000 +
@@ -113,7 +184,11 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     },
                     body: JSON.stringify({
-                        duration_ms: durationMs
+                        duration_ms: durationMs,
+                        // values that we can use
+                        setHours: hours,
+                        setMinutes: minutes,
+                        setSeconds: seconds
                     }),
                 })
                 .then(res => res.json())
@@ -161,9 +236,7 @@
 
         function tick() {
             if (!endTime) return;
-
             const remaining = Math.max(0, endTime - Date.now());
-
             countdown.innerText = convertNumberToTimeString(remaining);
 
             if (remaining > 0) {
@@ -179,14 +252,7 @@
             timeInputContainer.hidden = hidden;
         }
 
-        function convertNumberToTimeString(time) {
-            const totalSeconds = Math.floor(time / 1000);
-            const hours = Math.floor(totalSeconds / 3600) || 0;
-            const minutes = Math.floor((totalSeconds % 3600) / 60) || 0;
-            const seconds = totalSeconds % 60 || 0;
-
-            return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-        }
+        
 
         // auto-sync on page load
         fetch('/countdown')
@@ -207,6 +273,11 @@
                 }
             });
 
+
+        
+
+
+        window.setCurrentTimer = setCurrentTimer;
         window.startOrPauseCountdown = startOrPauseCountdown;
         window.resetCountdown = resetCountdown;
     });

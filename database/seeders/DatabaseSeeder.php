@@ -40,6 +40,16 @@ class DatabaseSeeder extends Seeder
             'option_datatype' => 'boolean',
             'option_value' => '0'
         ]);
+        DB::table('options')->insert([
+            'option_name' => 'set_time',
+            'option_datatype' => 'text',
+            'option_value' => '00:00:00'
+        ]);
+        DB::table('options')->insert([
+            'option_name' => 'expected_end_time',
+            'option_datatype' => 'text',
+            'option_value' => '00:00:00'
+        ]);
 
         Candidates::factory(5)->create();
 
@@ -176,6 +186,5 @@ else:
     print(f'"{text}" is not a palindrome')
 PYTHON
         ]);
-
     }
 }
