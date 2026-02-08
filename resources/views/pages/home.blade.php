@@ -76,6 +76,15 @@
             background-clip: text;
         }
 
+        .plain-text {
+            color: #090404;
+            /* solid color */
+            background: none;
+            /* remove any background gradients */
+            -webkit-background-clip: unset;
+            -webkit-text-fill-color: unset;
+        }
+
         .h2 {
             color: white;
         }
@@ -107,8 +116,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold gradient-text">The Hunger Games</h1>
-                        <p class="text-xs text-gray-500">Coding Competition</p>
+                        <h1 class="text-xl font-bold plain-text">The Hunger Games</h1>
+                        <p class="text-xs text-gray-500 plain-text">Coding Competition</p>
                     </div>
                 </div>
 
@@ -170,7 +179,7 @@
                             Code. Compete. Conquer.
                         </h1>
 
-                        <p class="text-gray-600 text-lg mb-8 animate-slide-in" style="animation-delay: 0.2s">
+                        <p class="text-gray-800 text-lg mb-8 animate-slide-in" style="animation-delay: 0.2s">
                             Join the ultimate coding battlefield where developers showcase their skills,
                             solve real-world challenges, and claim victory in The Hunger Games of programming.
                         </p>
@@ -256,7 +265,7 @@
                     <section class="features">
                         <h3 class="text-xl font-bold mb-4 text-center">Real-time Challenges</h3>
                     </section>
-                    <p class="text-gray-600 text-center">Tackle live coding problems with increasing difficulty levels
+                    <p class="text-gray-800 text-center">Tackle live coding problems with increasing difficulty levels
                         and real-time leaderboard updates.</p>
                 </div>
 
@@ -273,7 +282,7 @@
                     <section class="features">
                         <h3 class="text-xl font-bold mb-4 text-center">Secure Platform</h3>
                     </section>
-                    <p class="text-gray-600 text-center">Compete with confidence knowing our platform ensures fair play
+                    <p class="text-gray-800 text-center">Compete with confidence knowing our platform ensures fair play
                         and protects your intellectual property.</p>
                 </div>
 
@@ -290,7 +299,7 @@
                     <section class="features">
                         <h3 class="text-xl font-bold mb-4 text-center">Community Network</h3>
                     </section>
-                    <p class="text-gray-600 text-center">Connect with fellow developers, share solutions, and learn from
+                    <p class="text-gray-800 text-center">Connect with fellow developers, share solutions, and learn from
                         the best in the programming community.</p>
                 </div>
             </div>
