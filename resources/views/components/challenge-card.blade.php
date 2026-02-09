@@ -6,9 +6,9 @@
             'card' => 'border border-success bg-success/5',
             'badge' => 'badge-success',
             'badgeLabel' => 'Reviewed',
-            'button' => 'btn-success btn-disabled',
+            'button' => 'btn-success',
             'label' => 'Reviewed',
-            'clickable' => false,
+            'clickable' => true,
         ],
         'submitted' => [
             'card' => 'border border-warning bg-warning/5',
