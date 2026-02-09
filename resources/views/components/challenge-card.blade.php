@@ -21,7 +21,7 @@
         default => [
             'card' => 'border border-base-300 hover:border-primary hover:bg-base-200 transition',
             'badge' => 'badge',
-            'badgeLabel' => 'Not Started',
+            'badgeLabel' => 'Unsolved',
             'button' => 'btn-primary',
             'label' => 'Solve Challenge',
             'clickable' => true,
