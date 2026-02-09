@@ -16,6 +16,9 @@
         </div>
     </div>
 
+    <!-- Hidden Fields hehe -->
+     <textarea hidden name="submittedCode" id="submittedCode">{{ $details->code }}</textarea>
+
     @if ($details->status === 'submitted')
         <div role="alert" class="fixed bottom-4 left-4 z-50 max-w-sm alert alert-info shadow-lg flex items-center gap-3">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -76,7 +79,7 @@
                         <h2 class="text-2xl font-bold">
                             {{ $details->title }}
                         </h2>
-                        
+
                         {{-- Next challenge --}}
                         @isset($next_challenge_id)
                             <div class="flex justify-end">

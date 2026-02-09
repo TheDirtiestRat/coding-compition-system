@@ -100,6 +100,7 @@ class CandidateController extends Controller
                 ->selectRaw("
                         challenges.*,
                         submissions.score,
+                        submissions.code,
                         CASE
                             WHEN submissions.is_score_submitted = 1 THEN 'reviewed'
                             WHEN submissions.id IS NOT NULL THEN 'submitted'
