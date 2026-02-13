@@ -64,7 +64,7 @@
 
                 <select class="select select-sm select-bordered basis-full" id="language-selector">
                     <option value="java" selected>Java</option>
-                    <option value="python">Python</option>
+                    {{-- <option value="python">Python</option> --}}
                 </select>
 
                 <button id="run_code_btn" class="btn btn-sm btn-primary w-[200px]">
