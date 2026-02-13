@@ -16,10 +16,13 @@
         </div>
     </div>
 
+    <!-- Hidden Fields hehe -->
+    <textarea hidden name="submittedCode" id="submittedCode">{{ $details->code }}</textarea>
+
     @if ($details->status === 'submitted')
         <div role="alert" class="fixed bottom-4 left-4 z-50 max-w-sm alert alert-info shadow-lg flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
@@ -30,6 +33,22 @@
             <span class="text-sm">
                 Submitted for review. You may re-submit until it&apos;s given a score.
             </span>
+        </div>
+    @elseif ($details->status === 'reviewed')
+        <div role="alert" class="fixed bottom-4 left-4 z-50 max-w-sm alert alert-success shadow-lg flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+                <path d="M12 9h.01" />
+                <path d="M11 12h1v4h1" />
+            </svg>
+
+            <p class="text-sm">
+                Code has already been reviewed with a score of <br>
+            <p class="text-xl font-bold">{{ $details->score }}/{{ $details->points }}</p>
+            </p>
         </div>
     @endif
 
@@ -45,17 +64,18 @@
 
                 <select class="select select-sm select-bordered basis-full" id="language-selector">
                     <option value="java" selected>Java</option>
-                    <option value="python">Python</option>
+                    {{-- <option value="python">Python</option> --}}
                 </select>
 
                 <button id="run_code_btn" class="btn btn-sm btn-primary w-[200px]">
                     Run
                 </button>
-                <button id="submit_code_btn" class="btn rounded-tr-xl btn-sm btn-secondary w-[200px]"
-                    @isset($details)
+                @if ($details->status !== "reviewed")
+                    <button id="submit_code_btn" class="btn rounded-tr-xl btn-sm btn-secondary w-[200px]" @isset($details)
                     value="{{ $details->id }}" @endisset>
-                    Submit
-                </button>
+                        Submit
+                    </button>
+                @endif
             </div>
 
             {{-- Editor --}}
@@ -76,7 +96,7 @@
                         <h2 class="text-2xl font-bold">
                             {{ $details->title }}
                         </h2>
-                        
+
                         {{-- Next challenge --}}
                         @isset($next_challenge_id)
                             <div class="flex justify-end">
@@ -113,7 +133,9 @@
             {{-- Output --}}
             <div class="divider">Code Output</div>
 
-            <div id="code_output_area" class="card rounded-2xl bg-base-300 shadow-lg p-4 font-mono text-sm whitespace-pre-wrap break-all h-full overflow-y-auto max-h-[400px]">This is where the output of the code will be.
+            <div id="code_output_area"
+                class="card rounded-2xl bg-base-300 shadow-lg p-4 font-mono text-sm whitespace-pre-wrap break-all h-full overflow-y-auto max-h-[400px]">
+                This is where the output of the code will be.
             </div>
         </div>
     </div>

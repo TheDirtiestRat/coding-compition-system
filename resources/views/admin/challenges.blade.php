@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.\admin')
 
 @section('admin-content')
     {{-- alert --}}
@@ -36,8 +36,8 @@
                     {{-- form --}}
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">Challenge ID</legend>
-                        <input type="text" class="input" name="challenge_id" id="challenge_id" placeholder="Challenge Id"
-                            readonly />
+                        <input type="text" class="input" name="challenge_id" id="challenge_id"
+                            value="{{ $last_id->id + 1 }}" placeholder="Challenge Id" readonly />
                         <legend class="fieldset-legend">Challenge Title</legend>
                         <input type="text" class="input w-full" name="title" id="title" placeholder="Type here" />
                         <legend class="fieldset-legend">Description</legend>
@@ -85,8 +85,13 @@
                     <button onclick="copyCode()" class="btn btn-sm btn-base-100 btn-ghost rounded-xl">Copy Code</button>
                 </div>
                 <div id="monacoEditorContainer" class="w-full h-[480px]"></div>
-                <div class="basis-auto bg-base-100 p-2 px-3 h-full rounded-b-xl">
-                    <p class="text-gray-400">Edit the code here ma Rigga!</p>
+                <div class="basis-auto bg-base-100 p-3 flex gap-3 flex-col px-3 h-full rounded-b-3xl">
+                    <div class="flex gap-3">
+                        <p class="text-gray-400 w-full">Edit the code here ma Rigga!</p>
+                        <button id="testCodeBtn" class="btn btn-sm btn-primary basis-2/4">Test Code</button>
+                    </div>
+                    <div id="code_output_area" class="basis-full bg-gray-400 p-3 rounded-xl w-full whitespace-pre-wrap break-all font-mono">Code Output:
+                    </div>
                 </div>
             </div>
             {{-- <div id="submissionDisplayContainer" class="basis-full flex flex-col bg-base-100 rounded-xl p-3 gap-4">
@@ -162,10 +167,17 @@
 
             editorInstance = monaco.editor.create(container, {
                 // TODO: Add language column in Challenges table
-                langage: codeLanguage ?? 'java',
+                language: codeLanguage ?? 'java',
+                value: `class Main {
+    public static void main(String[] args) {
+        // code here ...
+    }
+}`,
                 automaticLayout: true,
                 theme: 'vs-dark',
-                minimap: { enabled: false },
+                minimap: {
+                    enabled: false
+                },
                 fontSize: 14,
             });
 
@@ -188,9 +200,55 @@
             });
         }
 
+        // here is the code for the testing of the candidates code
+        async function run_code() {
+            const currentLanguage = "Java"
+            const code = editorInstance.getValue()
+            const url_code_api = "/run-java-code";
+
+            const outputElement = document.getElementById("code_output_area");
+            outputElement.textContent = `Testing code in the server...`;
+
+            try {
+                const response = await fetch("/run-java-code", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        // Ensure the CSRF token element exists before trying to access its attribute
+                        "X-CSRF-TOKEN": document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute("content") || "",
+                    },
+                    body: JSON.stringify({
+                        code: code
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    outputElement.textContent = `${currentLanguage} Output:\n${data.output}`;
+                } else {
+                    // Server-side execution error (e.g., syntax error)
+                    outputElement.textContent =
+                        `Server Error (${currentLanguage}):\n${data.error || "Unknown server error"}`;
+                }
+            } catch (error) {
+                // Network or fetch error
+                outputElement.textContent = `Network/Fetch Error: ${error.message}`;
+            }
+        }
+
+
+
         document.addEventListener("DOMContentLoaded", () => {
             initCodeEditor();
             attachSubmitChallengeListener();
+
+            const test_btn = document.getElementById('testCodeBtn');
+            test_btn.addEventListener('click', () => {
+                run_code();
+            })
         });
     </script>
 @endsection
