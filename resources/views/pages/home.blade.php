@@ -329,7 +329,7 @@
                         <p class="text-gray-400 mb-6">
                             ACLC Programmers Guild.
                             <br />
-                            Providing reliable tech since {{ date('Y') }}
+                            Providing reliable tech since 2022
                         </p>
                         <p class="text-gray-500 text-sm">Copyright © {{ date('Y') }} - All rights reserved</p>
                     </div>
@@ -370,8 +370,7 @@
                                 <img src="{{ asset('images/officialLogo.png') }}" class="w-12 h-12 object-contain" />
                             </a>
                         </div>
-                        <p class="text-gray-400 mt-6">Follow us for updates on upcoming competitions and coding
-                            challenges.</p>
+                        <p class="text-gray-400 mt-6">Follow us to know more about the ACLC Programmers Guild.</p>
                     </div>
                 </div>
             </div>

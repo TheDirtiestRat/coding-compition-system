@@ -65,7 +65,7 @@
         <div class="text-white text-center md:text-left md:w-1/2 animate-slide-in">
             <div class="mb-6">
                 <h1 class="text-5xl md:text-6xl font-bold mb-2">Coding Competition</h1>
-                <p class="text-xl opacity-90">Showcase your skills. Challenge your limits.</p>
+                <p class="text-xl opacity-90">Showcase your skills. Challenge your limits. And Conquer.</p>
             </div>
 
             <div class="hidden md:block mt-10">
@@ -85,15 +85,41 @@
 
                 <div class="flex items-center space-x-4">
                     <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                            class="w-6 h-6 text-white fill-current">
+
+                            <!-- Taller, thinner cup -->
+                            <path d="M7 3h10v4
+                                            C17 11 14.5 13 12 13
+                                            C9.5 13 7 11 7 7V3z" />
+
+                            <!-- Left slim bull-horn handle -->
+                            <path d="M7 5
+                                            C4.5 5 4 9 6.8 10
+                                            C7.6 10.3 8 9.4 7.6 8.8
+                                            C7.2 8.2 7 7.6 7 6.8
+                                            C7 6.2 7 5.6 7 5z" />
+
+                            <!-- Right slim bull-horn handle -->
+                            <path d="M17 5
+           C19.5 5 20 9 17.2 10
+           C16.4 10.3 16 9.4 16.4 8.8
+           C16.8 8.2 17 7.6 17 6.8
+           C17 6.2 17 5.6 17 5z" />
+
+                            <!-- Slightly longer stem -->
+                            <rect x="10.75" y="13" width="2.5" height="3.5" rx="1" />
+
+                            <!-- Slim base -->
+                            <rect x="8.5" y="16.5" width="7" height="1.8" rx="1" />
+                            <rect x="7.5" y="18.5" width="9" height="2" rx="1" />
+
                         </svg>
+
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold">Secure Platform</h3>
-                        <p class="text-white/80">Your data and submissions are protected</p>
+                        <h3 class="text-lg font-semibold">Competitive Environment</h3>
+                        <p class="text-white/80">Test your skills with other competitors</p>
                     </div>
                 </div>
             </div>
