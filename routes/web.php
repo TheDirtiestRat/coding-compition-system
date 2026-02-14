@@ -17,8 +17,13 @@ use Illuminate\Support\Facades\DB;
 Route::get('/', function () {
     return view('pages.home');
 });
+
 Route::get('/home', function () {
     return view('pages.home');
+});
+
+Route::get('/credits', function () {
+    return view('pages.credits');
 });
 
 // Authentication Routes
