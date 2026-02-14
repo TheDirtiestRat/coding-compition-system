@@ -13,10 +13,12 @@
 </head>
 
 <body class="w-screen h-screen flex justify-center items-center">
-    <h3 id="countdown"
-        class="text-[200px] font-mono font-semibold text-center underline decoration-2 decoration-indigo-400 decoration-double">
-        00:00:00
-    </h3>
+    <div class="flex flex-col">
+        <p id="countdown" class="text-[200px] font-semibold text-center p-0 leading-tight">
+            00:00:00
+        </p>
+        <p class="p-0 text-center">Compitetion Ends in ...</p>
+    </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -47,8 +49,7 @@
             }
 
             function displayPaused(remainingTimeInMs) {
-                const remainingTimeInTimeStr
-                    = convertNumberToTimeString(remainingTimeInMs)
+                const remainingTimeInTimeStr = convertNumberToTimeString(remainingTimeInMs)
                 endTime = null;
                 countdown.innerText = remainingTimeInTimeStr;
                 tick();
@@ -93,6 +94,43 @@
                     }
                 });
 
+            // get the current time
+            function getCurrentTime() {
+                return fetch('/admin/timer/get_timer', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        },
+                        body: JSON.stringify({}),
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        curTime = data;
+                        return data;
+                    });
+            }
+
+            setInterval(async () => {
+                const timer = await getCurrentTime();
+                let countdownTimer = timer['curTimeInMils'];
+                let endTime = timer['endTimeInMils'];
+
+                // console.log({
+                //     "curr" : countdownTimer,
+                //     "end" : endTime,
+                //     "time?" : timer['isTime'],
+                // });
+
+                const remaining = Math.max(0, endTime - countdownTimer) * 1000;
+                // console.log(remaining);
+
+                if (timer['isTime'] == false) {
+                    countdown.innerText = convertNumberToTimeString(remaining);
+                } else {
+                    countdown.innerText = "Time!!"
+                }
+            }, 1000);
         });
     </script>
 </body>

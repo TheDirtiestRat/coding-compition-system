@@ -14,43 +14,54 @@
 
             <div class="flex flex-col items-center justify-center gap-4">
                 <div id="timeInputContainer" class="space-x-4 flex flex-row gap-2">
-                    <input type="number" class="input min-w-24" name="" id="hourInput" placeholder="Hour" min="0" max="23">
+                    <input type="number" class="input min-w-24" name="" id="hourInput" placeholder="Hour"
+                        min="0" max="23">
 
-                    <input type="number" class="input min-w-24" name="" id="minInput" placeholder="Minute" min="0" max="59">
+                    <input type="number" class="input min-w-24" name="" id="minInput" placeholder="Minute"
+                        min="0" max="59">
 
-                    <input type="number" class="input min-w-24" name="" id="secInput" placeholder="Second" min="0" max="59">
+                    <input type="number" class="input min-w-24" name="" id="secInput" placeholder="Second"
+                        min="0" max="59">
                 </div>
 
                 <div class="space-x-4">
+                    <button id="getTimerBtn" class="btn btn-primary btn-lg" type="button">Get</button>
                     <button id="startStopButton" class="btn btn-primary btn-lg" type="button"
-                        onclick="startOrPauseCountdown()">Start</button>
+                        onclick="setCurrentTimer()">Start</button>
                     <button class="btn btn-secondary btn-soft btn-lg" type="button"
-                        onclick="resetCountdown()">Reset</button>
+                        onclick="resetCountdowns()">Reset</button>
                 </div>
             </div>
         </div>
 
-        <div class="basis-full bg-base-100 rounded-xl p-3 h-80 overflow-y-scroll">
+        <div class="basis-full bg-base-100 rounded-xl p-3 h-80 overflow-y-auto">
             <table class="table table-zebra">
                 <!-- head -->
-                <thead class="bg-slate-700/50 text-center text-neutral-200">
+                <thead class=" text-center text-neutral-200">
                     <tr>
-                        <th>Ranking</th>
-                        <th>Name</th>
-                        <th>Points</th>
-                        <th>Group</th>
+                        <th class="bg-slate-700/50 rounded-tl-xl">Ranking</th>
+                        <th class="bg-slate-700/50">Name</th>
+                        <th class="bg-slate-700/50">Points</th>
+                        <th class="bg-slate-700/50 rounded-tr-xl">Group</th>
                     </tr>
                 </thead>
                 <tbody>
+                    {{-- genereates the rank --}}
+                    @php
+                        $rank = 0;
+                    @endphp
                     @foreach ($candidates as $candidate)
+                        @php
+                            $rank += 1;
+                        @endphp
                         <tr class="text-center">
-                            @if ($candidate->total_points == 0)
+                            @if ($candidate->total_score == 0)
                                 <th class="text-neutral-400 font-light">N/A</th>
                             @else
-                                <th>{{ $candidate->rank }}</th>
+                                <th>{{ $rank }}</th>
                             @endif
                             <td>{{ $candidate->fullname }}</td>
-                            <td>{{ $candidate->total_points }}</td>
+                            <td>{{ $candidate->total_score }}</td>
                             <td>
                                 <p class="badge badge-primary badge-soft">{{ $candidate->group }}</p>
                             </td>
@@ -68,6 +79,9 @@
         let endTime = null;
         let isPaused = false;
 
+        let curTime = null;
+
+        const getTimerBtn = document.getElementById("getTimerBtn");
         const countdown = document.getElementById("countdown");
         const startStopButton = document.getElementById("startStopButton");
 
@@ -84,11 +98,78 @@
             }
         }
 
-        function startCountdown() {
+        function convertNumberToTimeString(time) {
+            const totalSeconds = Math.floor(time / 1000);
+            const hours = Math.floor(totalSeconds / 3600) || 0;
+            const minutes = Math.floor((totalSeconds % 3600) / 60) || 0;
+            const seconds = totalSeconds % 60 || 0;
+
+            return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+        }
+
+        // get the current time
+        function getCurrentTime() {
+            return fetch('/admin/timer/get_timer', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+                body: JSON.stringify({}),
+            })
+            .then(res => res.json())
+            .then(data => {
+                curTime = data;
+                return data;
+            });
+        }
+
+        setInterval(async () => {
+            const timer = await getCurrentTime();
+            let countdownTimer = timer['curTimeInMils'];
+            let endTime = timer['endTimeInMils'];
+
+            // console.log({
+            //     "curr" : countdownTimer,
+            //     "end" : endTime,
+            //     "time?" : timer['isTime'],
+            // });
+
+            const remaining = Math.max(0, endTime - countdownTimer) * 1000;
+            // console.log(remaining);
+
+            if (timer['isTime'] == false) {
+                countdown.innerText = convertNumberToTimeString(remaining);
+            }else {
+                countdown.innerText = "Time!!"
+            }
+        }, 1000);
+        
+        function setCurrentTimer() {
             const hours = Number(hourInput.value) || 0;
             const minutes = Number(minuteInput.value) || 0;
             const seconds = Number(secondInput.value) || 0;
 
+            fetch('/admin/timer/set_timer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                    body: JSON.stringify({
+                        // values that we can use
+                        setHours: hours,
+                        setMinutes: minutes,
+                        setSeconds: seconds
+                    }),
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log(data);
+                });
+        }
+
+        function startCountdown() {
             const durationMs =
                 hours * 3600000 +
                 minutes * 60000 +
@@ -97,13 +178,19 @@
             if (!durationMs) return;
 
             fetch('/admin/countdown/start', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                },
-                body: JSON.stringify({ duration_ms: durationMs }),
-            })
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                    body: JSON.stringify({
+                        duration_ms: durationMs,
+                        // values that we can use
+                        setHours: hours,
+                        setMinutes: minutes,
+                        setSeconds: seconds
+                    }),
+                })
                 .then(res => res.json())
                 .then(data => {
                     endTime = data.endTime;
@@ -115,11 +202,11 @@
 
         function pauseCountdown() {
             fetch('/admin/countdown/pause', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                },
-            })
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                })
                 .then(() => {
                     cancelAnimationFrame(rafId);
                     endTime = null;
@@ -149,9 +236,7 @@
 
         function tick() {
             if (!endTime) return;
-
             const remaining = Math.max(0, endTime - Date.now());
-
             countdown.innerText = convertNumberToTimeString(remaining);
 
             if (remaining > 0) {
@@ -167,14 +252,7 @@
             timeInputContainer.hidden = hidden;
         }
 
-        function convertNumberToTimeString(time) {
-            const totalSeconds = Math.floor(time / 1000);
-            const hours = Math.floor(totalSeconds / 3600) || 0;
-            const minutes = Math.floor((totalSeconds % 3600) / 60) || 0;
-            const seconds = totalSeconds % 60 || 0;
-
-            return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-        }
+        
 
         // auto-sync on page load
         fetch('/countdown')
@@ -195,6 +273,11 @@
                 }
             });
 
+
+        
+
+
+        window.setCurrentTimer = setCurrentTimer;
         window.startOrPauseCountdown = startOrPauseCountdown;
         window.resetCountdown = resetCountdown;
     });

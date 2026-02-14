@@ -14,6 +14,6 @@
 
     <form method="POST" action="{{ url('/logout') }}" class="navbar-end w-full">
         @csrf
-        <button type="submit" class="btn rounded-xl bg-base-100">Logout</button>
+        <button type="submit" class="btn rounded-xl btn-soft">Logout</button>
     </form>
 </nav>

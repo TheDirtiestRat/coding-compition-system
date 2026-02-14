@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Challenges;
 use App\Models\Candidates;
 use App\Models\SolvedChallenges;
+use App\Models\Submissions;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -16,7 +17,7 @@ class CandidateController extends Controller
     {
         $challenges = Challenges::latest()->get();
 
-        return  response()->json($challenges);
+        return response()->json($challenges);
     }
 
     public function get_challenge_details($id)
@@ -31,27 +32,55 @@ class CandidateController extends Controller
     public function code_problems()
     {
         $user = Auth::user();
-        $candidate = Candidates::where('user_id', '=', $user->id)->first();
-        
-        $solvedChallengeIds = $candidate 
-            ? SolvedChallenges::where('candidate_id', '=', $candidate->id)->pluck('challenge_id')->toArray()
-            : [];
+        $candidate = Candidates::where('user_id', $user->id)->first();
 
-        $easy_challenges = Challenges::where("difficulty", "=", 'easy')->latest()->get()
-            ->map(fn($challenge) => $challenge->setAttribute('is_solved', in_array($challenge->id, $solvedChallengeIds)));
-        
-        $medium_challenges = Challenges::where("difficulty", "=", 'medium')->latest()->get()
-            ->map(fn($challenge) => $challenge->setAttribute('is_solved', in_array($challenge->id, $solvedChallengeIds)));
-        
-        $hard_challenges = Challenges::where("difficulty", "=", 'hard')->latest()->get()
-            ->map(fn($challenge) => $challenge->setAttribute('is_solved', in_array($challenge->id, $solvedChallengeIds)));
-        
-        $challenges = Challenges::where("difficulty", "=", 'challenge')->latest()->get()
-            ->map(fn($challenge) => $challenge->setAttribute('is_solved', in_array($challenge->id, $solvedChallengeIds)));
+        $baseQuery = fn($difficulty) =>
+            Challenges::where('challenges.difficulty', $difficulty)
+                ->leftJoin('submissions', function ($join) use ($candidate) {
+                    $join->on('submissions.challenge_id', '=', 'challenges.id')
+                        ->where('submissions.candidate_id', '=', $candidate->id);
+                })
+                ->selectRaw("
+                    challenges.*,
+                    submissions.score,
+                    CASE
+                        WHEN submissions.is_score_submitted = 1 THEN 'reviewed'
+                        WHEN submissions.id IS NOT NULL THEN 'submitted'
+                        ELSE 'not_started'
+                    END AS status
+                ")
+                ->get();
 
-        // dd($easy_challenges);
+        $easy_challenges = $baseQuery('easy');
+        $medium_challenges = $baseQuery('medium');
+        $hard_challenges = $baseQuery('hard');
+        $challenges = $baseQuery('challenge');
 
-        return view('pages.code-problems', compact('challenges', 'easy_challenges', 'medium_challenges', 'hard_challenges'));
+        $unsolved_challenge_id = Challenges::query()
+                ->leftJoin('submissions', function ($join) use ($candidate) {
+                    $join->on('submissions.challenge_id', '=', 'challenges.id')
+                        ->where('submissions.candidate_id', '=', $candidate->id);
+                })
+                ->whereNull('submissions.id') // NOT STARTED
+                ->orderByRaw("
+                    CASE challenges.difficulty
+                        WHEN 'easy' THEN 1
+                        WHEN 'medium' THEN 2
+                        WHEN 'hard' THEN 3
+                        WHEN 'challenge' THEN 4
+                        ELSE 4
+                    END
+                ")
+                ->orderBy('challenges.id', 'asc')
+                ->value('challenges.id');
+
+        return view('pages.code-problems', compact(
+            'challenges',
+            'easy_challenges',
+            'medium_challenges',
+            'hard_challenges',
+            'unsolved_challenge_id'
+        ));
     }
 
     /**
@@ -59,131 +88,105 @@ class CandidateController extends Controller
      */
     public function open_code_editor(string $challenge_id = "-1")
     {
+        $user = Auth::user();
+        $candidate = Candidates::where('user_id', $user->id)->first();
+
         if ($challenge_id >= 0) {
-            $details = Challenges::select(['id', 'title', 'description', 'difficulty', 'points'])->where('id', "=", $challenge_id)->get();
-            // dd($details);
-            return view('pages.code-editor', compact('details'));
+            $details = Challenges::query()
+                ->leftJoin('submissions', function ($join) use ($candidate) {
+                    $join->on('submissions.challenge_id', '=', 'challenges.id')
+                        ->where('submissions.candidate_id', '=', $candidate->id);
+                })
+                ->selectRaw("
+                        challenges.*,
+                        submissions.score,
+                        submissions.code,
+                        CASE
+                            WHEN submissions.is_score_submitted = 1 THEN 'reviewed'
+                            WHEN submissions.id IS NOT NULL THEN 'submitted'
+                            ELSE 'not_started'
+                        END AS status
+                    ")
+                ->where('challenges.id', "=", $challenge_id)
+                ->get()
+                ->first();
+
+            $next_challenge_id = Challenges::query()
+                ->leftJoin('submissions', function ($join) use ($candidate) {
+                    $join->on('submissions.challenge_id', '=', 'challenges.id')
+                        ->where('submissions.candidate_id', '=', $candidate->id);
+                })
+                ->whereNot('challenges.id', '=', $challenge_id)
+                ->whereNull('submissions.id') // NOT STARTED
+                ->orderByRaw("
+                    CASE challenges.difficulty
+                        WHEN 'easy' THEN 1
+                        WHEN 'medium' THEN 2
+                        WHEN 'hard' THEN 3
+                        WHEN 'challenge' THEN 4
+                        ELSE 4
+                    END
+                ")
+                ->orderBy('challenges.id', 'asc')
+                ->value('challenges.id');
+
+            return view('pages.code-editor', compact('details', 'next_challenge_id'));
         }
 
         return view('pages.code-editor');
     }
 
-    public function addScorePoints(string $challenge_id)
+    public function submit_code_for_review(Request $request)
     {
-        // get the user by the candidate details
+        // Get candidate
         $user = Auth::user();
         $candidate = Candidates::where('user_id', '=', $user->id)->first();
 
-        // // check the user first
-        if (!$candidate) {
-            return response()->json([
-                'status' => 'fail',
-                'message' => "Can't find this candidate (You must be anuthorize user.)",
-                // 'data' => $challenge->challege_key_file_path,
-                'match' => false
-            ], 200);
-            // return back()->with('error', 'Can't find this candidate (You must be anuthorize user.)');
-            // return false;
-        }
-
-        $challenge = Challenges::find($challenge_id);
-        $solved_challenge = SolvedChallenges::where('candidate_id', '=', $candidate->id)
-            ->where('challenge_id', '=', $challenge->id)
-            ->first();
-        // $solved_challenge = SolvedChallenges::where('candidate_id', '=', $candidate->id)->where('challenge_id', '=', $challenge->id)->first();
-
-        // // check first if the challenge is solve by the candidate first
-        if ($solved_challenge) {
-            return response()->json([
-                'status' => 'fail',
-                'message' => 'You have already solved this challenge.',
-                // 'data' => $challenge->challege_key_file_path,
-                'match' => false
-            ], 200);
-            // return back()->with('info','You have already solved this challenge.');
-            // return false;
-        }
-
-        // // insert it in the dateabase
-        $solved = SolvedChallenges::create([
-            'candidate_id' => $candidate->id,
-            'challenge_id' => $challenge->id,
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Score is added.',
-            'data' => $solved_challenge,
-            'match' => true
-        ], 200);
-        // return true;
-    }
-
-    public function verifySubmittedCode(Request $request)
-    {
-        // 1. Validation
         $request->validate([
-            'challenge_id'   => 'required|string',
-            // 'challenge_id'   => 'required|exists:challenges,id', // Ensure ID actually exists in DB
-            'submitted_text' => 'required|string',
+            'challenge_id' => 'required|string',
+            'code' => 'required|string',
         ]);
-
-        // 2. Retrieve Challenge from Database
         $challenge_id = $request->input('challenge_id');
         $challenge = Challenges::find($challenge_id);
 
-        if (!$challenge) {
+        if (!isset($candidate)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Candidate not found.'
+            ], 404);
+        }
+
+        if (!isset($challenge)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Challenge not found.'
             ], 404);
         }
 
-        // wrong spelling challenge
-        $masterPath = $challenge->challege_key_file_path;
-        // $masterPath = 'master-files/test.txt';
-        $submittedText = $request->input('submitted_text');
+        $existingSubmission = Submissions::where('candidate_id', $candidate->id)
+            ->where('challenge_id', $challenge_id)
+            ->first();
 
-        // 3. Check Storage
-        if (!Storage::disk('local')->exists($masterPath)) {
-            Log::error("Master file missing: {$masterPath}");
+        if ($existingSubmission?->is_score_submitted) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Internal server error: Answer key missing.'
-            ], 500);
+                'message' => 'This submission has already been reviewed and can no longer be modified.',
+            ], 409);
         }
 
-        $expectedText = Storage::disk('local')->get($masterPath);
-        $submittedText = $request->input('submitted_text');
-
-        // 4. Normalization Logic
-        $normalize = function ($text) {
-            $text = trim($text);
-            // Replace all whitespace (tabs, newlines, multiple spaces) with a single space
-            return preg_replace('/\s+/', ' ', $text);
-        };
-
-        // 5. Comparison
-        if ($normalize($submittedText) === $normalize($expectedText)) {
-
-            // in here where we set the score when the code match.
-            $add_score_points = $this->addScorePoints($challenge_id);
-            $response = json_decode($add_score_points->getContent(), true);
-
-            if ($add_score_points) {
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Congratulations! The code matches. '.$response['message'],
-                    'match' => true
-                ], 200);
-            }
-        }
+        Submissions::upsert(
+            [
+                'candidate_id' => $candidate->id,
+                'challenge_id' => $challenge_id,
+                'code' => $request->input('code')
+            ],
+            uniqueBy: ['candidate_id', 'challenge_id'],
+            update: ['code']
+        );
 
         return response()->json([
-            'status' => 'fail',
-            'message' => 'The submitted text does not match. the path: ',
-            // 'data' => $challenge->challege_key_file_path,
-            'match' => false
+            'status' => 'success',
+            'message' => 'Code submitted successfully. Awaiting review...',
         ], 200);
     }
 

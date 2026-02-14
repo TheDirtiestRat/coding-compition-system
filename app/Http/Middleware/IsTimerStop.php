@@ -22,10 +22,20 @@ class IsTimerStop
         // 2. I'm assuming your value column is called 'option_value'
         $status = DB::table('options')
             ->where('option_name', 'start_compition')
-            ->value('option_value'); 
+            ->value('option_value');
+        
+        // check if the current time overlaps to the expected end time if it is then it is time.
+        $current_time = date("h:i:s");
+        $curTimeInMils = strtotime($current_time);
+
+        $get_end_time = DB::table('options')
+            ->where('option_name', "expected_end_time")->first('option_value');
+        $end_time = date($get_end_time->option_value);
+        $endTimeInMils = strtotime($end_time);
 
         // 3. Check if the status is specifically '0' (Competition Stopped)
-        if ($status === '0') {
+        // if ($status === '0')
+        if ($curTimeInMils >= $endTimeInMils) {
             abort(403, 'The competition has ended. You cannot access this page anymore.');
         }
 

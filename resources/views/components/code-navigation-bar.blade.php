@@ -1,4 +1,4 @@
-<div class="navbar bg-base-300 shadow rounded-xl">
+<div class="navbar bg-base-300 shadow rounded-xl px-3">
     {{-- for small screen --}}
     <div class="navbar-start">
         <div class="dropdown">
@@ -10,7 +10,13 @@
             </div>
             <ul tabindex="-1" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
                 <li><a href="{{ url('code-problems') }}">Problems</a></li>
-                <li><a href="{{ url('code-editor') }}">Code Editor</a></li>
+                <li>
+                    @isset($unsolved_challenge_id)
+                        <a href="{{ url('/code-editor/' . $unsolved_challenge_id) }}">
+                            Code Editor
+                        </a>
+                    @endisset
+                </li>
             </ul>
         </div>
         <a class="btn btn-ghost text-xl">Coding Editor</a>
@@ -20,7 +26,13 @@
     <div class="navbar-center hidden lg:flex">
         <ul class="menu menu-horizontal px-1">
             <li><a href="{{ url('code-problems') }}">Problems</a></li>
-            <li><a href="{{ url('code-editor') }}">Code Editor</a></li>
+            <li>
+                @isset($unsolved_challenge_id)
+                    <a href="{{ url('/code-editor/' . $unsolved_challenge_id) }}">
+                        Code Editor
+                    </a>
+                @endisset
+            </li>
         </ul>
     </div>
 
@@ -29,8 +41,7 @@
         @if (Auth::check())
             <p>Welcome, {{ auth()->user()->name }}</p>
         @endif
-        <button type="submit" class="btn">
-
+        <button type="submit" class="btn btn-soft rounded-xl">
             Logout
         </button>
     </form>

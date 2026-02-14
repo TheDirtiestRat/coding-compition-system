@@ -12,7 +12,7 @@ const monacoEditorPlugin = monacoEditorPluginModule.default || monacoEditorPlugi
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js','resources/js/admin.js','resources/js/users.js'],
+            input: ['resources/css/app.css', 'resources/js/app.js','resources/js/admin.js','resources/js/users.js','resources/js/monaco.js'],
             refresh: true,
         }),
         tailwindcss(),

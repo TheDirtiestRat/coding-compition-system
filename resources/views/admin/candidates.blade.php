@@ -86,13 +86,13 @@
             <div class="overflow-x-auto">
                 <table class="table table-zebra">
                     <!-- head -->
-                    <thead class="bg-slate-700/50 text-neutral-200 text-center">
+                    <thead class=" text-neutral-200 text-center">
                         <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Username</th>
-                            <th>Group</th>
-                            <th>Actions</th>
+                            <th class="bg-slate-700/50 rounded-tl-xl">ID</th>
+                            <th class="bg-slate-700/50">Name</th>
+                            <th class="bg-slate-700/50">Username</th>
+                            <th class="bg-slate-700/50">Group</th>
+                            <th class="bg-slate-700/50 rounded-tr-xl">Actions</th>
                         </tr>
                     </thead>
                     <tbody>

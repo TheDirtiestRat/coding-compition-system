@@ -16,17 +16,17 @@ let currentTheme;
 function init_code_editor(language, theme) {
     const container = document.getElementById("monaco-editor-container");
 
+    const codevalue =
+    `class Main {
+    public static void main(String[] args) {
+        // Java Code here ...
+    }
+}`
+
     if (container) {
         // Create the editor instance ONCE
         editorInstance = monaco.editor.create(container, {
-            value: `class Main {
-        public static void main(String[] args) {
-            // Example usage of the method
-            for(char letters = 'A'; letters <='E'; letters++){
-                System.out.print(letters +"  ");
-            }
-        }
-    }`,
+            value: codevalue,
             language: language,
             automaticLayout: true,
             theme: theme,
@@ -102,15 +102,14 @@ function runClientCode(code) {
     }
 }
 
-// code verify function
-function verify_code(code, id) {
+function submitCodeForReview(code, id) {
     const outputAlert = document.getElementById("alert_container");
     const outputAlertError = document.getElementById("alert_error");
     const outputAlertSuccess = document.getElementById("alert_success");
     const challenge_id = id;
     const submittedCode = code;
 
-    fetch("/api/verify-code-challenge", {
+    fetch("/api/submit-code-for-review", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -121,31 +120,26 @@ function verify_code(code, id) {
         },
         body: JSON.stringify({
             challenge_id: challenge_id,
-            submitted_text: submittedCode,
+            code: submittedCode,
         }),
     })
         .then((response) => {
             if (!response.ok) {
+                outputAlertSuccess.classList.add("hidden");
+                outputAlertError.classList.remove("hidden");
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
         .then((data) => {
-            // console.log(data);
+            // Tell the user that code was submitted successfully
             outputAlert.classList.remove("hidden");
             outputAlert.classList.add("flex");
-            if (data.match) {
-                // alert("Code Verified!");
-                const spanAlertSuccess =
-                    document.getElementById("success_alert_text");
-                outputAlertError.classList.add("hidden");
-                outputAlertSuccess.classList.remove("hidden");
-                spanAlertSuccess.innerText = "Code Verified! " + data.message;
-            } else {
-                // alert("Verification Failed.");
-                outputAlertSuccess.classList.add("hidden");
-                outputAlertError.classList.remove("hidden");
-            }
+            const spanAlertSuccess =
+                document.getElementById("success_alert_text");
+            outputAlertError.classList.add("hidden");
+            outputAlertSuccess.classList.remove("hidden");
+            spanAlertSuccess.innerText = data.message;
         })
         .catch((error) => {
             console.error("Error:", error);
@@ -154,6 +148,15 @@ function verify_code(code, id) {
             outputAlertSuccess.classList.add("hidden");
             outputAlertError.classList.remove("hidden");
         });
+}
+
+// When the candidate has already submitted something,
+// we just fetch it again from the hidden field
+function initWithSubmittedCode() {
+    const submittedCodeEl = document.getElementById("submittedCode");
+    if (!submittedCodeEl.value.trim()) return;
+
+    editorInstance.setValue(submittedCodeEl.value)
 }
 
 // --- Main DOM Content Loaded Handler ---
@@ -169,6 +172,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // 2. Initialize the editor with the initial values
     init_code_editor(currentLanguage, currentTheme);
 
+    // Get submitted code
+    initWithSubmittedCode();
+
     // --- Event Listeners for Selectors ---
 
     // Listener for Language Change
@@ -178,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Update editor language without destroying the instance
             monaco.editor.setModelLanguage(
                 editorInstance.getModel(),
-                currentLanguage
+                currentLanguage,
             );
             console.log(`Language changed to: ${currentLanguage}`);
         }
@@ -224,9 +230,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // run the code verify button
+    // run the code submit button
     document
-        .getElementById("check_code_btn")
+        .getElementById("submit_code_btn")
         ?.addEventListener("click", (event) => {
             if (!editorInstance) {
                 console.error("Monaco Editor not initialized.");
@@ -234,180 +240,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             const code = editorInstance.getValue();
 
-            verify_code(code, event.target.value);
+            submitCodeForReview(code, event.target.value);
         });
 
     console.log(`Initial Setup: ${currentLanguage} - ${currentTheme}`);
 });
 
-// import "./bootstrap";
-// import * as monaco from "monaco-editor";
 
-// // Declare the editor instance variable in a scope accessible by the button handler
-// let editorInstance;
-
-// function setup_code_editor(language, theme) {
-//     const container = document.getElementById("monaco-editor-container");
-
-//     if (container) {
-//         editorInstance = monaco.editor.create(container, {
-//             // Assign the instance
-//             value: 'print("Hello, Laravel with Python!")\nprint(1 + 2)',
-//             language: language,
-//             automaticLayout: true,
-//             theme: theme,
-//         });
-
-//         // Listen for resize events to update layout
-//         window.addEventListener("resize", () => {
-//             editorInstance.layout();
-//         });
-//     }
-// }
-
-// document.addEventListener("DOMContentLoaded", () => {
-//     let newLanguage;
-//     let newTheme;
-//     const languageSelectorElement =
-//         document.querySelector("#language-selector");
-//     const themeSelectorElement = document.querySelector("#theme-selector");
-
-//     newLanguage = languageSelectorElement.value
-//     newTheme = themeSelectorElement.value
-
-//     languageSelectorElement.addEventListener("change", function (event) {
-//         // 3. Define the action to take when the value changes
-//         newLanguage = event.target.value;
-//         // console.log(`The element's value has changed to: ${newLanguage}`);
-//         setup_code_editor(newLanguage, newTheme);
-//     });
-//     themeSelectorElement.addEventListener("change", function (event) {
-//         // 3. Define the action to take when the value changes
-//         newTheme = event.target.value;
-//         // console.log(`The element's value has changed to: ${newTheme}`);
-//     });
-
-//     // Add click listener to the run button
-//     document.getElementById("run_code_btn")?.addEventListener("click", () => {
-//         if (editorInstance) {
-//             // run the code base on the language
-//             console.log("running the code... in " + newLanguage);
-//             switch (newLanguage) {
-//                 case "java":
-//                     runServerCode(editorInstance.getValue(), "/run-java-code");
-//                     console.log("sending code to java server...");
-//                     break;
-//                 case "python":
-//                     runServerCode(
-//                         editorInstance.getValue(),
-//                         "/run-python-code"
-//                     );
-//                     console.log("sending code to python server...");
-//                     break;
-//                 // ... more case statements ...
-//                 default:
-//                     runClientCode(editorInstance.getValue());
-//                     console.log("sending code...");
-//             }
-//         }
-//     });
-
-//     setup_code_editor(newLanguage, newTheme);
-//     console.log("the current: " + newLanguage + " - " + newTheme);
-// });
-
-// async function runServerCode(code, url_code_api = "/run-python-code") {
-//     const outputArea = document.getElementById("code_output_area");
-//     outputArea.textContent = "Running Python code on server...";
-
-//     try {
-//         const response = await fetch(url_code_api, {
-//             // <-- Changed endpoint URL
-//             method: "POST",
-//             headers: {
-//                 "Content-Type": "application/json",
-//                 "X-CSRF-TOKEN": document
-//                     .querySelector('meta[name="csrf-token"]')
-//                     .getAttribute("content"),
-//             },
-//             body: JSON.stringify({ code: code }),
-//         });
-
-//         const data = await response.json();
-
-//         if (response.ok) {
-//             outputArea.textContent = `Python Output:\n${data.output}`;
-//         } else {
-//             // Handle server-side errors (e.g., syntax errors in Python)
-//             outputArea.textContent = `Server Error:\n${data.error}`;
-//         }
-//     } catch (error) {
-//         // Handle network or fetch errors
-//         outputArea.textContent = `Network Error: ${error.message}`;
-//     }
-// }
-
-// function runClientCode(code) {
-//     const outputArea = document.getElementById("code_output_area");
-//     try {
-//         // Use a function constructor for slightly safer execution than eval()
-//         // Capture the return value or anything logged to the console
-//         const scriptFunction = new Function(code);
-//         const result = scriptFunction();
-
-//         outputArea.textContent = `Execution Successful. Returned: ${
-//             result || "None"
-//         }`;
-//     } catch (error) {
-//         outputArea.textContent = `Execution Error: ${error.message}`;
-//         console.error(error);
-//     }
-// }
-
-// // New function to handle server-side execution via Fetch API
-// // async function runServerPythonCode(code) {
-// //     const outputArea = document.getElementById("code_output_area");
-// //     outputArea.textContent = "Running Python code on server...";
-
-// //     try {
-// //         const response = await fetch("/run-python-code", {
-// //             // <-- Changed endpoint URL
-// //             method: "POST",
-// //             headers: {
-// //                 "Content-Type": "application/json",
-// //                 "X-CSRF-TOKEN": document
-// //                     .querySelector('meta[name="csrf-token"]')
-// //                     .getAttribute("content"),
-// //             },
-// //             body: JSON.stringify({ code: code }),
-// //         });
-
-// //         const data = await response.json();
-
-// //         if (response.ok) {
-// //             outputArea.textContent = `Python Output:\n${data.output}`;
-// //         } else {
-// //             // Handle server-side errors (e.g., syntax errors in Python)
-// //             outputArea.textContent = `Server Error:\n${data.error}`;
-// //         }
-// //     } catch (error) {
-// //         // Handle network or fetch errors
-// //         outputArea.textContent = `Network Error: ${error.message}`;
-// //     }
-// // }
-
-// // good for security run this if server is in docker
-// // New function to handle server-side execution via Fetch API for secure Python endpoint
-// // async function runServerPythonCode(code) {
-// //     // ... (logic to display 'Running Python code on server...') ...
-// //     try {
-// //         // <-- Target the secure endpoint URL
-// //         const response = await fetch("/run-python-code-secure", {
-// //             // ... (headers including CSRF token) ...
-// //             body: JSON.stringify({ code: code }),
-// //         });
-// //         // ... (logic to handle response/error) ...
-// //     } catch (error) {
-// //         // ... (handle network or fetch errors) ...
-// //     }
-// // }

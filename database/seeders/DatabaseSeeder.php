@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use App\Models\Candidates;
-use App\Models\Challenges;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -40,23 +39,24 @@ class DatabaseSeeder extends Seeder
             'option_datatype' => 'boolean',
             'option_value' => '0'
         ]);
+        DB::table('options')->insert([
+            'option_name' => 'set_time',
+            'option_datatype' => 'text',
+            'option_value' => '00:00:00'
+        ]);
+        DB::table('options')->insert([
+            'option_name' => 'expected_end_time',
+            'option_datatype' => 'text',
+            'option_value' => '00:00:00'
+        ]);
 
         Candidates::factory(5)->create();
 
-        Challenges::factory()->create([
-            'title' => "Challenge A",
-            'description' => 'Your goal is to create a "Hello world" program using Java script.',
-            'points' => 10,
-            'difficulty' => 'easy',
-            'challege_key_file_path' => "master-files/JavaA.txt",
+        // create the challenges
+        $this->call([
+            ChallengeSeeder::class,
         ]);
 
-        Challenges::factory()->create([
-            'title' => "Challenge B",
-            'description' => 'Create a program using Java script that adds value a = 10 and b = 5 and would show the sum of 15 Output: "The sum of A and B is = 15".',
-            'points' => 15,
-            'difficulty' => 'easy',
-            'challege_key_file_path' => "master-files/JavaB.txt",
-        ]);
+        
     }
 }

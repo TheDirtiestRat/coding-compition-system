@@ -36,9 +36,44 @@
             return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
         }
 
+        // get the current time
+        function getCurrentTime() {
+            return fetch('/timer/get_timer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                    body: JSON.stringify({}),
+                })
+                .then(res => res.json())
+                .then(data => {
+                    curTime = data;
+                    return data;
+                });
+        }
+
+        const interID = setInterval(async () => {
+            const timer = await getCurrentTime();
+            let countdownTimer = timer['curTimeInMils'];
+            let endTime = timer['endTimeInMils'];
+
+            const remaining = Math.max(0, endTime - countdownTimer) * 1000;
+
+            if (timer['isTime'] == false) {
+                countdown.innerText = convertNumberToTimeString(remaining);
+                countdownDisplay.hidden = false;
+            } else {
+                countdown.innerText = "Time!!";
+                countdownDisplay.hidden = true;
+                if (window.location.href != ( "http://"+ (window.location.hostname + ':' + window.location.port + '/code-problems'))) {
+                    window.location.href = "/competition-ended";
+                }
+            }
+        }, 1000);
+
         function displayPaused(remainingTimeInMs) {
-            const remainingTimeInTimeStr
-                = convertNumberToTimeString(remainingTimeInMs)
+            const remainingTimeInTimeStr = convertNumberToTimeString(remainingTimeInMs)
             endTime = null;
             countdown.innerText = remainingTimeInTimeStr;
             countdownDisplay.hidden = false;
@@ -58,7 +93,7 @@
 
             // redirects to the end page
             window.location.href = "/competition-ended";
-
+            alert("timer done!");
 
             tick();
         }
