@@ -111,24 +111,38 @@ class CandidateController extends Controller
                 ->get()
                 ->first();
 
-            $next_challenge_id = Challenges::query()
-                ->leftJoin('submissions', function ($join) use ($candidate) {
-                    $join->on('submissions.challenge_id', '=', 'challenges.id')
-                        ->where('submissions.candidate_id', '=', $candidate->id);
-                })
-                ->whereNot('challenges.id', '=', $challenge_id)
-                ->whereNull('submissions.id') // NOT STARTED
-                ->orderByRaw("
-                    CASE challenges.difficulty
-                        WHEN 'easy' THEN 1
-                        WHEN 'medium' THEN 2
-                        WHEN 'hard' THEN 3
-                        WHEN 'challenge' THEN 4
-                        ELSE 4
-                    END
-                ")
-                ->orderBy('challenges.id', 'asc')
-                ->value('challenges.id');
+            // $total_challenges = Challenges::count();
+            $next_id = Challenges::where('id', '>', $challenge_id)->first('id');
+            if ($next_id == null) {
+                $next_id = Challenges::orderBy('id', 'asc')->first('id');
+            }
+            $next_challenge_id = $next_id->id;
+            
+            // $challenge_exist = Challenges::where('id', '=', $next_challenge_id)->first('id');
+
+            // if ($next_challenge_id > $total_challenges && $challenge_exist == null) {
+            //     $next_challenge_id = 0;
+            // }
+
+
+            // $next_challenge_id = Challenges::query()
+            //     ->leftJoin('submissions', function ($join) use ($candidate) {
+            //         $join->on('submissions.challenge_id', '=', 'challenges.id')
+            //             ->where('submissions.candidate_id', '=', $candidate->id);
+            //     })
+            //     ->whereNot('challenges.id', '=', $challenge_id)
+            //     ->whereNull('submissions.id') // NOT STARTED
+            //     ->orderByRaw("
+            //         CASE challenges.difficulty
+            //             WHEN 'easy' THEN 1
+            //             WHEN 'medium' THEN 2
+            //             WHEN 'hard' THEN 3
+            //             WHEN 'challenge' THEN 4
+            //             ELSE 4
+            //         END
+            //     ")
+            //     ->orderBy('challenges.id', 'asc')
+            //     ->value('challenges.id');
 
             return view('pages.code-editor', compact('details', 'next_challenge_id'));
         }
