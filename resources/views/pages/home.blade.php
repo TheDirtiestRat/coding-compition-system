@@ -17,7 +17,7 @@
         {{-- home navigation bar --}}
         <div class="navbar bg-base-100 shadow rounded-xl border border-gray-500 sticky top-0 z-10">
             <div class="flex-1">
-                <a class="btn btn-ghost text-xl">The Hunger Games (Coding Compitetion)</a>
+                <a class="btn btn-ghost text-xl">The Hunger Games (Coding Competition)</a>
             </div>
             <div class="flex-none">
                 <ul class="menu menu-horizontal px-1">
@@ -71,7 +71,7 @@
                     <br />
                     Providing unreliable tech since 2024
                 </p>
-                <p>Copyright ©{{ Date('Year') }} - All right reserved</p>
+                <p>Copyright &copy; {{ date('Y') }} - All rights reserved.</p>
             </aside>
             <nav>
                 <div class="grid grid-flow-col gap-4">
@@ -99,6 +99,9 @@
                             </path>
                         </svg>
                     </a>
+                </div>
+                <div class="mt-4">
+                    <a href="{{ url('/credits') }}" class="link link-hover">Credits</a>
                 </div>
             </nav>
         </footer>
