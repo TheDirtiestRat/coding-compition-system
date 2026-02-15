@@ -14,62 +14,62 @@
 
 <body class="bg-base-200">
     @php
-        $roleOrder = ['Guild Adviser', 'President', 'Vice President', 'Secretary', 'Member'];
+        $roleOrder = ['Guild Adviser', 'President', 'Vice President', 'Secretary', 'Guild Member'];
 
         $members = [
             [
-                'name' => 'Avery Stone',
+                'name' => 'Dunhill Leal',
                 'role' => 'Guild Adviser',
-                'age' => 29,
-                'github' => 'https://github.com/avery-stone',
-            ],
-            [
-                'name' => 'Blake Carter',
-                'role' => 'President',
-                'age' => 22,
-                'github' => 'https://github.com/blake-carter',
-            ],
-            [
-                'name' => 'Casey Rivera',
-                'role' => 'Vice President',
-                'age' => 21,
+                'age' => 'N/A',
                 'github' => '',
             ],
             [
-                'name' => 'Drew Morgan',
+                'name' => 'Miko Carlo A. Arar',
+                'role' => 'President',
+                'age' => 23,
+                'github' => 'https://github.com/mekowkowwe',
+            ],
+            [
+                'name' => 'Mark James V. Felecio',
+                'role' => 'Vice President',
+                'age' => 19,
+                'github' => 'https://github.com/mjfelecio',
+            ],
+            [
+                'name' => 'Avelino Magallanes',
                 'role' => 'Secretary',
                 'age' => 20,
-                'github' => 'https://github.com/drew-morgan',
+                'github' => 'https://github.com/The-Grim-Reaper110011101',
             ],
             [
-                'name' => 'Emery Quinn',
-                'role' => 'Member',
-                'age' => 20,
-                'github' => '',
-            ],
-            [
-                'name' => 'Finley Reed',
-                'role' => 'Member',
-                'age' => 21,
-                'github' => 'https://github.com/finley-reed',
-            ],
-            [
-                'name' => 'Gray Harper',
-                'role' => 'Member',
-                'age' => 20,
-                'github' => '',
-            ],
-            [
-                'name' => 'Hayden Brooks',
-                'role' => 'Member',
+                'name' => 'Dj Lynn Marie J. Lanuza',
+                'role' => 'Guild Member',
                 'age' => 22,
-                'github' => 'https://github.com/hayden-brooks',
+                'github' => 'https://github.com/dejayy27',
             ],
             [
-                'name' => 'Indigo Lane',
-                'role' => 'Member',
+                'name' => 'Justine Dorae L. Suralta',
+                'role' => 'Guild Member',
+                'age' => 20,
+                'github' => 'https://github.com/Coffleatea',
+            ],
+            [
+                'name' => 'Jeson Beltran',
+                'role' => 'Guild Member',
+                'age' => 20,
+                'github' => 'https://github.com/Katsura6',
+            ],
+            [
+                'name' => 'John Kenneth D. Dignos',
+                'role' => 'Guild Member',
+                'age' => 21,
+                'github' => 'https://github.com/IceNinja2017',
+            ],
+            [
+                'name' => 'John Ashly O. Gasacao',
+                'role' => 'Guild Member',
                 'age' => 19,
-                'github' => '',
+                'github' => 'https://github.com/OfficialSage26',
             ],
         ];
 
