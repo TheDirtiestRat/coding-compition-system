@@ -15,26 +15,7 @@
 <body>
     <div class="p-3 container flex flex-col gap-3 mx-auto relative">
         {{-- home navigation bar --}}
-        <div class="navbar bg-base-100 shadow rounded-xl border border-gray-500 sticky top-0 z-10">
-            <div class="flex-1">
-                <a class="btn btn-ghost text-xl">The Hunger Games (Coding Competition)</a>
-            </div>
-            <div class="flex-none">
-                <ul class="menu menu-horizontal px-1">
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#about">About</a></li>
-                    <li>
-                        <details>
-                            <summary>Authenticate</summary>
-                            <ul class="bg-base-100 rounded-t-none shadow p-2">
-                                <li><a href="{{ url('login') }}">Login</a></li>
-                                {{-- <li><a>Sign up</a></li> --}}
-                            </ul>
-                        </details>
-                    </li>
-                </ul>
-            </div>
-        </div>
+        <x-public-navbar active="home" />
 
         {{-- hero section --}}
         <div id="home" class="hero h-[600px]  rounded-2xl"
