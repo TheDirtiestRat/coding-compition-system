@@ -78,6 +78,24 @@
                 return array_search($member['role'], $roleOrder, true);
             })
             ->values();
+
+        $tiers = [
+            [
+                'title' => 'Guild Adviser',
+                'members' => $members->where('role', 'Guild Adviser')->values(),
+                'grid' => 'max-w-sm grid-cols-1',
+            ],
+            [
+                'title' => 'Officers',
+                'members' => $members->whereIn('role', ['President', 'Vice President', 'Secretary'])->values(),
+                'grid' => 'max-w-5xl grid-cols-1 md:grid-cols-3',
+            ],
+            [
+                'title' => 'Guild Members',
+                'members' => $members->where('role', 'Guild Member')->values(),
+                'grid' => 'max-w-7xl grid-cols-1 sm:grid-cols-2 lg:grid-cols-5',
+            ],
+        ];
     @endphp
 
     <div class="p-3 container flex flex-col gap-3 mx-auto relative">
@@ -92,38 +110,50 @@
                 </p>
             </section>
 
-            <section class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                @foreach ($members as $member)
-                    @php
-                        $initials = collect(explode(' ', $member['name']))
-                            ->filter()
-                            ->map(function ($part) {
-                                return strtoupper(substr($part, 0, 1));
-                            })
-                            ->take(2)
-                            ->implode('');
-                    @endphp
+            <section class="space-y-4">
+                @foreach ($tiers as $tier)
+                    <div>
+                        <p class="text-center text-xs font-semibold uppercase tracking-widest text-base-content/70 mb-2">
+                            {{ $tier['title'] }}
+                        </p>
 
-                    <article class="rounded-2xl bg-base-100 p-6 shadow border border-base-300">
-                        <div
-                            class="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-3xl bg-neutral text-3xl font-extrabold text-neutral-content shadow">
-                            {{ $initials }}
+                        <div class="flex justify-center">
+                            <div class="grid gap-3 w-full {{ $tier['grid'] }}">
+                                @foreach ($tier['members'] as $member)
+                                    @php
+                                        $initials = collect(explode(' ', $member['name']))
+                                            ->filter()
+                                            ->map(function ($part) {
+                                                return strtoupper(substr($part, 0, 1));
+                                            })
+                                            ->take(2)
+                                            ->implode('');
+                                    @endphp
+
+                                    <article class="rounded-2xl bg-base-100 p-6 shadow border border-base-300">
+                                        <div
+                                            class="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-3xl bg-neutral text-3xl font-extrabold text-neutral-content shadow">
+                                            {{ $initials }}
+                                        </div>
+
+                                        <h2 class="text-center text-2xl font-bold">{{ $member['name'] }}</h2>
+
+                                        <div class="mt-4 flex items-center justify-center gap-2">
+                                            <span class="badge badge-primary badge-soft">{{ $member['role'] }}</span>
+                                            <span class="badge badge-ghost">Age {{ $member['age'] }}</span>
+                                        </div>
+
+                                        @if (!empty($member['github']))
+                                            <a href="{{ $member['github'] }}" target="_blank" rel="noopener noreferrer"
+                                                class="btn btn-neutral mt-5 w-full rounded-xl">
+                                                GitHub
+                                            </a>
+                                        @endif
+                                    </article>
+                                @endforeach
+                            </div>
                         </div>
-
-                        <h2 class="text-center text-2xl font-bold">{{ $member['name'] }}</h2>
-
-                        <div class="mt-4 flex items-center justify-center gap-2">
-                            <span class="badge badge-primary badge-soft">{{ $member['role'] }}</span>
-                            <span class="badge badge-ghost">Age {{ $member['age'] }}</span>
-                        </div>
-
-                        @if (!empty($member['github']))
-                            <a href="{{ $member['github'] }}" target="_blank" rel="noopener noreferrer"
-                                class="btn btn-neutral mt-5 w-full rounded-xl">
-                                GitHub
-                            </a>
-                        @endif
-                    </article>
+                    </div>
                 @endforeach
             </section>
         </main>
