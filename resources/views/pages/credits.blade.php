@@ -22,54 +22,63 @@
                 'role' => 'Guild Adviser',
                 'age' => 'N/A',
                 'github' => '',
+                'photo' => 'images/guild/dunhill.png',
             ],
             [
                 'name' => 'Miko Carlo A. Arar',
                 'role' => 'President',
                 'age' => 23,
                 'github' => 'https://github.com/mekowkowwe',
+                'photo' => 'images/guild/miko.jpg',
             ],
             [
                 'name' => 'Mark James V. Felecio',
                 'role' => 'Vice President',
                 'age' => 19,
                 'github' => 'https://github.com/mjfelecio',
+                'photo' => 'images/guild/mark.png',
             ],
             [
                 'name' => 'Avelino Magallanes',
                 'role' => 'Secretary',
                 'age' => 20,
                 'github' => 'https://github.com/The-Grim-Reaper110011101',
+                'photo' => 'images/guild/ave.png',
             ],
             [
                 'name' => 'Dj Lynn Marie J. Lanuza',
                 'role' => 'Guild Member',
                 'age' => 22,
                 'github' => 'https://github.com/dejayy27',
+                'photo' => 'images/guild/dj.png',
             ],
             [
                 'name' => 'Justine Dorae L. Suralta',
                 'role' => 'Guild Member',
                 'age' => 20,
                 'github' => 'https://github.com/Coffleatea',
+                'photo' => 'images/guild/justine.png',
             ],
             [
                 'name' => 'Jeson Beltran',
                 'role' => 'Guild Member',
                 'age' => 20,
                 'github' => 'https://github.com/Katsura6',
+                'photo' => 'images/guild/jeson.png',
             ],
             [
                 'name' => 'John Kenneth D. Dignos',
                 'role' => 'Guild Member',
                 'age' => 21,
                 'github' => 'https://github.com/IceNinja2017',
+                'photo' => 'images/guild/kenneth.png',
             ],
             [
                 'name' => 'John Ashly O. Gasacao',
                 'role' => 'Guild Member',
                 'age' => 19,
                 'github' => 'https://github.com/OfficialSage26',
+                'photo' => 'images/guild/ashly.png',
             ],
         ];
 
@@ -93,7 +102,7 @@
             [
                 'title' => 'Guild Members',
                 'members' => $members->where('role', 'Guild Member')->values(),
-                'grid' => 'max-w-7xl grid-cols-1 sm:grid-cols-2 lg:grid-cols-5',
+                'grid' => 'max-w-5xl grid-cols-1 sm:grid-cols-2',
             ],
         ];
     @endphp
@@ -105,8 +114,7 @@
             <section class="card bg-base-300 rounded-box grid p-8 place-items-center text-center">
                 <h1 class="text-4xl font-bold md:text-5xl">Programmers&apos; Guild Credits</h1>
                 <p class="mx-auto mt-4 max-w-3xl text-lg text-base-content/80">
-                    Meet the team behind the platform. Member photos can be replaced later, but for now each card uses
-                    initials.
+                    Meet the team behind the platform.
                 </p>
             </section>
 
@@ -121,6 +129,11 @@
                             <div class="grid gap-3 w-full {{ $tier['grid'] }}">
                                 @foreach ($tier['members'] as $member)
                                     @php
+                                        $isLastOddMember =
+                                            $tier['title'] === 'Guild Members' &&
+                                            $tier['members']->count() % 2 === 1 &&
+                                            $loop->last;
+
                                         $initials = collect(explode(' ', $member['name']))
                                             ->filter()
                                             ->map(function ($part) {
@@ -130,11 +143,19 @@
                                             ->implode('');
                                     @endphp
 
-                                    <article class="rounded-2xl bg-base-100 p-6 shadow border border-base-300">
-                                        <div
-                                            class="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-3xl bg-neutral text-3xl font-extrabold text-neutral-content shadow">
-                                            {{ $initials }}
-                                        </div>
+                                    <article @class([
+                                        'rounded-2xl bg-base-100 p-6 shadow border border-base-300',
+                                        'sm:col-span-2 sm:justify-self-center sm:w-1/2' => $isLastOddMember,
+                                    ])>
+                                        @if (!empty($member['photo']) && file_exists(public_path($member['photo'])))
+                                            <img src="{{ asset($member['photo']) }}" alt="{{ $member['name'] }}"
+                                                class="mx-auto mb-4 h-24 w-24 rounded-3xl object-cover border border-base-300 shadow">
+                                        @else
+                                            <div
+                                                class="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-3xl bg-neutral text-3xl font-extrabold text-neutral-content shadow">
+                                                {{ $initials }}
+                                            </div>
+                                        @endif
 
                                         <h2 class="text-center text-2xl font-bold">{{ $member['name'] }}</h2>
 
