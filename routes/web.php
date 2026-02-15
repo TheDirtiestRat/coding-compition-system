@@ -20,6 +20,9 @@ Route::get('/', function () {
 Route::get('/home', function () {
     return view('pages.home');
 });
+Route::get('/credits', function () {
+    return view('pages.credits');
+});
 
 // Authentication Routes
 Route::get('/login', [AuthenticationController::class, 'showLoginForm'])->name('login');
