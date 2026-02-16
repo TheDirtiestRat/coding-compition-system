@@ -19,9 +19,9 @@
         $members = [
             [
                 'name' => 'Dunhill Leal',
-                'role' => 'Guild Adviser',
-                'age' => 'N/A',
-                'github' => '',
+                'role' => 'Guild Elder',
+                'age' => 'Secret',
+                'github' => 'https://github.com/TheDirtiestRat',
                 'photo' => 'images/guild/dunhill.png',
             ],
             [
@@ -90,8 +90,8 @@
 
         $tiers = [
             [
-                'title' => 'Guild Adviser',
-                'members' => $members->where('role', 'Guild Adviser')->values(),
+                'title' => 'Guild Elder',
+                'members' => $members->where('role', 'Guild Elder')->values(),
                 'grid' => 'max-w-sm grid-cols-1',
             ],
             [
