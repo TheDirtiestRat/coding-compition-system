@@ -76,7 +76,7 @@
             [
                 'name' => 'John Ashly O. Gasacao',
                 'role' => 'Guild Member',
-                'age' => 19,
+                'age' => 20,
                 'github' => 'https://github.com/OfficialSage26',
                 'photo' => 'images/guild/ashly.png',
             ],
