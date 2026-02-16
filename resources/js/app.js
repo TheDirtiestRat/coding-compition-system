@@ -16,7 +16,7 @@ let currentTheme;
 function init_code_editor(language, theme) {
     const container = document.getElementById("monaco-editor-container");
 
-    const codevalue = 
+    const codevalue =
     `class Main {
     public static void main(String[] args) {
         // Java Code here ...
@@ -150,6 +150,15 @@ function submitCodeForReview(code, id) {
         });
 }
 
+// When the candidate has already submitted something,
+// we just fetch it again from the hidden field
+function initWithSubmittedCode() {
+    const submittedCodeEl = document.getElementById("submittedCode");
+    if (!submittedCodeEl.value.trim()) return;
+
+    editorInstance.setValue(submittedCodeEl.value)
+}
+
 // --- Main DOM Content Loaded Handler ---
 document.addEventListener("DOMContentLoaded", () => {
     const languageSelectorElement =
@@ -162,6 +171,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 2. Initialize the editor with the initial values
     init_code_editor(currentLanguage, currentTheme);
+
+    // Get submitted code
+    initWithSubmittedCode();
 
     // --- Event Listeners for Selectors ---
 

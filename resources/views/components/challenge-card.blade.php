@@ -6,9 +6,9 @@
             'card' => 'border border-success bg-success/5',
             'badge' => 'badge-success',
             'badgeLabel' => 'Reviewed',
-            'button' => 'btn-success btn-disabled',
+            'button' => 'btn-success',
             'label' => 'Reviewed',
-            'clickable' => false,
+            'clickable' => true,
         ],
         'submitted' => [
             'card' => 'border border-warning bg-warning/5',
@@ -21,7 +21,7 @@
         default => [
             'card' => 'border border-base-300 hover:border-primary hover:bg-base-200 transition',
             'badge' => 'badge',
-            'badgeLabel' => 'Not Started',
+            'badgeLabel' => 'Unsolved',
             'button' => 'btn-primary',
             'label' => 'Solve Challenge',
             'clickable' => true,

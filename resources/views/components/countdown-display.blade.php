@@ -53,7 +53,7 @@
                 });
         }
 
-        setInterval(async () => {
+        const interID = setInterval(async () => {
             const timer = await getCurrentTime();
             let countdownTimer = timer['curTimeInMils'];
             let endTime = timer['endTimeInMils'];
@@ -66,7 +66,9 @@
             } else {
                 countdown.innerText = "Time!!";
                 countdownDisplay.hidden = true;
-                window.location.href = "/competition-ended";
+                if (window.location.href != ( "http://"+ (window.location.hostname + ':' + window.location.port + '/code-problems'))) {
+                    window.location.href = "/competition-ended";
+                }
             }
         }, 1000);
 

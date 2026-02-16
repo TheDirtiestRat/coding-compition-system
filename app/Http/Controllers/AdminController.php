@@ -182,8 +182,9 @@ class AdminController extends Controller
     public function challenges()
     {
         $challenges = Challenges::latest()->get();
+        $last_id = Challenges::latest()->first('id');
 
-        return view('admin.challenges', compact('challenges'));
+        return view('admin.challenges', compact('challenges','last_id'));
     }
 
     public function get_challenge_details($id)
@@ -196,7 +197,7 @@ class AdminController extends Controller
     public function save_challenge(Request $request)
     {
         $validatedData = $request->validate([
-            'challenge_id' => 'sometimes|exists:challenges,id',
+            'challenge_id' => 'required',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'difficulty' => 'required|in:easy,medium,hard,challenge',
