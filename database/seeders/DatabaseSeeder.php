@@ -8,6 +8,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,13 +25,13 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin',
             'user_type' => 'admin',
             'email' => 'admin@example.com',
-            'password' => 'admin',
+            'password' => Hash::make('admin'),
         ]);
 
         User::factory()->create([
             'name' => 'User',
             'email' => 'user@example.com',
-            'password' => 'user',
+            'password' => Hash::make('user'),
         ]);
 
         // insert option values
