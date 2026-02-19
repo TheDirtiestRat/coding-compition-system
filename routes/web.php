@@ -21,6 +21,9 @@ Route::get('/', function () {
 Route::get('/home', function () {
     return view('pages.home');
 });
+Route::get('/credits', function () {
+    return view('pages.credits');
+});
 
 Route::get('/credits', function () {
     return view('pages.credits');

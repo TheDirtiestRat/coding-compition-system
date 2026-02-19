@@ -20,9 +20,16 @@ class AdminController extends Controller
             Candidates::leftJoin('submissions', 'candidates.id', '=', 'submissions.candidate_id')
                 ->select(
                     'candidates.*',
-                    DB::raw('COALESCE(SUM(score), 0) as total_score'),
+                    DB::raw('COALESCE(SUM(submissions.score), 0) as total_score'),
                 )
-                ->groupBy('candidates.id')
+                ->groupBy(
+                    'candidates.id',
+                    'candidates.fullname',
+                    'candidates.group',
+                    'candidates.user_id',
+                    'candidates.created_at',
+                    'candidates.updated_at',
+                )
                 ->orderByDesc('total_score')
                 ->get();
 
