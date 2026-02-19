@@ -180,8 +180,8 @@
                         </h1>
 
                         <p class="text-gray-800 text-lg mb-8 animate-slide-in" style="animation-delay: 0.2s">
-                            Join the ultimate coding battlefield where developers showcase their skills,
-                            solve real-world challenges, and claim victory in The Hunger Games of programming.
+                            Apil mo sa Hunger games kit awon nato inyoha utok kong ma kaya ninyo og solve ning ge himo namo
+                            na mga Coding problems.
                         </p>
 
                         <div class="flex flex-col sm:flex-row gap-4 animate-slide-in" style="animation-delay: 0.3s">
@@ -222,12 +222,12 @@
                                 <div class="p-6 bg-gray-900 text-green-400 font-mono">
                                     <div class="text-sm space-y-1">
                                         <div>
-                                            <span class="text-purple-400">function</span>
-                                            <span class="text-blue-400">solveChallenge</span>() &#123;
+                                            <span class="text-purple-400">public static void</span>
+                                            <span class="text-blue-400">solveAkoaProblema</span>() &#123;
                                         </div>
                                         <div class="ml-4">
                                             <span class="text-yellow-400">return</span>
-                                            <span class="text-green-400">"Victory"</span>;
+                                            <span class="text-green-400">"Way kuwarta"</span>;
                                         </div>
                                         <div>&#125;</div>
                                     </div>
@@ -247,8 +247,9 @@
         <div class="max-w-7xl mx-auto px-6 lg:px-12">
             <div class="text-center mb-12">
                 <h2 class="h2 text-4xl font-bold mb-4">Why Compete With Us?</h2>
-                <p class="text-white max-w-2xl mx-auto">Experience the thrill of competitive programming with
-                    cutting-edge challenges and a vibrant community.</p>
+                <p class="text-white max-w-2xl mx-auto">
+                    Wa lang to test kong kinsay welling mo test sa ilaha ka utokan especially sa mga Bright diha og minds. 
+                </p>
             </div>
 
             <div class="grid md:grid-cols-3 gap-8 mb-12">
@@ -280,10 +281,11 @@
                         </svg>
                     </div>
                     <section class="features">
-                        <h3 class="text-xl font-bold mb-4 text-center">Secure Platform</h3>
+                        <h3 class="text-xl font-bold mb-4 text-center">Di mo ka gawas hantod di mo ma tima</h3>
                     </section>
-                    <p class="text-gray-800 text-center">Compete with confidence knowing our platform ensures fair play
-                        and protects your intellectual property.</p>
+                    <p class="text-gray-800 text-center">
+                        E make sure namo na ma hunger sa mo before mo maka games.
+                    </p>
                 </div>
 
                 <!-- Feature 3 -->
@@ -299,8 +301,9 @@
                     <section class="features">
                         <h3 class="text-xl font-bold mb-4 text-center">Community Network</h3>
                     </section>
-                    <p class="text-gray-800 text-center">Connect with fellow developers, share solutions, and learn from
-                        the best in the programming community.</p>
+                    <p class="text-gray-800 text-center">
+                        Maka kita ka sa imo katapad na naka solved na sa problems niya ikaw wala pa.
+                    </p>
                 </div>
             </div>
         </div>
@@ -329,7 +332,7 @@
                         <p class="text-gray-400 mb-6">
                             ACLC Programmers Guild.
                             <br />
-                            Providing reliable tech since 2022
+                            Providing un-reliable tech since 2022 but most trusted
                         </p>
                         <p class="text-gray-500 text-sm">Copyright © {{ date('Y') }} - All rights reserved</p>
                     </div>
