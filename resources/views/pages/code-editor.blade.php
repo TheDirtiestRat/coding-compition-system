@@ -1,28 +1,15 @@
 @extends('layouts.code-editor')
 
 @section('code-content')
-    {{-- Alerts --}}
-    <div id="alert_container" class="w-full flex flex-col gap-2 mb-3 hidden">
-        <div role="alert" id="alert_success" class="alert alert-success shadow w-fit mx-auto hidden">
-            <span id="success_alert_text">Code Verified! Points Added +999</span>
-        </div>
 
-        <div role="alert" id="alert_info" class="alert alert-info shadow w-fit mx-auto hidden">
-            <span id="info_alert_text">Information Alert Message</span>
-        </div>
-
-        <div role="alert" id="alert_error" class="alert alert-error shadow w-fit mx-auto hidden">
-            <span>Code Verification Failed.</span>
-        </div>
-    </div>
 
     <!-- Hidden Fields hehe -->
     <textarea hidden name="submittedCode" id="submittedCode">{{ $details->code }}</textarea>
 
     @if ($details->status === 'submitted')
         <div role="alert" class="fixed bottom-4 left-4 z-50 max-w-sm alert alert-info shadow-lg flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
@@ -35,9 +22,10 @@
             </span>
         </div>
     @elseif ($details->status === 'reviewed')
-        <div role="alert" class="fixed bottom-4 left-4 z-50 max-w-sm alert alert-success shadow-lg flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+        <div role="alert"
+            class="fixed bottom-4 left-4 z-50 max-w-sm alert alert-success shadow-lg flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
@@ -70,8 +58,9 @@
                 <button id="run_code_btn" class="btn btn-sm btn-primary w-[200px]">
                     Run
                 </button>
-                @if ($details->status !== "reviewed")
-                    <button id="submit_code_btn" class="btn rounded-tr-xl btn-sm btn-secondary w-[200px]" @isset($details)
+                @if ($details->status !== 'reviewed')
+                    <button id="submit_code_btn" class="btn rounded-tr-xl btn-sm btn-secondary w-[200px]"
+                        @isset($details)
                     value="{{ $details->id }}" @endisset>
                         Submit
                     </button>
@@ -89,6 +78,20 @@
 
         {{-- RIGHT: Problem & Output --}}
         <div class="flex flex-col w-full gap-1">
+            {{-- Alerts --}}
+            <div id="alert_container" class="w-full flex flex-col gap-2 mb-3 hidden">
+                <div role="alert" id="alert_success" class="alert alert-success shadow  hidden">
+                    <span id="success_alert_text">Code Verified! Points Added +999</span>
+                </div>
+
+                <div role="alert" id="alert_info" class="alert alert-info shadow hidden">
+                    <span id="info_alert_text">Information Alert Message</span>
+                </div>
+
+                <div role="alert" id="alert_error" class="alert alert-error shadow hidden">
+                    <span>Code Verification Failed.</span>
+                </div>
+            </div>
             {{-- Problem details --}}
             <div class="card rounded-2xl bg-base-300 shadow-lg p-4 space-y-2">
                 @isset($details)

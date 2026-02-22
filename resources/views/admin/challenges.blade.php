@@ -37,7 +37,9 @@
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">Challenge ID</legend>
                         <input type="text" class="input" name="challenge_id" id="challenge_id"
-                            value="{{ $last_id->id + 1 }}" placeholder="Challenge Id" readonly />
+                            value="@isset($last_id->id)
+                                {{ $last_id->id + 1 }}
+                            @endisset" placeholder="Challenge Id" readonly />
                         <legend class="fieldset-legend">Challenge Title</legend>
                         <input type="text" class="input w-full" name="title" id="title" placeholder="Type here" />
                         <legend class="fieldset-legend">Description</legend>

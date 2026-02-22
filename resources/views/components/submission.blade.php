@@ -1,6 +1,6 @@
 <div
     onclick="view_submission('{{ $submission->id }}')"
-    class="bg-base-300 h-fit rounded-md p-3 hover:bg-base-200 hover:cursor-grab"
+    class="bg-base-300 h-fit rounded-2xl p-4 hover:bg-base-200 hover:cursor-grab"
 >
     <div class="flex flex-row justify-between items-center">
         <p class="text-sm">{{ $submission->candidate_name }}</p>

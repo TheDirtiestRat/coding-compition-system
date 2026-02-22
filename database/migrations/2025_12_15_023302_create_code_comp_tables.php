@@ -11,8 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('events', function (Blueprint $table) {
+            $table->id();
+            $table->string("title")->default("no name");
+            $table->timestamps();
+        });
+
         Schema::create('candidates', function (Blueprint $table) {
             $table->id();
+            
+            $table->foreign('event_id')->constrained('events')->onDelete('cascade');
+
             $table->string("fullname")->default("no name");
             $table->string("group")->default("none");
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
@@ -21,6 +30,9 @@ return new class extends Migration
 
         Schema::create('challenges', function (Blueprint $table) {
             $table->id();
+
+            $table->foreign('event_id')->constrained('events')->onDelete('cascade');
+
             $table->string("title")->default("A Challenge")->nullable(false);
             $table->text("description");
             $table->float("points")->default(100);
@@ -32,6 +44,8 @@ return new class extends Migration
 
         Schema::create('submissions', function (Blueprint $table) {
             $table->id();
+
+            $table->foreign('event_id')->constrained('events')->onDelete('cascade');
 
             $table->foreignId('candidate_id')->constrained('candidates')->onDelete('cascade');
             $table->foreignId('challenge_id')->constrained('challenges')->onDelete('cascade');

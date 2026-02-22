@@ -25,14 +25,14 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin',
             'user_type' => 'admin',
             'email' => 'admin@example.com',
-            'password' => Hash::make('admin'),
+            'password' => Hash::make('dunhillleal24'),
         ]);
 
-        User::factory()->create([
-            'name' => 'User',
-            'email' => 'user@example.com',
-            'password' => Hash::make('user'),
-        ]);
+        // User::factory()->create([
+        //     'name' => 'User',
+        //     'email' => 'user@example.com',
+        //     'password' => Hash::make('user1'),
+        // ]);
 
         // insert option values
         DB::table('options')->insert([
@@ -51,7 +51,7 @@ class DatabaseSeeder extends Seeder
             'option_value' => '00:00:00'
         ]);
 
-        Candidates::factory(5)->create();
+        // Candidates::factory(5)->create();
 
         // create the challenges
         $this->call([

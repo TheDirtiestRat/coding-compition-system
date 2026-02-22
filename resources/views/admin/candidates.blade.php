@@ -59,8 +59,8 @@
                     {{-- form --}}
                     <fieldset class="fieldset mt-2">
                         <legend class="fieldset-legend text-md">Candidate ID: </legend>
-                        <input type="text" class="input" name="candidate_id" id="candidate_id"
-                            placeholder="User Id" readonly disabled />
+                        <input type="text" class="input" name="candidate_id" id="candidate_id" placeholder="User Id"
+                            readonly />
                         <legend class="fieldset-legend">New name?</legend>
                         <input type="text" class="input" name="edit_name" id="edit_name" placeholder="Type here" />
                         {{-- <p class="label">Optional</p> --}}
@@ -107,6 +107,8 @@
                                     </p>
                                 </td>
                                 <td class="flex flex-row items-center justify-center gap-2">
+                                    <a href="{{ url('/admin/candidates/view/' . $candidate->id) }}"
+                                        class="btn btn-xs btn-info">View</a>
                                     <button class="btn btn-xs"
                                         onclick="edit_candidate('{{ $candidate->id }}','{{ $candidate->fullname }}','{{ optional($candidate->user)->name }}')">Edit</button>
                                     <form action="{{ url('/admin/delete-candidate/' . $candidate->id) }}"
@@ -123,6 +125,36 @@
             </div>
         </div>
     </div>
+
+    {{-- candidate info --}}
+    @isset($can_name, $user_acc, $solved_challenges)
+        <div class="flex flex-row gap-3 w-full bg-base-100 rounded-xl p-3 mt-3">
+            <div class="p-2 basis-auto flex flex-col gap-2">
+                <span class="text-2xl font-bold text-nowrap">Candidate Details</span>
+                <strong><span>Name: {{ $can_name->fullname }}</span></strong>
+                <span>Username: {{ $user_acc->name }}</span>
+                <span>Email: {{ $user_acc->email }}</span>
+                <span>Group: {{ $candidate->group }}</span>
+            </div>
+            <div class="divider lg:divider-horizontal">*</div>
+            <div class="p-2 basis-full">
+                <span class="text-2xl font-bold">Solved Problems ({{ count($solved_challenges) }})</span>
+                {{-- list --}}
+                <div class="grid grid-cols-3 gap-3 mt-3">
+                    @foreach ($solved_challenges as $challenges)
+                        <div class="bg-base-300 h-fit rounded-2xl p-4 hover:bg-base-200 hover:cursor-grab">
+                            <div class="flex flex-row justify-between items-center mb-1">
+                                <p class="badge badge-xs badge-primary">{{ $challenges->difficulty }}</p>
+                                <p class="badge badge-xs badge-primary">Points: {{ $challenges->score }} / {{ $challenges->points }}</p>
+                            </div>
+                            <p class="">{{ $challenges->title }}</p>
+                            <p class="mt-2 text-xs">Date: {{ $challenges->created_at }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @endisset
 @endsection
 
 @section('admin-scripts')

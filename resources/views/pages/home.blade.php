@@ -180,7 +180,8 @@
                         </h1>
 
                         <p class="text-gray-800 text-lg mb-8 animate-slide-in" style="animation-delay: 0.2s">
-                            Apil mo sa Hunger games kit awon nato inyoha utok kong ma kaya ninyo og solve ning ge himo namo
+                            Apil mo sa Hunger games kit awon nato inyoha utok kong ma kaya ninyo og solve ning ge himo
+                            namo
                             na mga Coding problems.
                         </p>
 
@@ -248,7 +249,8 @@
             <div class="text-center mb-12">
                 <h2 class="h2 text-4xl font-bold mb-4">Why Compete With Us?</h2>
                 <p class="text-white max-w-2xl mx-auto">
-                    Wa lang to test kong kinsay welling mo test sa ilaha ka utokan especially sa mga Bright diha og minds. 
+                    Wa lang to test kong kinsay welling mo test sa ilaha ka utokan especially sa mga Bright diha og
+                    minds.
                 </p>
             </div>
 
@@ -309,6 +311,170 @@
         </div>
     </section>
 
+    {{-- Members --}}
+    @php
+        $roleOrder = ['Guild Adviser', 'President', 'Vice President', 'Secretary', 'Guild Member'];
+
+        $members = [
+            [
+                'name' => 'Dunhill Leal',
+                'role' => 'Guild Elder',
+                'age' => 'Secret',
+                'github' => 'https://github.com/TheDirtiestRat',
+                'photo' => 'images/guild/dunhill.png',
+            ],
+            [
+                'name' => 'Miko Carlo A. Arar',
+                'role' => 'President',
+                'age' => 23,
+                'github' => 'https://github.com/mekowkowwe',
+                'photo' => 'images/guild/miko.jpg',
+            ],
+            [
+                'name' => 'Mark James V. Felecio',
+                'role' => 'Vice President',
+                'age' => 19,
+                'github' => 'https://github.com/mjfelecio',
+                'photo' => 'images/guild/mark.png',
+            ],
+            [
+                'name' => 'Avelino Magallanes',
+                'role' => 'Secretary',
+                'age' => 20,
+                'github' => 'https://github.com/The-Grim-Reaper110011101',
+                'photo' => 'images/guild/ave.png',
+            ],
+            [
+                'name' => 'Dj Lynn Marie J. Lanuza',
+                'role' => 'Guild Member',
+                'age' => 22,
+                'github' => 'https://github.com/dejayy27',
+                'photo' => 'images/guild/dj.png',
+            ],
+            [
+                'name' => 'Justine Dorae L. Suralta',
+                'role' => 'Guild Member',
+                'age' => 20,
+                'github' => 'https://github.com/Coffleatea',
+                'photo' => 'images/guild/justine.png',
+            ],
+            [
+                'name' => 'Jeson Beltran',
+                'role' => 'Guild Member',
+                'age' => 20,
+                'github' => 'https://github.com/Katsura6',
+                'photo' => 'images/guild/jeson.png',
+            ],
+            [
+                'name' => 'John Kenneth D. Dignos',
+                'role' => 'Guild Member',
+                'age' => 21,
+                'github' => 'https://github.com/IceNinja2017',
+                'photo' => 'images/guild/kenneth.png',
+            ],
+            [
+                'name' => 'John Ashly O. Gasacao',
+                'role' => 'Guild Member',
+                'age' => 20,
+                'github' => 'https://github.com/OfficialSage26',
+                'photo' => 'images/guild/ashly.png',
+            ],
+        ];
+
+        $members = collect($members)
+            ->sortBy(function ($member) use ($roleOrder) {
+                return array_search($member['role'], $roleOrder, true);
+            })
+            ->values();
+
+        $tiers = [
+            [
+                'title' => 'Guild Elder',
+                'members' => $members->where('role', 'Guild Elder')->values(),
+                'grid' => 'max-w-sm grid-cols-1',
+            ],
+            [
+                'title' => 'Officers',
+                'members' => $members->whereIn('role', ['President', 'Vice President', 'Secretary'])->values(),
+                'grid' => 'max-w-5xl grid-cols-1 md:grid-cols-3',
+            ],
+            [
+                'title' => 'Guild Members',
+                'members' => $members->where('role', 'Guild Member')->values(),
+                'grid' => 'max-w-5xl grid-cols-1 sm:grid-cols-2',
+            ],
+        ];
+    @endphp
+
+    <main class="mb-16 container max-w-[800px] mx-auto flex flex-col gap-4">
+        <section class="max-w-[800px] mx-auto bg-base-300 rounded-2xl grid p-8 place-items-center text-center">
+            <h1 class="text-4xl font-bold md:text-5xl">Programmers&apos; Guild Credits</h1>
+            <p class="mx-auto mt-4 max-w-3xl text-lg text-base-content/80">
+                Meet the team behind the platform.
+            </p>
+        </section>
+
+        <section class="space-y-4">
+            @foreach ($tiers as $tier)
+                <div>
+                    <p class="text-center text-xs font-semibold uppercase tracking-widest text-base-content/70 mb-2">
+                        {{ $tier['title'] }}
+                    </p>
+
+                    <div class="flex justify-center">
+                        <div class="grid gap-3 w-full {{ $tier['grid'] }}">
+                            @foreach ($tier['members'] as $member)
+                                @php
+                                    $isLastOddMember =
+                                        $tier['title'] === 'Guild Members' &&
+                                        $tier['members']->count() % 2 === 1 &&
+                                        $loop->last;
+
+                                    $initials = collect(explode(' ', $member['name']))
+                                        ->filter()
+                                        ->map(function ($part) {
+                                            return strtoupper(substr($part, 0, 1));
+                                        })
+                                        ->take(2)
+                                        ->implode('');
+                                @endphp
+
+                                <article @class([
+                                    'rounded-2xl bg-base-100 p-6 shadow border border-base-300',
+                                    'sm:col-span-2 sm:justify-self-center sm:w-1/2' => $isLastOddMember,
+                                ])>
+                                    @if (!empty($member['photo']) && file_exists(public_path($member['photo'])))
+                                        <img src="{{ asset($member['photo']) }}" alt="{{ $member['name'] }}"
+                                            class="mx-auto mb-4 h-24 w-24 rounded-3xl object-cover border border-base-300 shadow">
+                                    @else
+                                        <div
+                                            class="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-3xl bg-neutral text-3xl font-extrabold text-neutral-content shadow">
+                                            {{ $initials }}
+                                        </div>
+                                    @endif
+
+                                    <h2 class="text-center text-2xl font-bold">{{ $member['name'] }}</h2>
+
+                                    <div class="mt-4 flex items-center justify-center gap-2">
+                                        <span class="badge badge-primary badge-soft">{{ $member['role'] }}</span>
+                                        <span class="badge badge-ghost">Age {{ $member['age'] }}</span>
+                                    </div>
+
+                                    @if (!empty($member['github']))
+                                        <a href="{{ $member['github'] }}" target="_blank" rel="noopener noreferrer"
+                                            class="btn btn-neutral mt-5 w-full rounded-xl">
+                                            GitHub
+                                        </a>
+                                    @endif
+                                </article>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </section>
+    </main>
+
     <!-- Footer -->
     <div class="px-4 sm:px-6 lg:px-8">
         <footer class="bg-gradient-to-r from-gray-900 to-black text-white rounded-3xl overflow-hidden shadow-2xl">
@@ -341,7 +507,8 @@
                     <div class="animate-slide-in" style="animation-delay: 0.1s">
                         <h4 class="text-lg font-bold mb-6">Quick Links</h4>
                         <ul class="space-y-3">
-                            <li><a href="#home" class="text-gray-400 hover:text-white transition duration-200">Home</a>
+                            <li><a href="#home"
+                                    class="text-gray-400 hover:text-white transition duration-200">Home</a>
                             </li>
                             <li><a href="#about"
                                     class="text-gray-400 hover:text-white transition duration-200">About</a>
@@ -357,8 +524,8 @@
                         <div class="flex space-x-4">
                             <a href="#"
                                 class="w-12 h-12 rounded-full bg-gray-800 hover:bg-blue-600 flex items-center justify-center transition duration-300 transform hover:-translate-y-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24"
-                                    class="fill-current">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30"
+                                    viewBox="0 0 24 24" class="fill-current">
                                     <path
                                         d="M15 8.8V6.9c0-.6.4-.9 1-.9h2V3h-2.8c-2.8 0-4.2 1.7-4.2 4.1v1.7H9v3h2v9h3v-9h2.7l.4-3H14z" />
                                 </svg>
@@ -367,7 +534,8 @@
 
 
                             </a>
-                            <a href="/credits" class="w-12 h-12 rounded-full bg-gray-800 hover:bg-gray-600
+                            <a href="/credits"
+                                class="w-12 h-12 rounded-full bg-gray-800 hover:bg-gray-600
            flex items-center justify-center transition duration-300
            transform hover:-translate-y-1">
                                 <img src="{{ asset('images/officialLogo.png') }}" class="w-12 h-12 object-contain" />
@@ -381,17 +549,17 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             // Mobile menu toggle
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             const mobileMenu = document.getElementById('mobileMenu');
 
-            mobileMenuBtn.addEventListener('click', function () {
+            mobileMenuBtn.addEventListener('click', function() {
                 mobileMenu.classList.toggle('hidden');
             });
 
             // Close mobile menu when clicking outside
-            document.addEventListener('click', function (event) {
+            document.addEventListener('click', function(event) {
                 if (!mobileMenuBtn.contains(event.target) && !mobileMenu.contains(event.target)) {
                     mobileMenu.classList.add('hidden');
                 }
@@ -399,7 +567,7 @@
 
             // Smooth scrolling for anchor links
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
+                anchor.addEventListener('click', function(e) {
                     e.preventDefault();
                     const targetId = this.getAttribute('href');
                     if (targetId === '#') return;

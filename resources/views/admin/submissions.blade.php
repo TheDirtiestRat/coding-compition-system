@@ -66,7 +66,7 @@
             <button class="btn btn-sm btn-primary ml-4">Submit</button>
         </form>
 
-        <div id="code_output_area" class="basis-full bg-gray-400 p-3 rounded-xl w-full font-mono">Code Output:</div>
+        <div id="code_output_area" class="basis-full bg-gray-400 p-3 rounded-xl w-full font-mono whitespace-pre-wrap break-all">Code Output:</div>
     </div>
 
     {{-- Submissions --}}

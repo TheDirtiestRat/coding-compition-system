@@ -170,6 +170,25 @@ class AdminController extends Controller
         return redirect('/admin/candidates')->with('success', 'Competitor updated successfully!');
     }
 
+    public function view_candidate(string $candidate_id)
+    {
+        $candidate = Candidates::where('id','=', $candidate_id)->first();
+        $can_name = Candidates::select('fullname')->where('id','=', $candidate_id)->first();
+        $user_acc = User::findOr($candidate->user_id);
+
+        $solved_challenges = Challenges::select('challenges.id','challenges.title','challenges.points','challenges.language','challenges.difficulty','challenges.created_at','submissions.challenge_id','submissions.score')->join('submissions', function ($join) use ($candidate) {
+                    $join->on('submissions.challenge_id', '=', 'challenges.id')
+                        ->where('submissions.candidate_id', '=', $candidate->id);
+                })
+                ->get();
+
+        // dd($solved_challenges);
+
+        $candidates = Candidates::with('user')->latest()->get();
+
+        return view('admin.candidates', compact('candidates', 'solved_challenges', 'can_name','user_acc'));
+    }
+
     public function delete_candidate(string $candidate_id)
     {
         // Delete the candidate record
@@ -183,6 +202,7 @@ class AdminController extends Controller
     {
         $challenges = Challenges::latest()->get();
         $last_id = Challenges::latest()->first('id');
+
 
         return view('admin.challenges', compact('challenges','last_id'));
     }

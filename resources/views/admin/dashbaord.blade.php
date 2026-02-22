@@ -29,7 +29,7 @@
                     <button id="startStopButton" class="btn btn-primary btn-lg" type="button"
                         onclick="setCurrentTimer()">Start</button>
                     <button class="btn btn-secondary btn-soft btn-lg" type="button"
-                        onclick="resetCountdowns()">Reset</button>
+                        onclick="setCurrentTimer()">Reset</button>
                 </div>
             </div>
         </div>
@@ -215,23 +215,24 @@
         }
 
         function resetCountdown() {
-            fetch('/admin/countdown/reset', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                }
-            }).then(() => {
-                cancelAnimationFrame(rafId);
-                endTime = null;
+            setCurrentTimer();
+            // fetch('/admin/countdown/reset', {
+            //     method: 'POST',
+            //     headers: {
+            //         'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            //     }
+            // }).then(() => {
+            //     cancelAnimationFrame(rafId);
+            //     endTime = null;
 
-                // Reset inputs
-                countdown.innerText = "00:00:00";
-                startStopButton.innerText = "Start";
-                hourInput.value = "";
-                minuteInput.value = "";
-                secondInput.value = "";
-                hideInputs(false);
-            });
+            //     // Reset inputs
+            //     countdown.innerText = "00:00:00";
+            //     startStopButton.innerText = "Start";
+            //     hourInput.value = "";
+            //     minuteInput.value = "";
+            //     secondInput.value = "";
+            //     hideInputs(false);
+            // });
         }
 
         function tick() {

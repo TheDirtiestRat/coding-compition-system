@@ -17,7 +17,7 @@
         <p id="countdown" class="text-[200px] font-semibold text-center p-0 leading-tight">
             00:00:00
         </p>
-        <p class="p-0 text-center">Compitetion Ends in ...</p>
+        <p class="p-0 text-center">Kompetition Ends in ...</p>
     </div>
 
     <script>
