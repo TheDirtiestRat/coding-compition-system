@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
+use Carbon\Carbon;
+
 class AdminController extends Controller
 {
     public function dashboard()
@@ -18,20 +20,20 @@ class AdminController extends Controller
         // gets the list of candidates with their total points
         $candidates =
             Candidates::leftJoin('submissions', 'candidates.id', '=', 'submissions.candidate_id')
-                ->select(
-                    'candidates.*',
-                    DB::raw('COALESCE(SUM(submissions.score), 0) as total_score'),
-                )
-                ->groupBy(
-                    'candidates.id',
-                    'candidates.fullname',
-                    'candidates.group',
-                    'candidates.user_id',
-                    'candidates.created_at',
-                    'candidates.updated_at',
-                )
-                ->orderByDesc('total_score')
-                ->get();
+            ->select(
+                'candidates.*',
+                DB::raw('COALESCE(SUM(submissions.score), 0) as total_score'),
+            )
+            ->groupBy(
+                'candidates.id',
+                'candidates.fullname',
+                'candidates.group',
+                'candidates.user_id',
+                'candidates.created_at',
+                'candidates.updated_at',
+            )
+            ->orderByDesc('total_score')
+            ->get();
 
         $previousPoints = null;
         $currentRank = 0;
@@ -56,11 +58,20 @@ class AdminController extends Controller
         return view('admin.dashbaord', compact('candidates'));
     }
 
+    public function events()
+    {
+        $events = DB::table('events')->get('*');
+
+        return view('admin.events', compact('events'));
+    }
+
     public function candidates()
     {
-        $candidates = Candidates::with('user')->latest()->get();
+        $candidates = Candidates::join('events','candidates.event_id', "=", "events.id")->with('user')->get();
+        // dd($candidates);
+        $events = DB::table('events')->get();
 
-        return view('admin.candidates', compact('candidates'));
+        return view('admin.candidates', compact('candidates','events'));
     }
 
     public function submissions()
@@ -104,9 +115,80 @@ class AdminController extends Controller
         // return view('admin.submissions', compact('submissions'));
     }
 
+    public function add_event(Request $request)
+    {
+        $validatedData = $request->validate([
+            'event_title' => 'required|string|max:255',
+        ]);
+
+        try {
+            $event = DB::table('events')->insert([
+                'title' => $validatedData['event_title'],
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]);
+        } catch (\Exception $e) {
+            return redirect('/admin/events')->with('error', 'Error creating Event: ' . $e->getMessage());
+        }
+
+
+        return redirect('/admin/events')->with('success', 'A Event is Created!');
+    }
+
+    public function activate_event(Request $request)
+    {
+        $validatedData = $request->validate([
+            'event_id' => 'required|exists:events,id',
+            'isActive' => 'required',
+        ]);
+
+        // deactivates all active events and activates the event selected so that there can only one active event at a time.
+        DB::table('events')->where('isActive', '=', true)->update([
+            'isActive' => false,
+            'updated_at' => Carbon::now(),
+        ]);
+
+        $event = DB::table('events')->where('id', '=', $validatedData['event_id'])->update([
+            'isActive' => true,
+            'updated_at' => Carbon::now(),
+        ]);
+
+        $active_msg = ($validatedData['isActive']) ? "Activated" : "DeActivated!";
+
+        return redirect('/admin/events')->with('success', 'Event is ' . $active_msg . ' successfully!');
+    }
+
+    public function update_event(Request $request)
+    {
+        $validatedData = $request->validate([
+            'event_id' => 'required|exists:events,id',
+            'edit_title' => 'required|string|max:255',
+        ]);
+
+        try {
+            $event = DB::table('events')->where('id','=',$validatedData['event_id'])->update([
+                'title' => $validatedData['edit_title'],
+                'updated_at' => Carbon::now(),
+            ]);
+        } catch (\Exception $e) {
+            return redirect('/admin/events')->with('error', 'Error updating Event : ' . $e->getMessage());
+        }
+
+        return redirect('/admin/events')->with('success', 'Event is updated successfully!');
+    }
+
+    public function delete_event(string $event_id)
+    {
+        DB::table('events')->delete($event_id);
+
+        // Redirect back with a success message
+        return redirect('/admin/events')->with('success', 'Event is and the following connected to it is deleted successfully.');
+    }
+
     public function add_candidate(Request $request)
     {
         $validatedData = $request->validate([
+            'event_id' => 'required|exists:events,id',
             'candidate_name' => 'required|string|max:255',
             'username' => 'required|string|max:128',
             'user_password' => 'required',
@@ -120,6 +202,7 @@ class AdminController extends Controller
             ]);
 
             $candidate = Candidates::create([
+                'event_id' => $validatedData['event_id'],
                 'fullname' => $validatedData['candidate_name'],
                 'group' => "none",
                 'user_id' => $user->id,
@@ -138,6 +221,7 @@ class AdminController extends Controller
     public function update_candidate(Request $request)
     {
         $validatedData = $request->validate([
+            'event_id' => 'required|exists:events,id',
             'candidate_id' => 'required|exists:candidates,id',
             'edit_name' => 'required|string|max:255',
             'edit_username' => 'required|string|max:128',
@@ -161,6 +245,7 @@ class AdminController extends Controller
             }
 
             $candidate->update([
+                'event_id' => $validatedData['event_id'],
                 'fullname' => $validatedData['edit_name'],
             ]);
         } catch (\Exception $e) {
@@ -172,21 +257,21 @@ class AdminController extends Controller
 
     public function view_candidate(string $candidate_id)
     {
-        $candidate = Candidates::where('id','=', $candidate_id)->first();
-        $can_name = Candidates::select('fullname')->where('id','=', $candidate_id)->first();
+        $candidate = Candidates::where('id', '=', $candidate_id)->first();
+        $can_name = Candidates::select('fullname')->where('id', '=', $candidate_id)->first();
         $user_acc = User::findOr($candidate->user_id);
 
-        $solved_challenges = Challenges::select('challenges.id','challenges.title','challenges.points','challenges.language','challenges.difficulty','challenges.created_at','submissions.challenge_id','submissions.score')->join('submissions', function ($join) use ($candidate) {
-                    $join->on('submissions.challenge_id', '=', 'challenges.id')
-                        ->where('submissions.candidate_id', '=', $candidate->id);
-                })
-                ->get();
+        $solved_challenges = Challenges::select('challenges.id', 'challenges.title', 'challenges.points', 'challenges.language', 'challenges.difficulty', 'challenges.created_at', 'submissions.challenge_id', 'submissions.score')->join('submissions', function ($join) use ($candidate) {
+            $join->on('submissions.challenge_id', '=', 'challenges.id')
+                ->where('submissions.candidate_id', '=', $candidate->id);
+        })
+            ->get();
 
         // dd($solved_challenges);
 
         $candidates = Candidates::with('user')->latest()->get();
 
-        return view('admin.candidates', compact('candidates', 'solved_challenges', 'can_name','user_acc'));
+        return view('admin.candidates', compact('candidates', 'solved_challenges', 'can_name', 'user_acc'));
     }
 
     public function delete_candidate(string $candidate_id)
@@ -202,9 +287,9 @@ class AdminController extends Controller
     {
         $challenges = Challenges::latest()->get();
         $last_id = Challenges::latest()->first('id');
+        $events = DB::table('events')->get();
 
-
-        return view('admin.challenges', compact('challenges','last_id'));
+        return view('admin.challenges', compact('challenges', 'last_id', 'events'));
     }
 
     public function get_challenge_details($id)
@@ -217,6 +302,7 @@ class AdminController extends Controller
     public function save_challenge(Request $request)
     {
         $validatedData = $request->validate([
+            'event_id' => 'required|exists:events,id',
             'challenge_id' => 'required',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -230,6 +316,7 @@ class AdminController extends Controller
             $challenge = Challenges::updateOrCreate(
                 ['id' => $validatedData['challenge_id'] ?? null],
                 [
+                    'event_id' => $validatedData['event_id'],
                     'title' => $validatedData['title'],
                     'description' => $validatedData['description'],
                     'difficulty' => $validatedData['difficulty'],
@@ -252,8 +339,8 @@ class AdminController extends Controller
         return redirect('/admin/challenges')->with(
             'success',
             $challenge->wasRecentlyCreated
-            ? 'Challenge created successfully!'
-            : 'Challenge updated successfully!'
+                ? 'Challenge created successfully!'
+                : 'Challenge updated successfully!'
         );
     }
 

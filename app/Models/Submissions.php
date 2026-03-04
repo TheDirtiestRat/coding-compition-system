@@ -14,6 +14,7 @@ class Submissions extends Model
     protected $table = 'submissions';
 
     protected $fillable = [
+        'event_id',
         'candidate_id',
         'challenge_id',
         'score',

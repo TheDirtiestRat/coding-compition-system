@@ -19,7 +19,7 @@
                 </li>
             </ul>
         </div>
-        <a class="btn btn-ghost text-xl">Coding Editor</a>
+        <a class="btn btn-ghost text-xl">Coding Editor | @include('components.title')</a>
     </div>
 
     {{-- for big screen --}}

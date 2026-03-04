@@ -45,9 +45,15 @@ Route::middleware('auth')->group(function () {
     // admin side pages
     Route::middleware('is.admin')->group(function () {
         Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
+        Route::get('/admin/events', [AdminController::class, 'events']);
         Route::get('/admin/candidates', [AdminController::class, 'candidates']);
         Route::get('/admin/challenges', [AdminController::class, 'challenges']);
         Route::get('/admin/submissions', [AdminController::class, 'submissions']);
+
+        Route::post('/admin/add-event', [AdminController::class, 'add_event']);
+        Route::post('/admin/update-event', [AdminController::class, 'update_event']);
+        Route::post('/admin/active-event', [AdminController::class, 'activate_event']);
+        Route::delete('/admin/delete-event/{event_id}', [AdminController::class, 'delete_event']);
 
         Route::get('/admin/candidates/view/{candidate_id}', [AdminController::class, 'view_candidate']);
         Route::post('/admin/add-candidate', [AdminController::class, 'add_candidate']);

@@ -14,6 +14,7 @@
 
 <body class="w-screen h-screen flex justify-center items-center">
     <div class="flex flex-col">
+        <p class="p-0 text-center">@include('components.title')</p>
         <p id="countdown" class="text-[200px] font-semibold text-center p-0 leading-tight">
             00:00:00
         </p>

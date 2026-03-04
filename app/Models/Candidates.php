@@ -14,6 +14,7 @@ class Candidates extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'event_id',
         'fullname',
         'group',
         'user_id',
@@ -23,4 +24,9 @@ class Candidates extends Model
     {
         return $this->belongsTo(\App\Models\User::class);
     }
+
+    public function events()
+{
+    return $this->belongsTo(\App\Models\Events::class);
+}
 }

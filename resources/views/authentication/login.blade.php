@@ -64,7 +64,7 @@
         <!-- Left side - Branding/Visual -->
         <div class="text-white text-center md:text-left md:w-1/2 animate-slide-in">
             <div class="mb-6">
-                <h1 class="text-5xl md:text-6xl font-bold mb-2">Coding Competition</h1>
+                <h1 class="text-5xl md:text-6xl font-bold mb-2">@include('components.title') | Coding Competition</h1>
                 <p class="text-xl opacity-90">Showcase your skills. Challenge your limits. And Conquer.</p>
             </div>
 

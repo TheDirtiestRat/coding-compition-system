@@ -36,6 +36,19 @@
                     @csrf
                     {{-- form --}}
                     <fieldset class="fieldset mt-2">
+                        <legend class="fieldset-legend">for waht Event?</legend>
+                        <select class="select" name="event_id">
+                            @forelse  ($events as $event)
+                                @if ($event->isActive)
+                                    <option value="{{ $event->id }}" selected>{{ $event->title }}</option>
+                                @else
+                                    <option value="{{ $event->id }}">{{ $event->title }}</option>
+                                @endif
+                            @empty
+                                <option disabled selected>Pick a Event</option>
+                            @endforelse
+                        </select>
+
                         <legend class="fieldset-legend">Candidates name?</legend>
                         <input type="text" class="input" name="candidate_name" placeholder="Type here" />
                         {{-- <p class="label">Optional</p> --}}
@@ -61,6 +74,20 @@
                         <legend class="fieldset-legend text-md">Candidate ID: </legend>
                         <input type="text" class="input" name="candidate_id" id="candidate_id" placeholder="User Id"
                             readonly />
+
+                        <legend class="fieldset-legend">New Event?</legend>
+                        <select class="select" name="event_id" id="event_id">
+                            @forelse  ($events as $event)
+                                @if ($event->isActive)
+                                    <option value="{{ $event->id }}" selected>{{ $event->title }}</option>
+                                @else
+                                    <option value="{{ $event->id }}">{{ $event->title }}</option>
+                                @endif
+                            @empty
+                                <option disabled selected>Pick a Event</option>
+                            @endforelse
+                        </select>
+
                         <legend class="fieldset-legend">New name?</legend>
                         <input type="text" class="input" name="edit_name" id="edit_name" placeholder="Type here" />
                         {{-- <p class="label">Optional</p> --}}
@@ -92,6 +119,7 @@
                             <th class="bg-slate-700/50">Name</th>
                             <th class="bg-slate-700/50">Username</th>
                             <th class="bg-slate-700/50">Group</th>
+                            <th class="bg-slate-700/50">Event</th>
                             <th class="bg-slate-700/50 rounded-tr-xl">Actions</th>
                         </tr>
                     </thead>
@@ -106,11 +134,12 @@
                                         {{ $candidate->group }}
                                     </p>
                                 </td>
+                                <td>{{ $candidate->title }}</td>
                                 <td class="flex flex-row items-center justify-center gap-2">
                                     <a href="{{ url('/admin/candidates/view/' . $candidate->id) }}"
                                         class="btn btn-xs btn-info">View</a>
                                     <button class="btn btn-xs"
-                                        onclick="edit_candidate('{{ $candidate->id }}','{{ $candidate->fullname }}','{{ optional($candidate->user)->name }}')">Edit</button>
+                                        onclick="edit_candidate('{{ $candidate->id }}','{{ $candidate->event_id }}','{{ $candidate->fullname }}','{{ optional($candidate->user)->name }}')">Edit</button>
                                     <form action="{{ url('/admin/delete-candidate/' . $candidate->id) }}"
                                         class="candidate_delete_form" method="POST">
                                         @csrf
@@ -145,7 +174,8 @@
                         <div class="bg-base-300 h-fit rounded-2xl p-4 hover:bg-base-200 hover:cursor-grab">
                             <div class="flex flex-row justify-between items-center mb-1">
                                 <p class="badge badge-xs badge-primary">{{ $challenges->difficulty }}</p>
-                                <p class="badge badge-xs badge-primary">Points: {{ $challenges->score }} / {{ $challenges->points }}</p>
+                                <p class="badge badge-xs badge-primary">Points: {{ $challenges->score }} /
+                                    {{ $challenges->points }}</p>
                             </div>
                             <p class="">{{ $challenges->title }}</p>
                             <p class="mt-2 text-xs">Date: {{ $challenges->created_at }}</p>
@@ -159,13 +189,15 @@
 
 @section('admin-scripts')
     <script>
-        function edit_candidate(user_id, name, username) {
+        function edit_candidate(user_id, event_id, name, username) {
             const edit_tab = document.getElementById("edit_tabs");
+            const can_event_id = document.getElementById("event_id");
             const can_user_id = document.getElementById("candidate_id");
             const can_name = document.getElementById("edit_name");
             const can_username = document.getElementById("edit_username");
             const can_password = document.getElementById("edit_user_password");
 
+            can_event_id.value = event_id
             can_user_id.value = user_id
             can_name.value = name;
             can_username.value = username;

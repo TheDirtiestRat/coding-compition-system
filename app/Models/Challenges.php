@@ -10,6 +10,7 @@ class Challenges extends Model
     use HasFactory;
 
     protected $fillable = [
+        'event_id',
         'title',
         'description',
         'difficulty',

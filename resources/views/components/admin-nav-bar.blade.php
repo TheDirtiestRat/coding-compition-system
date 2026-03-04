@@ -10,7 +10,7 @@
             <path d="M14 10l2 2l-2 2"></path>
         </svg>
     </label>
-    <div class="px-4 md:text-nowrap">Hunger Games</div>
+    <div class="px-4 md:text-nowrap">@include('components.title')</div>
 
     <form method="POST" action="{{ url('/logout') }}" class="navbar-end w-full">
         @csrf

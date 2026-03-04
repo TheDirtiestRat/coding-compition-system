@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\View;
+use App\Models\Events;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,5 +22,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
+        View::composer('*', function ($view) {
+            $event = Events::where('isActive', true)->first();
+            $view->with('event_title', $event ? $event->title : 'Coding Competition');
+        });
     }
 }

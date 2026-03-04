@@ -39,7 +39,24 @@
                         <input type="text" class="input" name="challenge_id" id="challenge_id"
                             value="@isset($last_id->id)
                                 {{ $last_id->id + 1 }}
-                            @endisset" placeholder="Challenge Id" readonly />
+                                 @else
+                                 {{ 1 }}
+                            @endisset"
+                            placeholder="Challenge Id" readonly />
+
+                        <legend class="fieldset-legend">for waht Event?</legend>
+                        <select class="select" name="event_id" id="event_id">
+                            @forelse  ($events as $event)
+                                @if ($event->isActive)
+                                    <option value="{{ $event->id }}" selected>{{ $event->title }}</option>
+                                @else
+                                    <option value="{{ $event->id }}">{{ $event->title }}</option>
+                                @endif
+                            @empty
+                                <option disabled selected>Pick a Event</option>
+                            @endforelse
+                        </select>
+
                         <legend class="fieldset-legend">Challenge Title</legend>
                         <input type="text" class="input w-full" name="title" id="title" placeholder="Type here" />
                         <legend class="fieldset-legend">Description</legend>
@@ -92,7 +109,9 @@
                         <p class="text-gray-400 w-full">Edit the code here ma Rigga!</p>
                         <button id="testCodeBtn" class="btn btn-sm btn-primary basis-2/4">Test Code</button>
                     </div>
-                    <div id="code_output_area" class="basis-full bg-gray-400 p-3 rounded-xl w-full whitespace-pre-wrap break-all font-mono">Code Output:
+                    <div id="code_output_area"
+                        class="basis-full bg-gray-400 p-3 rounded-xl w-full whitespace-pre-wrap break-all font-mono">Code
+                        Output:
                     </div>
                 </div>
             </div>
@@ -123,6 +142,7 @@
         function edit_challenge(challenge_id) {
             const form = document.getElementById('challenge_form')
             const challenge_id_elem = document.getElementById("challenge_id");
+            const challenge_event_elem = document.getElementById("event_id");
             const challenge_title = document.getElementById("title");
             const challenge_description = document.getElementById("description");
             const challenge_difficulty = document.getElementById("difficulty");
@@ -140,9 +160,10 @@
                 .then(response => response.json())
                 .then(data => {
                     challenge_data = data
-                    console.log('Dynamic data:', data);
+                    // console.log('Dynamic data:', data);
                     // Update the DOM with the fetched data
                     // console.log(challenge_data)
+                    challenge_event_elem.value = data['event_id']
                     challenge_title.value = data['title']
                     challenge_description.value = data['description']
                     challenge_difficulty.value = data['difficulty']

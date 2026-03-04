@@ -14,13 +14,14 @@ return new class extends Migration
         Schema::create('events', function (Blueprint $table) {
             $table->id();
             $table->string("title")->default("no name");
+            $table->boolean('isActive')->default(false);
             $table->timestamps();
         });
 
         Schema::create('candidates', function (Blueprint $table) {
             $table->id();
             
-            $table->foreign('event_id')->constrained('events')->onDelete('cascade');
+            $table->foreignId('event_id')->constrained('events')->onDelete('cascade');
 
             $table->string("fullname")->default("no name");
             $table->string("group")->default("none");
@@ -31,7 +32,7 @@ return new class extends Migration
         Schema::create('challenges', function (Blueprint $table) {
             $table->id();
 
-            $table->foreign('event_id')->constrained('events')->onDelete('cascade');
+            $table->foreignId('event_id')->constrained('events')->onDelete('cascade');
 
             $table->string("title")->default("A Challenge")->nullable(false);
             $table->text("description");
@@ -44,8 +45,6 @@ return new class extends Migration
 
         Schema::create('submissions', function (Blueprint $table) {
             $table->id();
-
-            $table->foreign('event_id')->constrained('events')->onDelete('cascade');
 
             $table->foreignId('candidate_id')->constrained('candidates')->onDelete('cascade');
             $table->foreignId('challenge_id')->constrained('challenges')->onDelete('cascade');

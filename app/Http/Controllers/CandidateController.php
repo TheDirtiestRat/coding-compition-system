@@ -35,7 +35,7 @@ class CandidateController extends Controller
         $candidate = Candidates::where('user_id', $user->id)->first();
 
         $baseQuery = fn($difficulty) =>
-            Challenges::where('challenges.difficulty', $difficulty)
+            Challenges::where('challenges.difficulty', $difficulty)->where('challenges.event_id',$candidate->event_id)  
                 ->leftJoin('submissions', function ($join) use ($candidate) {
                     $join->on('submissions.challenge_id', '=', 'challenges.id')
                         ->where('submissions.candidate_id', '=', $candidate->id);
@@ -92,7 +92,7 @@ class CandidateController extends Controller
         $candidate = Candidates::where('user_id', $user->id)->first();
 
         if ($challenge_id >= 0) {
-            $details = Challenges::query()
+            $details = Challenges::query()->where('challenges.event_id',$candidate->event_id)
                 ->leftJoin('submissions', function ($join) use ($candidate) {
                     $join->on('submissions.challenge_id', '=', 'challenges.id')
                         ->where('submissions.candidate_id', '=', $candidate->id);
@@ -112,7 +112,7 @@ class CandidateController extends Controller
                 ->first();
 
             // $total_challenges = Challenges::count();
-            $next_id = Challenges::where('id', '>', $challenge_id)->first('id');
+            $next_id = Challenges::where('id', '>', $challenge_id)->where('challenges.event_id',$candidate->event_id)->first('id');
             if ($next_id == null) {
                 $next_id = Challenges::orderBy('id', 'asc')->first('id');
             }
@@ -160,6 +160,7 @@ class CandidateController extends Controller
             'challenge_id' => 'required|string',
             'code' => 'required|string',
         ]);
+
         $challenge_id = $request->input('challenge_id');
         $challenge = Challenges::find($challenge_id);
 
