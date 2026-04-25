@@ -25,79 +25,13 @@
         document.addEventListener("DOMContentLoaded", () => {
             let rafId = null;
             let endTime = null;
+            let isTime = false;
 
             const countdown = document.getElementById("countdown");
 
-            function tick() {
-                if (!endTime) return;
-
-                const remaining = Math.max(0, endTime - Date.now());
-
-                countdown.innerText = convertNumberToTimeString(remaining);
-
-                if (remaining > 0) {
-                    rafId = requestAnimationFrame(tick);
-                }
-            }
-
-            function convertNumberToTimeString(time) {
-                const totalSeconds = Math.floor(time / 1000);
-                const hours = Math.floor(totalSeconds / 3600) || 0;
-                const minutes = Math.floor((totalSeconds % 3600) / 60) || 0;
-                const seconds = totalSeconds % 60 || 0;
-
-                return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-            }
-
-            function displayPaused(remainingTimeInMs) {
-                const remainingTimeInTimeStr = convertNumberToTimeString(remainingTimeInMs)
-                endTime = null;
-                countdown.innerText = remainingTimeInTimeStr;
-                tick();
-            }
-
-            function startCountdown(endTimeInMs) {
-                endTime = endTimeInMs;
-                tick();
-            }
-
-            function resetCountdown() {
-                endTime = null;
-                tick();
-            }
-
-            // auto-sync on page load
-            fetch('/countdown')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.endTime) {
-                        startCountdown(data.endTime)
-                    } else if (data.remainingMs) {
-                        displayPaused(data.remainingMs)
-                    }
-                });
-
-            Echo.channel('countdown')
-                .listen('CountdownEvent', (e) => {
-                    switch (e.type) {
-                        case 'paused':
-                            displayPaused(e.data.remainingMs)
-                            break;
-                        case 'start':
-                            startCountdown(e.data.endTime)
-                            break;
-                        case 'resumed':
-                            startCountdown(e.data.endTime)
-                            break;
-                        case 'reset':
-                            resetCountdown()
-                            break;
-                    }
-                });
-
             // get the current time
             function getCurrentTime() {
-                return fetch('/admin/timer/get_timer', {
+                return fetch('/timer/get_timer', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -165,6 +99,73 @@
                     .map(v => String(v).padStart(2, '0'))
                     .join(':');
             }
+
+            // function tick() {
+            //     if (!endTime) return;
+
+            //     const remaining = Math.max(0, endTime - Date.now());
+
+            //     countdown.innerText = convertNumberToTimeString(remaining);
+
+            //     if (remaining > 0) {
+            //         rafId = requestAnimationFrame(tick);
+            //     }
+            // }
+
+            // function convertNumberToTimeString(time) {
+            //     const totalSeconds = Math.floor(time / 1000);
+            //     const hours = Math.floor(totalSeconds / 3600) || 0;
+            //     const minutes = Math.floor((totalSeconds % 3600) / 60) || 0;
+            //     const seconds = totalSeconds % 60 || 0;
+
+            //     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+            // }
+
+            // function displayPaused(remainingTimeInMs) {
+            //     const remainingTimeInTimeStr = convertNumberToTimeString(remainingTimeInMs)
+            //     endTime = null;
+            //     countdown.innerText = remainingTimeInTimeStr;
+            //     tick();
+            // }
+
+            // function startCountdown(endTimeInMs) {
+            //     endTime = endTimeInMs;
+            //     tick();
+            // }
+
+            // function resetCountdown() {
+            //     endTime = null;
+            //     tick();
+            // }
+
+            // // auto-sync on page load
+            // fetch('/countdown')
+            //     .then(res => res.json())
+            //     .then(data => {
+            //         if (data.endTime) {
+            //             startCountdown(data.endTime)
+            //         } else if (data.remainingMs) {
+            //             displayPaused(data.remainingMs)
+            //         }
+            //     });
+
+            // Echo.channel('countdown')
+            //     .listen('CountdownEvent', (e) => {
+            //         switch (e.type) {
+            //             case 'paused':
+            //                 displayPaused(e.data.remainingMs)
+            //                 break;
+            //             case 'start':
+            //                 startCountdown(e.data.endTime)
+            //                 break;
+            //             case 'resumed':
+            //                 startCountdown(e.data.endTime)
+            //                 break;
+            //             case 'reset':
+            //                 resetCountdown()
+            //                 break;
+            //         }
+            //     });
 
             // setInterval(async () => {
             //     const timer = await getCurrentTime();
