@@ -112,26 +112,80 @@
                     });
             }
 
+            // gets the server timer
             setInterval(async () => {
+                startTimer();
+            }, 6000);
+
+            async function startTimer() {
                 const timer = await getCurrentTime();
-                let countdownTimer = timer['curTimeInMils'];
-                let endTime = timer['endTimeInMils'];
+                countdownTimer = timer['curTimeInMils'];
+                endTime = timer['endTimeInMils'];
+                isTime = timer['isTime'];
 
-                // console.log({
-                //     "curr" : countdownTimer,
-                //     "end" : endTime,
-                //     "time?" : timer['isTime'],
-                // });
+                // const remaining = Math.max(0, endTime - countdownTimer) * 1000;
+                console.log("calling the server for time?");
 
-                const remaining = Math.max(0, endTime - countdownTimer) * 1000;
-                // console.log(remaining);
-
-                if (timer['isTime'] == false) {
-                    countdown.innerText = convertNumberToTimeString(remaining);
-                } else {
-                    countdown.innerText = "Time!!"
+                if (isTime == true) {
+                    // countdown.innerText = convertNumberToTimeString(remaining);
+                    countdown.innerText = "!00:00:00!";
+                    console.log("the server is now time!");
                 }
+            }
+
+            // update the clients timer
+            setInterval(() => {
+                if (isTime) {
+                    return;
+                }
+                // Date.now() is the cleanest way to get the current timestamp in ms
+                const nowMs = Date.now();
+                const endTimeMs = endTime * 1000;
+
+                // Calculate the difference (remaining time in milliseconds)
+                const remaining = Math.max(0, endTimeMs - nowMs);
+
+                // Update the display
+                countdown.innerText = formatHMS(remaining);
+
             }, 1000);
+
+            /**
+             * Formats milliseconds into a clean H:M:S string
+             */
+            function formatHMS(ms) {
+                const totalSeconds = Math.floor(ms / 1000);
+
+                const h = Math.floor(totalSeconds / 3600);
+                const m = Math.floor((totalSeconds % 3600) / 60);
+                const s = totalSeconds % 60;
+
+                // Returns "HH:MM:SS"
+                return [h, m, s]
+                    .map(v => String(v).padStart(2, '0'))
+                    .join(':');
+            }
+
+            // setInterval(async () => {
+            //     const timer = await getCurrentTime();
+            //     let countdownTimer = timer['curTimeInMils'];
+            //     let endTime = timer['endTimeInMils'];
+
+            //     // console.log({
+            //     //     "curr" : countdownTimer,
+            //     //     "end" : endTime,
+            //     //     "time?" : timer['isTime'],
+            //     // });
+
+            //     const remaining = Math.max(0, endTime - countdownTimer) * 1000;
+            //     // console.log(remaining);
+
+            //     if (timer['isTime'] == false) {
+            //         countdown.innerText = convertNumberToTimeString(remaining);
+            //     } else {
+            //         countdown.innerText = "Time!!"
+            //     }
+            // }, 4000);
         });
     </script>
 </body>

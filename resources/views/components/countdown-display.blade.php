@@ -7,6 +7,7 @@
     document.addEventListener("DOMContentLoaded", () => {
         let rafId = null;
         let endTime = null;
+        let time_remaining = "";
 
         const countdownDisplay = document.getElementById("countdownDisplay");
         countdownDisplay.hidden = true; // Hide countdown by default
@@ -53,24 +54,28 @@
                 });
         }
 
-        // const interID = setInterval(async () => {
-        //     const timer = await getCurrentTime();
-        //     let countdownTimer = timer['curTimeInMils'];
-        //     let endTime = timer['endTimeInMils'];
+        const interID = setInterval(async () => {
+            const timer = await getCurrentTime();
+            let countdownTimer = timer['curTimeInMils'];
+            let endTime = timer['endTimeInMils'];
 
-        //     const remaining = Math.max(0, endTime - countdownTimer) * 1000;
+            const remaining = Math.max(0, endTime - countdownTimer) * 1000;
 
-        //     if (timer['isTime'] == false) {
-        //         countdown.innerText = convertNumberToTimeString(remaining);
-        //         countdownDisplay.hidden = false;
-        //     } else {
-        //         countdown.innerText = "Time!!";
-        //         countdownDisplay.hidden = true;
-        //         if (window.location.href != ( "http://"+ (window.location.hostname + ':' + window.location.port + '/code-problems'))) {
-        //             window.location.href = "/competition-ended";
-        //         }
-        //     }
-        // }, 1000);
+            if (timer['isTime'] == false) {
+                // countdown.innerText = convertNumberToTimeString(remaining);
+                time_remaining = convertNumberToTimeString(remaining);
+                countdownDisplay.hidden = false;
+            } else {
+                countdown.innerText = "Time!!";
+                countdownDisplay.hidden = true;
+                if (window.location.href != ( "http://"+ (window.location.hostname + ':' + window.location.port + '/code-problems'))) {
+                    window.location.href = "/competition-ended";
+                }
+            }
+        }, 8000);
+
+        // perform tick timer in client side
+        setInterval((countdown.innerText = time_remaining) => {}, 1000);
 
         function displayPaused(remainingTimeInMs) {
             const remainingTimeInTimeStr = convertNumberToTimeString(remainingTimeInMs)
