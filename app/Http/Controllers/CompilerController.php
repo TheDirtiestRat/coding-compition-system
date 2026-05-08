@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Symfony\Component\Process\Process;
 use Illuminate\Support\Facades\File; // Add this use statement
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
+use Illuminate\Support\Str;
 
 class CompilerController extends Controller
 {
@@ -94,6 +96,50 @@ class CompilerController extends Controller
                 $sourceFile,
                 $classFileDir . '/' . $className . '.class'
             ]);
+        }
+    }
+
+    public function run_java_code_unique(Request $request)
+    {
+        $code = $request->input('code');
+        $executionTimeout = 5;
+
+        // 1. Create a unique workspace for this specific execution
+        $uniqueId = Str::random(10);
+        $tempDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'java_exec_' . $uniqueId;
+        File::makeDirectory($tempDir);
+
+        $className = 'Main';
+        $sourceFile = $tempDir . DIRECTORY_SEPARATOR . $className . '.java';
+
+        $path_to_javac = 'C:\Program Files\Java\jdk-23\bin\javac.exe';
+        $path_to_java = 'C:\Program Files\Java\jdk-23\bin\java.exe';
+
+        try {
+            File::put($sourceFile, $code);
+
+            // 2. Compilation
+            $compileProcess = new Process([$path_to_javac, $className . '.java'], $tempDir);
+            $compileProcess->setTimeout($executionTimeout);
+            $compileProcess->run();
+
+            if (!$compileProcess->isSuccessful()) {
+                return response()->json(['error' => "Compilation Error:\n" . $compileProcess->getErrorOutput()], 400);
+            }
+
+            // 3. Execution
+            $runProcess = new Process([$path_to_java, '-cp', '.', $className], $tempDir);
+            $runProcess->setTimeout($executionTimeout);
+            $runProcess->run();
+
+            return response()->json(['output' => $runProcess->getOutput()]);
+        } catch (ProcessTimedOutException $e) {
+            return response()->json(['error' => "Process timed out (Max {$executionTimeout}s). Check for infinite loops!"], 408);
+        } catch (\Throwable $e) {
+            return response()->json(['error' => "Server Error: " . $e->getMessage()], 500);
+        } finally {
+            // 4. Clean up the entire unique directory
+            File::deleteDirectory($tempDir);
         }
     }
 

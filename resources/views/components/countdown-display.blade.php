@@ -36,30 +36,19 @@
         setInterval(async () => {
 
             startTimer();
-        }, 6000);
+        }, 8000);
 
         async function startTimer() {
             const timer = await getCurrentTime();
             countdownTimer = timer['curTimeInMils'];
             endTime = timer['endTimeInMils'];
             isTime = timer['isTime'];
-
-            // const remaining = Math.max(0, endTime - countdownTimer) * 1000;
-            // console.log("calling the server for time?");
-
-            // if (isTime == true) {
-            //     // countdown.innerText = convertNumberToTimeString(remaining);
-            //     countdown.innerText = "!00:00:00!";
-            //     console.log("the server is now time!");
-            //     countdownDisplay.hidden = true;
-
-            // }
         }
 
         // update the clients timer
         setInterval(() => {
             if (isTime) {
-                countdownDisplay.hidden = true;
+                // countdownDisplay.hidden = true;
                 competitionComplete();
                 return;
             }
@@ -72,7 +61,7 @@
 
             // Update the display
             countdown.innerText = formatHMS(remaining);
-            countdownDisplay.hidden = false;
+            // countdownDisplay.hidden = false;
         }, 1000);
 
         /**
@@ -98,6 +87,19 @@
         }
 
         startTimer();
+        getCurrentTime();
+        countdownDisplay.hidden = true;
+
+        // const remaining = Math.max(0, endTime - countdownTimer) * 1000;
+        // console.log("calling the server for time?");
+
+        // if (isTime == true) {
+        //     // countdown.innerText = convertNumberToTimeString(remaining);
+        //     countdown.innerText = "!00:00:00!";
+        //     console.log("the server is now time!");
+        //     countdownDisplay.hidden = true;
+
+        // }
 
         // function tick() {
         //     if (!endTime) return;

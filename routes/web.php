@@ -107,7 +107,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/get-challenge-details/{id}', [CandidateController::class, 'get_challenge_details']);
 
     // to run server side code on my server device
-    Route::post('/run-java-code', [CompilerController::class, 'run_java_code']);
+    Route::post('/run-java-code', [CompilerController::class, 'run_java_code_unique']);
+    // Route::post('/run-java-code', [CompilerController::class, 'run_java_code']);
     Route::post('/run-python-code', [CompilerController::class, 'run_python_code']);
 
     Route::post('/timer/get_timer', [AdminCountdownController::class, 'get_timer']);
