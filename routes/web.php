@@ -45,6 +45,7 @@ Route::middleware('auth')->group(function () {
     // admin side pages
     Route::middleware('is.admin')->group(function () {
         Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
+        Route::get('/admin/results', [AdminController::class, 'results']);
         Route::get('/admin/events', [AdminController::class, 'events']);
         Route::get('/admin/candidates', [AdminController::class, 'candidates']);
         Route::get('/admin/challenges', [AdminController::class, 'challenges']);

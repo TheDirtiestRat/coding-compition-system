@@ -59,6 +59,49 @@ class AdminController extends Controller
         return view('admin.dashbaord', compact('candidates'));
     }
 
+    public function results()
+    {
+        // gets the list of candidates with their total points
+        $candidates =
+            Candidates::leftJoin('submissions', 'candidates.id', '=', 'submissions.candidate_id')
+            ->select(
+                'candidates.*',
+                DB::raw('COALESCE(SUM(submissions.score), 0) as total_score'),
+            )
+            ->groupBy(
+                'candidates.id',
+                'candidates.fullname',
+                'candidates.group',
+                'candidates.user_id',
+                'candidates.created_at',
+                'candidates.updated_at',
+            )
+            ->orderByDesc('total_score')
+            ->get();
+
+        $previousPoints = null;
+        $currentRank = 0;
+        $actualCount = 0;
+
+        $rankedCandidates = $candidates->sortByDesc('total_points')
+            ->values()
+            ->map(function ($candidate) use (&$previousPoints, &$currentRank, &$actualCount) {
+                $actualCount++;
+
+                // If points are different from the last person, update the rank to the current count
+                if ($candidate->total_points !== $previousPoints) {
+                    $currentRank = $actualCount;
+                }
+
+                $candidate->rank = $currentRank;
+                $previousPoints = $candidate->total_points;
+
+                return $candidate;
+            });
+
+        return view('pages.results', compact('candidates'));
+    }
+
     public function events()
     {
         $events = DB::table('events')->get('*');

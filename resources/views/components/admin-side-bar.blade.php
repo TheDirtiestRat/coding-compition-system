@@ -120,10 +120,11 @@
                     </button>
                 </a>
             </li>
-            {{-- <li class="basis-auto">
-                <a href="{{ url('admin/options') }}">
+
+            <li class="basis-auto">
+                <a href="{{ url('admin/results') }}" target="_blank">
                     <button class="is-drawer-close:tooltip is-drawer-close:tooltip-right flex items-center gap-3 h-8"
-                        data-tip="Options">
+                        data-tip="Results">
                         <!-- Settings icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -139,10 +140,10 @@
                             <path d="M4 18l11 0" />
                             <path d="M19 18l1 0" />
                         </svg>
-                        <span class="is-drawer-close:hidden">Options</span>
+                        <span class="is-drawer-close:hidden">Results</span>
                     </button>
                 </a>
-            </li> --}}
+            </li>
         </ul>
     </div>
 </div>
