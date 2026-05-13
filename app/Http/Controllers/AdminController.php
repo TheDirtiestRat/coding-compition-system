@@ -7,6 +7,7 @@ use App\Models\Candidates;
 use App\Models\Challenges;
 use App\Models\Submissions;
 use App\Models\User;
+use App\Models\Events;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -285,7 +286,8 @@ class AdminController extends Controller
 
     public function challenges()
     {
-        $challenges = Challenges::latest()->get();
+        $event = Events::where('isActive', true)->first();
+        $challenges = Challenges::where('challenges.event_id', "=", $event->id)->latest()->get();
         $last_id = Challenges::latest()->first('id');
         $events = DB::table('events')->get();
 

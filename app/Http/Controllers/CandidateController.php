@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Challenges;
 use App\Models\Candidates;
 use App\Models\SolvedChallenges;
+use App\Models\Events;
 use App\Models\Submissions;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -90,6 +91,7 @@ class CandidateController extends Controller
     {
         $user = Auth::user();
         $candidate = Candidates::where('user_id', $user->id)->first();
+        $event = Events::where('isActive', true)->first();
 
         if ($challenge_id >= 0) {
             $details = Challenges::query()->where('challenges.event_id',$candidate->event_id)
@@ -112,10 +114,15 @@ class CandidateController extends Controller
                 ->first();
 
             // $total_challenges = Challenges::count();
-            $next_id = Challenges::where('id', '>', $challenge_id)->where('challenges.event_id',$candidate->event_id)->first('id');
+            $next_id = Challenges::where('id', ">", $challenge_id)->where('challenges.event_id', "=", $event->id)->first('id');
             if ($next_id == null) {
-                $next_id = Challenges::orderBy('id', 'asc')->first('id');
+                // $next_id = Challenges::where('challenges.event_id', "=", $event->id)->orderBy('id', 'asc')->first('id');
+                return redirect('/code-problems');
             }
+
+            // if ($next_id->id == null) {
+            //     return redirect('/code-problems');
+            // }
             $next_challenge_id = $next_id->id;
             
             // $challenge_exist = Challenges::where('id', '=', $next_challenge_id)->first('id');
