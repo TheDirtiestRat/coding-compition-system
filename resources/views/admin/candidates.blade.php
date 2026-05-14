@@ -171,7 +171,8 @@
                 {{-- list --}}
                 <div class="grid grid-cols-3 gap-3 mt-3">
                     @foreach ($solved_challenges as $challenges)
-                        <div class="bg-base-300 h-fit rounded-2xl p-4 hover:bg-base-200 hover:cursor-grab">
+                        <div class="bg-base-300 h-fit rounded-2xl p-4 hover:bg-base-200 hover:cursor-grab"
+                            onclick="show_code_solutions({{ $challenges->id }})">
                             <div class="flex flex-row justify-between items-center mb-1">
                                 <p class="badge badge-xs badge-primary">{{ $challenges->difficulty }}</p>
                                 <p class="badge badge-xs badge-primary">Points: {{ $challenges->score }} /
@@ -185,6 +186,29 @@
             </div>
         </div>
     @endisset
+
+    {{-- modal --}}
+    <dialog id="code_modal" class="modal">
+        <div class="modal-box w-11/12 max-w-5xl">
+            <h3 class="text-lg font-bold">Code Output</h3>
+            <p class="basis-full bg-base-300 p-3 rounded-xl w-full whitespace-pre-wrap break-all mb-2"
+                id="code_instruction">
+                Instructions Code sits here...
+            </p>
+            <div class="grid grid-cols-2 gap-3 h-full">
+                <p class="basis-full bg-base-300 p-3 rounded-xl w-full whitespace-pre-wrap break-all font-mono"
+                    id="candidate_code">
+                    Candidates Code sits here...
+                </p>
+                <p class="basis-full p-3 rounded-xl w-full whitespace-pre-wrap break-all font-mono" id="solution_code">
+                    Solution Code sits here...
+                </p>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
 @endsection
 
 @section('admin-scripts')
@@ -203,6 +227,30 @@
             can_username.value = username;
 
             edit_tab.checked = true;
+        }
+
+        function show_code_solutions(no_id = 0) {
+            const modal = document.getElementById("code_modal");
+            // const problem_no = document.getElementById("problem_id");
+            const code_info = document.getElementById("code_instruction");
+            const code_input = document.getElementById("candidate_code");
+            const code_output = document.getElementById("solution_code");
+
+            fetch("/admin/get-candidates-codes/" + no_id) // Assumes you have this API route set up in Laravel
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log("Dynamic data:", data);
+                    // Update the DOM with the fetched data
+                    // console.log(challenge_data)
+                    // problem_no.innerText = no_id;
+                    code_input.innerText = data['code'];
+                    code_output.innerText = data['code_solution'];
+                    code_info.innerText = data['description'];
+
+                    // modal.showModal()
+                    modal.showModal();
+
+                });
         }
     </script>
 @endsection

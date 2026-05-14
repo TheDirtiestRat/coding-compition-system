@@ -114,7 +114,7 @@ class CandidateController extends Controller
                 ->first();
 
             // $total_challenges = Challenges::count();
-            $next_id = Challenges::where('id', ">", $challenge_id)->where('challenges.event_id', "=", $event->id)->first('id');
+            $next_id = Challenges::where('id', ">=", $challenge_id)->where('challenges.event_id', "=", $event->id)->first('id');
             if ($next_id == null) {
                 // $next_id = Challenges::where('challenges.event_id', "=", $event->id)->orderBy('id', 'asc')->first('id');
                 return redirect('/code-problems');
@@ -123,7 +123,7 @@ class CandidateController extends Controller
             // if ($next_id->id == null) {
             //     return redirect('/code-problems');
             // }
-            $next_challenge_id = $next_id->id;
+            $next_challenge_id = $next_id->id + 1;
             
             // $challenge_exist = Challenges::where('id', '=', $next_challenge_id)->first('id');
 

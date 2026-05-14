@@ -24,6 +24,7 @@ class SubmissionsController extends Controller
                 'challenges.difficulty as challenge_difficulty',
                 'challenges.language as challenge_language',
                 'challenges.code_solution',
+                'challenges.description',
             )
             ->first();
 

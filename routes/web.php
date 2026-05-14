@@ -60,6 +60,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin/add-candidate', [AdminController::class, 'add_candidate']);
         Route::post('/admin/update-candidate', [AdminController::class, 'update_candidate']);
         Route::delete('/admin/delete-candidate/{candidate_id}', [AdminController::class, 'delete_candidate']);
+        Route::get('/admin/get-candidates-codes/{id}', [AdminController::class, 'get_candidate_codes']);
 
         Route::get('/admin/api/get-challenge-details/{id}', [AdminController::class, 'get_challenge_details']);
         Route::post('/admin/save-challenge', [AdminController::class, 'save_challenge']);

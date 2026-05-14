@@ -30,30 +30,37 @@
 
     {{-- Main Content --}}
     <div class="flex gap-3 w-full">
-        @include('components.submission-placeholder')
-        @include('components.submission-display')
-
-        {{-- Code Solution --}}
-        <div class="basis-full flex flex-col shadow rounded-xl">
-            <div class="basis-auto bg-base-100 px-3 p-2 flex gap-2 rounded-t-xl">
-                <p class="text-xl basis-full">Challenge Code Solution</p>
-                <p id="solutionLanguage" class="text-gray-400 font-mono"></p>
+        <div class="flex flex-col w-full gap-3">
+            {{-- Code Instruction --}}
+            <div class="basis-auto bg-base-100 px-3 p-2 flex flex-col gap-2 rounded-xl">
+                <p class="text-xl basis-full">Challenge Description</p>
+                <p id="solutionInstruction" class="text-gray-400 w-full whitespace-pre-wrap break-all"></p>
             </div>
-            <div id="solutionEditor" class="h-[500px]"></div>
-            <div class="basis-auto bg-base-100 px-3 p-2 flex gap-2 rounded-b-xl">
-                <span class="text-gray-400 mb-2">
-                    the challenge solution code will appear here...
-                </span>
+
+            <div class="basis-full flex flex-row gap-3">
+                @include('components.submission-placeholder')
+                @include('components.submission-display')
+
+                {{-- Code Solution --}}
+                <div class="basis-full flex flex-col shadow rounded-xl">
+
+
+                    <div class="basis-auto bg-base-100 px-3 p-2 flex gap-2 rounded-t-xl">
+                        <p class="text-xl basis-full">Challenge Code Solution</p>
+                        <p id="solutionLanguage" class="text-gray-400 font-mono"></p>
+                    </div>
+                    <div id="solutionEditor" class="h-[500px]"></div>
+                    <div class="basis-auto bg-base-100 px-3 p-2 flex gap-2 rounded-b-xl">
+                        <span class="text-gray-400 mb-2">
+                            the challenge solution code will appear here...
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
-        {{-- <div class="basis-full bg-base-100 rounded-xl p-3">
-            <p class="text-2xl mb-2">Challenge Code Solution</p>
 
-            <div class="bg-gray-900 rounded-lg p-4">
-                <p id="solutionLanguage" class="text-gray-400 text-sm font-mono mb-2"></p>
-                <div id="solutionEditor" class="h-[500px]"></div>
-            </div>
-        </div> --}}
+
+
     </div>
 
     {{-- Score Section --}}
@@ -66,7 +73,8 @@
             <button class="btn btn-sm btn-primary ml-4">Submit</button>
         </form>
 
-        <div id="code_output_area" class="basis-full bg-gray-400 p-3 rounded-xl w-full font-mono whitespace-pre-wrap break-all">Code Output:</div>
+        <div id="code_output_area"
+            class="basis-full bg-gray-400 p-3 rounded-xl w-full font-mono whitespace-pre-wrap break-all">Code Output:</div>
     </div>
 
     {{-- Submissions --}}
@@ -106,6 +114,7 @@
                 scoreInput: document.getElementById('scoreInput'),
                 maxPointsLabel: document.getElementById('maxPointsLabel'),
                 solutionLanguage: document.getElementById('solutionLanguage'),
+                solutionInstruction: document.getElementById('solutionInstruction'),
             };
 
             // -----------------------------
@@ -160,6 +169,8 @@
                 el.challengeTitle.textContent = submission.challenge_title;
                 el.submittedAt.textContent = submission.submitted_at;
                 el.solutionLanguage.textContent = submission.challenge_language;
+
+                el.solutionInstruction.textContent = submission.description;
 
                 submissionEditor.setValue(submission.code);
                 solutionEditor.setValue(submission.code_solution);

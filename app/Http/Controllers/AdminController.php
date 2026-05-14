@@ -111,11 +111,11 @@ class AdminController extends Controller
 
     public function candidates()
     {
-        $candidates = Candidates::join('events','candidates.event_id', "=", "events.id")->with('user')->get();
+        $candidates = Candidates::join('events', 'candidates.event_id', "=", "events.id")->with('user')->get();
         // dd($candidates);
         $events = DB::table('events')->get();
 
-        return view('admin.candidates', compact('candidates','events'));
+        return view('admin.candidates', compact('candidates', 'events'));
     }
 
     public function submissions()
@@ -151,6 +151,7 @@ class AdminController extends Controller
                 'challenges.points as max_points',
                 'challenges.difficulty as challenge_difficulty',
                 'challenges.language as challenge_language',
+                'challenges.description',
             )
             ->orderByDesc('submitted_at')
             ->get();
@@ -210,7 +211,7 @@ class AdminController extends Controller
         ]);
 
         try {
-            $event = DB::table('events')->where('id','=',$validatedData['event_id'])->update([
+            $event = DB::table('events')->where('id', '=', $validatedData['event_id'])->update([
                 'title' => $validatedData['edit_title'],
                 'updated_at' => Carbon::now(),
             ]);
@@ -304,8 +305,9 @@ class AdminController extends Controller
         $candidate = Candidates::where('id', '=', $candidate_id)->first();
         $can_name = Candidates::select('fullname')->where('id', '=', $candidate_id)->first();
         $user_acc = User::findOr($candidate->user_id);
+        $events = Events::select()->get();
 
-        $solved_challenges = Challenges::select('challenges.id', 'challenges.title', 'challenges.points', 'challenges.language', 'challenges.difficulty', 'challenges.created_at', 'submissions.challenge_id', 'submissions.score')->join('submissions', function ($join) use ($candidate) {
+        $solved_challenges = Challenges::select('submissions.id', 'challenges.title', 'challenges.points', 'challenges.language', 'challenges.difficulty', 'challenges.created_at', 'submissions.challenge_id', 'submissions.score')->join('submissions', function ($join) use ($candidate) {
             $join->on('submissions.challenge_id', '=', 'challenges.id')
                 ->where('submissions.candidate_id', '=', $candidate->id);
         })
@@ -315,7 +317,18 @@ class AdminController extends Controller
 
         $candidates = Candidates::with('user')->latest()->get();
 
-        return view('admin.candidates', compact('candidates', 'solved_challenges', 'can_name', 'user_acc'));
+        return view('admin.candidates', compact('candidates', 'solved_challenges', 'can_name', 'user_acc', 'events'));
+    }
+
+    public function get_candidate_codes(string $id)
+    {
+        $code_solutions = Submissions::where('submissions.id', $id)
+            ->join('challenges', 'submissions.challenge_id', '=', 'challenges.id')
+            ->select('submissions.code', 'challenges.code_solution', 'challenges.description')
+            ->first();
+        // $code_solutions = Submissions::select()->where('id', "=", $id)->join('challenges','submissions.challenge_id', "=", "challenges.id")->get()->first();
+        // $result = $challenge->to->toJson(JSON_PRETTY_PRINT);
+        return response()->json($code_solutions);
     }
 
     public function delete_candidate(string $candidate_id)
