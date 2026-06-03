@@ -61,13 +61,14 @@ class AdminController extends Controller
 
     public function results()
     {
+        $active_event = Events::select()->where("isActive", "=", true)->get()->first();
         // gets the list of candidates with their total points
         $candidates =
             Candidates::leftJoin('submissions', 'candidates.id', '=', 'submissions.candidate_id')
             ->select(
                 'candidates.*',
                 DB::raw('COALESCE(SUM(submissions.score), 0) as total_score'),
-            )
+            )->where('event_id','=',$active_event->id)
             ->groupBy(
                 'candidates.id',
                 'candidates.fullname',
@@ -111,7 +112,9 @@ class AdminController extends Controller
 
     public function candidates()
     {
-        $candidates = Candidates::join('events', 'candidates.event_id', "=", "events.id")->with('user')->get();
+        $active_event = Events::select()->where("isActive", "=", true)->get()->first();
+        $candidates = Candidates::select()->where('event_id','=',$active_event->id)->with('user')->get();
+        // $candidates = Candidates::join('events', 'candidates.event_id', "=", $active_event->id)->with('user')->get();
         // dd($candidates);
         $events = DB::table('events')->get();
 
