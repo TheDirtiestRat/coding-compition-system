@@ -8,11 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Candidates extends Model
 {
     use HasFactory;
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+
     protected $fillable = [
         'event_id',
         'fullname',
@@ -22,11 +18,16 @@ class Candidates extends Model
 
     public function user()
     {
-        return $this->belongsTo(\App\Models\User::class);
+        return $this->belongsTo(User::class);
     }
 
-    public function events()
-{
-    return $this->belongsTo(\App\Models\Events::class);
-}
+    public function event()
+    {
+        return $this->belongsTo(Events::class, 'event_id');
+    }
+
+    public function submissions()
+    {
+        return $this->hasMany(Submissions::class, 'candidate_id');
+    }
 }

@@ -1,8 +1,18 @@
 @props(['challenge'])
 
 @php
-    $statusStyles = match ($challenge->status) {
-        'reviewed' => [
+    $canSolve = $competition_started ?? true;
+
+    $statusStyles = match (true) {
+        !$canSolve => [
+            'card' => 'border border-base-300 opacity-60',
+            'badge' => 'badge',
+            'badgeLabel' => 'Locked',
+            'button' => 'btn-neutral',
+            'label' => 'Not Available',
+            'clickable' => false,
+        ],
+        $challenge->status === 'reviewed' => [
             'card' => 'border border-success bg-success/5',
             'badge' => 'badge-success',
             'badgeLabel' => 'Reviewed',
@@ -10,7 +20,7 @@
             'label' => 'Reviewed',
             'clickable' => true,
         ],
-        'submitted' => [
+        $challenge->status === 'submitted' => [
             'card' => 'border border-warning bg-warning/5',
             'badge' => 'badge-warning',
             'badgeLabel' => 'Submitted',
@@ -42,6 +52,19 @@
         </span>
     </div>
 
+    @if ($challenge->relationLoaded('photos') && $challenge->photos->isNotEmpty())
+        <div class="flex gap-1 overflow-x-auto">
+            @foreach ($challenge->photos->take(3) as $photo)
+                <img src="{{ $photo->url ?? asset('storage/' . $photo->photo_path) }}" alt="Challenge photo" class="h-20 w-20 object-cover rounded-xl flex-shrink-0" />
+            @endforeach
+            @if ($challenge->photos->count() > 3)
+                <span class="text-sm text-gray-400 self-center">+{{ $challenge->photos->count() - 3 }} more</span>
+            @endif
+        </div>
+    @elseif ($challenge->photo ?? false)
+        <img src="{{ asset('storage/' . $challenge->photo) }}" alt="Challenge photo" class="h-32 w-full object-cover rounded-xl" />
+    @endif
+
     {{-- Score --}}
     <span class="text-sm mt-1">
         Score:
@@ -64,7 +87,7 @@
             </button>
         @endif
 
-        <button class="btn btn-ghost btn-sm" id="challenge_details_btn" value="{{ $challenge->id }}">
+        <button class="btn btn-ghost btn-sm challenge_details_btn" value="{{ $challenge->id }}">
             Details
         </button>
     </div>

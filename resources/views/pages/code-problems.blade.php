@@ -27,10 +27,9 @@
     <dialog id="my_modal_2" class="modal">
         <div class="modal-box w-[800px]">
             <h3 class="text-lg font-bold">Problem <span id="problem_id">99</span></h3>
-            <p class="py-3" id="problem_description">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quod neque
-                placeat error natus
-                maxime temporibus possimus voluptatem ea consectetur aut sapiente fugit illum ex totam porro eligendi dolor,
-                provident odio.</p>
+            <div id="problem_photo_container" class="hidden mt-2 flex flex-wrap gap-2">
+            </div>
+            <p class="py-3" id="problem_description">Loading...</p>
         </div>
         <form method="dialog" class="modal-backdrop">
             <button>close</button>

@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use App\Models\Candidates;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -14,13 +13,8 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
         User::factory()->create([
             'name' => 'Admin',
             'user_type' => 'admin',
@@ -28,13 +22,6 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('dunhillleal24'),
         ]);
 
-        // User::factory()->create([
-        //     'name' => 'User',
-        //     'email' => 'user@example.com',
-        //     'password' => Hash::make('user1'),
-        // ]);
-
-        // insert option values
         DB::table('options')->insert([
             'option_name' => 'start_compition',
             'option_datatype' => 'boolean',
@@ -50,14 +37,15 @@ class DatabaseSeeder extends Seeder
             'option_datatype' => 'text',
             'option_value' => '00:00:00'
         ]);
-
-        // Candidates::factory(5)->create();
-
-        // create the challenges
-        $this->call([
-            ChallengeSeeder::class,
+        DB::table('options')->insert([
+            'option_name' => 'registration_open',
+            'option_datatype' => 'boolean',
+            'option_value' => '0'
         ]);
 
-        
+        $this->call([
+            ChallengeSeeder::class,
+            ProgrammingLanguageSeeder::class,
+        ]);
     }
 }

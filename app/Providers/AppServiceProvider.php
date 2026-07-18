@@ -21,10 +21,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
         View::composer('*', function ($view) {
             $event = Events::where('isActive', true)->first();
-            $view->with('event_title', $event ? $event->title : 'Coding Competition');
+            $view->with('event_title', $event?->title ?? 'Coding Competition');
         });
     }
 }

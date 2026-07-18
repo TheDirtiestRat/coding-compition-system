@@ -6,13 +6,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class Events extends Model
 {
-    //
     protected $table = 'events';
 
     protected $fillable = [
         'title',
         'isActive',
     ];
+
+    public function candidates()
+    {
+        return $this->hasMany(Candidates::class, 'event_id');
+    }
+
+    public function challenges()
+    {
+        return $this->hasMany(Challenges::class, 'event_id');
+    }
 
     public static function getActiveEvent()
     {
@@ -21,6 +30,6 @@ class Events extends Model
 
     public static function getAllEvents()
     {
-        return self::get();
+        return self::all();
     }
 }

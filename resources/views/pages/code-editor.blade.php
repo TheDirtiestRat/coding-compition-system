@@ -4,8 +4,13 @@
 
 
     <!-- Hidden Fields hehe -->
-    <textarea hidden name="submittedCode" id="submittedCode">{{ $details->code }}</textarea>
+    <textarea hidden name="submittedCode" id="submittedCode">
+        @isset($details->code)
+            {{ $details->code }}
+        @endisset
+    </textarea>
 
+     @isset($details->code)
     @if ($details->status === 'submitted')
         <div role="alert" class="fixed bottom-4 left-4 z-50 max-w-sm alert alert-info shadow-lg flex items-center gap-3">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -39,6 +44,7 @@
             </p>
         </div>
     @endif
+    @endisset
 
     <div class="flex flex-col-reverse md:flex-row h-full w-full gap-4">
         {{-- LEFT: Editor --}}
@@ -51,13 +57,13 @@
                 </select>
 
                 <select class="select select-sm select-bordered basis-full" id="language-selector">
-                    <option value="java" selected>Java</option>
-                    {{-- <option value="python">Python</option> --}}
+                    <option value="">Loading...</option>
                 </select>
 
                 <button id="run_code_btn" class="btn btn-sm btn-primary w-[200px]">
                     Run
                 </button>
+                @isset($details)
                 @if ($details->status !== 'reviewed')
                     <button id="submit_code_btn" class="btn rounded-tr-xl btn-sm btn-secondary w-[200px]"
                         @isset($details)
@@ -65,6 +71,7 @@
                         Submit
                     </button>
                 @endif
+                @endisset
             </div>
 
             {{-- Editor --}}
@@ -79,18 +86,21 @@
         {{-- RIGHT: Problem & Output --}}
         <div class="flex flex-col w-full gap-1">
             {{-- Alerts --}}
+            @isset($details)
+                @if ($details->status === 'submitted')
+                    <div role="alert" class="alert alert-info shadow">
+                        <span>Your solution has been submitted for review. Please wait for the admin to score it.</span>
+                    </div>
+                @elseif ($details->status === 'reviewed')
+                    <div role="alert" class="alert alert-success shadow">
+                        <span>Your solution has been reviewed. Score: {{ $details->score }} / {{ $details->points }}</span>
+                    </div>
+                @endif
+            @endisset
+
             <div id="alert_container" class="w-full flex flex-col gap-2 mb-3 hidden">
-                <div role="alert" id="alert_success" class="alert alert-success shadow  hidden">
-                    <span id="success_alert_text">Code Verified! Points Added +999</span>
-                </div>
-
-                <div role="alert" id="alert_info" class="alert alert-info shadow hidden">
-                    <span id="info_alert_text">Information Alert Message</span>
-                </div>
-
-                <div role="alert" id="alert_error" class="alert alert-error shadow hidden">
-                    <span>Code Verification Failed.</span>
-                </div>
+                <div role="alert" id="alert_success" class="alert alert-success shadow hidden"></div>
+                <div role="alert" id="alert_error" class="alert alert-error shadow hidden"></div>
             </div>
             {{-- Problem details --}}
             <div class="card rounded-2xl bg-base-300 shadow-lg p-4 space-y-2">
@@ -122,6 +132,14 @@
                         </span>
                     </div>
 
+
+                    @if ($details->relationLoaded('photos') && $details->photos->isNotEmpty())
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            @foreach ($details->photos as $photo)
+                                <img src="{{ $photo->url ?? asset('storage/' . $photo->photo_path) }}" alt="Challenge photo" class="max-h-48 rounded-xl object-cover" />
+                            @endforeach
+                        </div>
+                    @endif
 
                     <div class="prose max-w-none text-base-content">
                         {!! nl2br(e($details->description)) !!}

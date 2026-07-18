@@ -90,18 +90,17 @@
                                 <td>{{ $event->title }}</td>
 
                                 <td>
-                                    <form action="{{ url('/admin/active-event/') }}" class="" method="POST">
+                                    <form action="{{ url('/admin/active-event/') }}" method="POST">
                                         @csrf
-                                        <input type="number" class="hidden" name="event_id" value="{{ $event->id }}" readonly/>
+                                        <input type="hidden" name="event_id" value="{{ $event->id }}" />
                                         @if ($event->isActive)
                                             <button type="submit" name="isActive" value="true"
                                                 class="btn btn-xs btn-success">Active</button>
                                         @else
-                                            <button type="submit" name="isActive" value="false"
-                                                class="btn btn-xs btn-secondary">Deactive</button>
+                                            <button type="submit" name="isActive" value="true"
+                                                class="btn btn-xs btn-secondary">Activate</button>
                                         @endif
                                     </form>
-
                                 </td>
                                 
                                 <td class="flex flex-row items-center justify-center gap-2">

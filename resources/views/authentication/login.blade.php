@@ -170,7 +170,8 @@
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                             </div>
-                            <input type="text" id="username" name="username" placeholder="Enter your username or email"
+                            <input type="text" id="username" name="username"
+                                placeholder="Enter your username or email"
                                 class="w-full pl-10 pr-4 py-3 border border-gray-700 rounded-lg focus:ring-2 bg-white text-gray-900 placeholder-gray-500 focus:ring-blue-900 focus:border-blue-500 transition duration-200 outline-none"
                                 value="{{ old('username') }}" />
                         </div>
@@ -232,32 +233,44 @@
                         @enderror
                     </div>
 
+
+
                     <!-- Login Button -->
                     <button type="submit"
                         class="w-full  bg-black hover:from-gray-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transition duration-200 transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                         Sign In
                     </button>
 
-                    <!-- Home Link -->
-                    <div class="mt-6 text-center">
-                        <a href="{{ url('/') }}"
-                            class="inline-flex items-center text-gray-600 hover:text-gray-900 font-medium transition duration-200">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
-                                </path>
-                            </svg>
-                            Go Home
-                        </a>
+                    <div class="mt-6 flex flex-row justify-between gap-2">
+                        {{-- Register Link --}}
+                        <div class="text-center">
+                            <a href="{{ url('/register') }}"
+                                class="inline-flex items-center text-gray-600 hover:text-gray-900 font-medium transition duration-200">
+                                Register User
+                            </a>
+                        </div>
+                        <!-- Home Link -->
+                        <div class="text-center">
+                            <a href="{{ url('/') }}"
+                                class="inline-flex items-center text-gray-600 hover:text-gray-900 font-medium transition duration-200">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                                    </path>
+                                </svg>
+                                Go Home
+                            </a>
+                        </div>
                     </div>
+
                 </form>
             </div>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             // Get password toggle elements
             const passwordInput = document.getElementById('password');
             const togglePasswordBtn = document.getElementById('togglePassword');
@@ -311,7 +324,7 @@
             passwordToggleBtn.addEventListener('click', togglePasswordVisibility);
 
             // Also allow toggling by pressing Enter on the toggle button
-            togglePasswordBtn.addEventListener('keypress', function (e) {
+            togglePasswordBtn.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     togglePasswordVisibility();
                 }
@@ -321,12 +334,12 @@
             const inputs = document.querySelectorAll('input');
             inputs.forEach(input => {
                 // Add focus effect
-                input.addEventListener('focus', function () {
+                input.addEventListener('focus', function() {
                     this.parentElement.classList.add('ring-2', 'ring-blue-100');
                 });
 
                 // Remove focus effect
-                input.addEventListener('blur', function () {
+                input.addEventListener('blur', function() {
                     this.parentElement.classList.remove('ring-2', 'ring-blue-100');
                 });
             });

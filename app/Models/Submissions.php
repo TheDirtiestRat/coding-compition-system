@@ -6,24 +6,34 @@ use Illuminate\Database\Eloquent\Model;
 
 class Submissions extends Model
 {
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
     protected $table = 'submissions';
 
     protected $fillable = [
-        'event_id',
         'candidate_id',
         'challenge_id',
         'score',
         'code',
-        'is_score_submitted'
+        'is_score_submitted',
+        'test_case_results',
+        'is_auto_reviewed',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_score_submitted' => 'boolean',
+            'is_auto_reviewed' => 'boolean',
+            'test_case_results' => 'array',
+        ];
+    }
 
     public function challenge()
     {
         return $this->belongsTo(Challenges::class, 'challenge_id');
+    }
+
+    public function candidate()
+    {
+        return $this->belongsTo(Candidates::class, 'candidate_id');
     }
 }

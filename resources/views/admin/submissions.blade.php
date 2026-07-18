@@ -63,6 +63,12 @@
 
     </div>
 
+    {{-- Test Case Results --}}
+    <div id="test_case_results_container" hidden class="bg-base-100 rounded-xl mt-3 p-3 flex flex-col gap-2">
+        <p class="text-lg font-medium">Test Case Results</p>
+        <div id="test_case_results_list" class="flex flex-col gap-2"></div>
+    </div>
+
     {{-- Score Section --}}
     <div id="scoreSection" hidden class="bg-base-100 rounded-xl mt-3 p-3 flex flex-row gap-3">
         <form id="scoreForm" class="flex items-center gap-3 px-3 ">
@@ -83,7 +89,7 @@
         <div class="h-[400px] overflow-y-auto">
             <div id="codeSubmissionListElem" class="grid grid-cols-2 gap-2">
                 @foreach ($submissions as $submission)
-                    @include('components.submission', [$submission])
+                    @include('components.submission', ['submission' => $submission])
                 @endforeach
             </div>
         </div>
@@ -174,6 +180,38 @@
 
                 submissionEditor.setValue(submission.code);
                 solutionEditor.setValue(submission.code_solution);
+
+                // Show test case results if available
+                const tcContainer = document.getElementById('test_case_results_container');
+                const tcList = document.getElementById('test_case_results_list');
+                tcList.innerHTML = '';
+                if (submission.test_case_results && submission.test_case_results.length > 0) {
+                    tcContainer.hidden = false;
+                    tcList.innerHTML = '';
+                    const results = typeof submission.test_case_results === 'string'
+                        ? JSON.parse(submission.test_case_results)
+                        : submission.test_case_results;
+                    results.forEach((tc, idx) => {
+                        const div = document.createElement('div');
+                        div.className = `p-2 rounded-xl text-sm ${tc.passed ? 'bg-success/20' : 'bg-error/20'}`;
+                        div.innerHTML = `
+                            <div class="flex justify-between">
+                                <span class="font-semibold">Test Case #${idx + 1}</span>
+                                <span class="badge ${tc.passed ? 'badge-success' : 'badge-error'} badge-sm">${tc.passed ? 'PASS' : 'FAIL'}</span>
+                            </div>
+                            <div class="text-xs mt-1">
+                                <div>Input: <code class="bg-base-300 px-1 rounded">${tc.input || '(none)'}</code></div>
+                                <div>Expected: <code class="bg-base-300 px-1 rounded">${tc.expected_output}</code></div>
+                                <div>Actual: <code class="bg-base-300 px-1 rounded">${tc.actual_output || '(error)'}</code></div>
+                                ${tc.error ? `<div class="text-error">Error: ${tc.error}</div>` : ''}
+                                <div>Points: ${tc.passed ? tc.points : 0}/${tc.points}</div>
+                            </div>
+                        `;
+                        tcList.appendChild(div);
+                    });
+                } else {
+                    tcContainer.hidden = true;
+                }
 
                 monaco.editor.setModelLanguage(
                     submissionEditor.getModel(),
@@ -297,14 +335,16 @@
             // -----------------------------
             // Init
             // -----------------------------
-            document.addEventListener('DOMContentLoaded',
-                function() {
-                    const test_btn = document.getElementById('testCodeBtn');
+            document.addEventListener('DOMContentLoaded', function() {
+                initEditors();
+
+                const test_btn = document.getElementById('testCodeBtn');
+                if (test_btn) {
                     test_btn.addEventListener('click', () => {
                         run_code();
-                    })
-                });
-            document.addEventListener('DOMContentLoaded', initEditors);
+                    });
+                }
+            });
 
             // refresh the submission list
             setInterval(async () => {

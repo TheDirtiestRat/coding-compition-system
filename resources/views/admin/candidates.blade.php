@@ -156,13 +156,13 @@
     </div>
 
     {{-- candidate info --}}
-    @isset($can_name, $user_acc, $solved_challenges)
+    @isset($solved_challenges)
         <div class="flex flex-row gap-3 w-full bg-base-100 rounded-xl p-3 mt-3">
             <div class="p-2 basis-auto flex flex-col gap-2">
                 <span class="text-2xl font-bold text-nowrap">Candidate Details</span>
-                <strong><span>Name: {{ $can_name->fullname }}</span></strong>
-                <span>Username: {{ $user_acc->name }}</span>
-                <span>Email: {{ $user_acc->email }}</span>
+                <strong><span>Name: {{ $candidate->fullname }}</span></strong>
+                <span>Username: {{ optional($candidate->user)->name }}</span>
+                <span>Email: {{ optional($candidate->user)->email }}</span>
                 <span>Group: {{ $candidate->group }}</span>
             </div>
             <div class="divider lg:divider-horizontal">*</div>
