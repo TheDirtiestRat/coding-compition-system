@@ -344,8 +344,13 @@ class AdminController extends Controller
         try {
             $challenge = DB::transaction(function () use ($request, $validatedData, &$uploadedPaths, &$deletedPaths) {
                 $challenge = ! empty($validatedData['challenge_id'])
-                    ? Challenges::findOrFail($validatedData['challenge_id'])
+                    ? Challenges::lockForUpdate()->findOrFail($validatedData['challenge_id'])
                     : new Challenges;
+                if ($challenge->exists && $challenge->submissions()->exists()) {
+                    throw ValidationException::withMessages([
+                        'challenge_id' => 'Challenges with submissions cannot be edited. Create a new challenge to change the task or grading rubric.',
+                    ]);
+                }
                 $challenge->fill([
                     'event_id' => $validatedData['event_id'],
                     'title' => $validatedData['title'],
@@ -389,6 +394,8 @@ class AdminController extends Controller
 
                 return $challenge;
             });
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (\Throwable $e) {
             Storage::disk('public')->delete($uploadedPaths);
             Log::error('Failed to save challenge', ['exception' => $e]);
