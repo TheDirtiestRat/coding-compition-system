@@ -4,22 +4,22 @@
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 place-content-center gap-3">
         <div class="divider col-span-full">Easy Problems</div>
         @foreach ($easy_challenges as $challenge)
-            <x-challenge-card :challenge="$challenge" />
+            <x-challenge-card :challenge="$challenge" :can-solve="$competition_started" />
         @endforeach
 
         <div class="divider col-span-full">Medium Problems</div>
         @foreach ($medium_challenges as $challenge)
-            <x-challenge-card :challenge="$challenge" />
+            <x-challenge-card :challenge="$challenge" :can-solve="$competition_started" />
         @endforeach
 
         <div class="divider col-span-full">Hard Problems</div>
         @foreach ($hard_challenges as $challenge)
-            <x-challenge-card :challenge="$challenge" />
+            <x-challenge-card :challenge="$challenge" :can-solve="$competition_started" />
         @endforeach
 
         <div class="divider col-span-full">Challenge Problems</div>
         @foreach ($challenges as $challenge)
-            <x-challenge-card :challenge="$challenge" />
+            <x-challenge-card :challenge="$challenge" :can-solve="$competition_started" />
         @endforeach
     </div>
 
