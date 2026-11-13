@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Models\Candidates;
 use App\Models\Challenges;
 use App\Models\ChallengePhoto;
@@ -11,12 +10,11 @@ use App\Models\Submissions;
 use App\Models\User;
 use App\Models\Events;
 use App\Models\ProgrammingLanguage;
-use App\Models\TestCase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
-use Carbon\Carbon;
 
 class AdminController extends Controller
 {
@@ -158,11 +156,10 @@ class AdminController extends Controller
             'isActive' => 'required|in:true,false',
         ]);
 
-        Events::where('isActive', true)->update(['isActive' => false]);
-
-        Events::where('id', $validatedData['event_id'])->update([
-            'isActive' => true,
-        ]);
+        DB::transaction(function () use ($validatedData) {
+            Events::where('isActive', true)->update(['isActive' => false]);
+            Events::whereKey($validatedData['event_id'])->update(['isActive' => true]);
+        });
 
         return redirect('/admin/events')->with('success', 'Event activated successfully!');
     }
@@ -202,18 +199,21 @@ class AdminController extends Controller
         ]);
 
         try {
-            $user = User::factory()->create([
-                'name' => trim($validatedData['username']),
-                'email' => trim(strtolower($validatedData['username'])) . '@hungergame.com',
-                'password' => bcrypt($validatedData['user_password']),
-            ]);
+            DB::transaction(function () use ($validatedData) {
+                $user = User::create([
+                    'name' => trim($validatedData['username']),
+                    'email' => trim(strtolower($validatedData['username'])) . '@hungergame.com',
+                    'password' => bcrypt($validatedData['user_password']),
+                    'user_type' => 'user',
+                ]);
 
-            Candidates::create([
-                'event_id' => $validatedData['event_id'],
-                'fullname' => $validatedData['candidate_name'],
-                'group' => "none",
-                'user_id' => $user->id,
-            ]);
+                Candidates::create([
+                    'event_id' => $validatedData['event_id'],
+                    'fullname' => $validatedData['candidate_name'],
+                    'group' => "none",
+                    'user_id' => $user->id,
+                ]);
+            });
         } catch (\Exception $e) {
             return redirect('/admin/candidates')->with('error', 'Error creating competitor: ' . $e->getMessage());
         }
@@ -232,24 +232,26 @@ class AdminController extends Controller
         ]);
 
         try {
-            $candidate = Candidates::findOrFail($validatedData['candidate_id']);
-            $user = $candidate->user;
+            DB::transaction(function () use ($validatedData) {
+                $candidate = Candidates::findOrFail($validatedData['candidate_id']);
+                $user = $candidate->user;
 
-            $user->update([
-                'name' => trim($validatedData['edit_username']),
-                'email' => trim(strtolower($validatedData['edit_username'])) . '@hungergame.com',
-            ]);
-
-            if (!empty($validatedData['edit_user_password'])) {
                 $user->update([
-                    'password' => bcrypt($validatedData['edit_user_password']),
+                    'name' => trim($validatedData['edit_username']),
+                    'email' => trim(strtolower($validatedData['edit_username'])) . '@hungergame.com',
                 ]);
-            }
 
-            $candidate->update([
-                'event_id' => $validatedData['event_id'],
-                'fullname' => $validatedData['edit_name'],
-            ]);
+                if (!empty($validatedData['edit_user_password'])) {
+                    $user->update([
+                        'password' => bcrypt($validatedData['edit_user_password']),
+                    ]);
+                }
+
+                $candidate->update([
+                    'event_id' => $validatedData['event_id'],
+                    'fullname' => $validatedData['edit_name'],
+                ]);
+            });
         } catch (\Exception $e) {
             return redirect('/admin/candidates')->with('error', 'Error updating competitor: ' . $e->getMessage());
         }
@@ -316,7 +318,7 @@ class AdminController extends Controller
 
     public function get_challenge_details($id)
     {
-        $challenge = Challenges::with('photos', 'testCases')->find($id);
+        $challenge = Challenges::with('photos', 'testCases')->findOrFail($id);
 
         $challenge->photos_list = $challenge->photos->map(function ($photo) {
             return [

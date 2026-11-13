@@ -59,19 +59,23 @@ class AuthenticationController extends Controller
         ]);
 
         try {
-            $user = User::create([
-                'name' => trim($validated['username']),
-                'email' => trim(strtolower($validated['username'])) . '@hungergame.com',
-                'password' => Hash::make($validated['password']),
-                'user_type' => 'user',
-            ]);
+            $user = DB::transaction(function () use ($validated, $activeEvent) {
+                $user = User::create([
+                    'name' => trim($validated['username']),
+                    'email' => trim(strtolower($validated['username'])) . '@hungergame.com',
+                    'password' => Hash::make($validated['password']),
+                    'user_type' => 'user',
+                ]);
 
-            Candidates::create([
-                'event_id' => $activeEvent->id,
-                'fullname' => $validated['fullname'],
-                'group' => 'none',
-                'user_id' => $user->id,
-            ]);
+                Candidates::create([
+                    'event_id' => $activeEvent->id,
+                    'fullname' => $validated['fullname'],
+                    'group' => 'none',
+                    'user_id' => $user->id,
+                ]);
+
+                return $user;
+            });
 
             Auth::login($user);
 
