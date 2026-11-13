@@ -227,6 +227,7 @@
             can_user_id.value = user_id
             can_name.value = name;
             can_username.value = username;
+            can_password.value = '';
 
             edit_tab.checked = true;
         }
