@@ -472,9 +472,10 @@ class AdminController extends Controller
 
         $newValue = $current === '1' ? '0' : '1';
 
-        DB::table('options')
-            ->where('option_name', 'registration_open')
-            ->update(['option_value' => $newValue]);
+        DB::table('options')->updateOrInsert(
+            ['option_name' => 'registration_open'],
+            ['option_value' => $newValue]
+        );
 
         $status = $newValue === '1' ? 'opened' : 'closed';
 
