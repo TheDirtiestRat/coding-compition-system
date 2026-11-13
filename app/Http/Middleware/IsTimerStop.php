@@ -12,7 +12,7 @@ class IsTimerStop
     public function handle(Request $request, Closure $next): Response
     {
         $timer = CompetitionTimer::state();
-        if (!$timer['started']) {
+        if (! $timer['started']) {
             return $request->expectsJson()
                 ? response()->json(['message' => 'The competition is not running.'], 409)
                 : redirect('/code-problems');

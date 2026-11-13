@@ -1,18 +1,18 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-
-use App\Http\Controllers\CompilerController;
-use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\AdminCountdownController;
+use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\CandidateController;
+use App\Http\Controllers\CompilerController;
 use App\Http\Controllers\CountdownController;
-use App\Http\Controllers\SubmissionsController;
 use App\Http\Controllers\ProgrammingLanguageController;
+use App\Http\Controllers\SubmissionsController;
+use App\Models\Candidates;
+use App\Models\Submissions;
 use App\Support\CompetitionTimer;
-
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('pages.home');
@@ -37,7 +37,6 @@ Route::post('/register', [AuthenticationController::class, 'register']);
 
 // Countdown
 Route::get('/countdown', [CountdownController::class, 'show']);
-
 
 // user side pages
 Route::middleware('auth')->group(function () {
@@ -109,16 +108,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/timer/get_timer', [AdminCountdownController::class, 'get_timer']);
 
     Route::get('/competition-ended', function () {
-        if (!CompetitionTimer::state()['isTime']) {
+        if (! CompetitionTimer::state()['isTime']) {
             return redirect('/code-problems');
         }
 
         $user = Auth::user();
-        $candidate = \App\Models\Candidates::where('user_id', $user?->id)->first();
+        $candidate = Candidates::where('user_id', $user?->id)->first();
         $totalScore = 0;
 
         if ($candidate) {
-            $totalScore = \App\Models\Submissions::where('candidate_id', $candidate->id)
+            $totalScore = Submissions::where('candidate_id', $candidate->id)
                 ->sum('score');
         }
 
