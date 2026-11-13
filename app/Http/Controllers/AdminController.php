@@ -285,15 +285,22 @@ class AdminController extends Controller
 
     public function delete_candidate(string $candidate_id)
     {
-        $candidate = Candidates::with('user')->findOrFail($candidate_id);
+        DB::transaction(function () use ($candidate_id) {
+            $candidate = Candidates::whereKey($candidate_id)->lockForUpdate()->firstOrFail();
+            $user = User::whereKey($candidate->user_id)->lockForUpdate()->first();
 
-        if ($candidate->user) {
-            $candidate->user->delete();
-        }
+            $candidate->delete();
 
-        $candidate->delete();
+            if ($user) {
+                User::whereKey($user->id)
+                    ->where('user_type', 'user')
+                    ->where('id', '!=', auth()->id())
+                    ->whereDoesntHave('candidates')
+                    ->delete();
+            }
+        });
 
-        return redirect('/admin/candidates')->with('success', 'User and Candidate deleted successfully.');
+        return redirect('/admin/candidates')->with('success', 'Candidate deleted successfully. Unused contestant account removed if eligible.');
     }
 
     public function challenges()
