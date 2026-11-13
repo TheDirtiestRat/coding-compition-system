@@ -56,6 +56,14 @@ return new class extends Migration
 
     public function down(): void
     {
+        Schema::table('challenges', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('language_id');
+            $table->string('photo')->nullable();
+        });
+        Schema::table('submissions', function (Blueprint $table) {
+            $table->dropColumn(['test_case_results', 'is_auto_reviewed']);
+        });
+
         Schema::dropIfExists('challenge_photos');
         Schema::dropIfExists('test_cases');
         Schema::dropIfExists('programming_languages');
