@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Submissions;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class SubmissionsController extends Controller
@@ -32,6 +33,10 @@ class SubmissionsController extends Controller
             )
             ->first();
 
+        if ($submission) {
+            $submission->code_hash = hash('sha256', $submission->code);
+        }
+
         return response()->json(['submission' => $submission]);
     }
 
@@ -53,18 +58,28 @@ class SubmissionsController extends Controller
 
         $validated = $request->validate([
             'score' => ['required', 'integer', 'min:0', 'max:' . $maxPoints],
+            'code_hash' => ['required', 'string', 'size:64'],
         ]);
 
         try {
-            $updated = Submissions::whereKey($submission->id)
-                ->where('is_score_submitted', false)
-                ->update([
-                    'score' => $validated['score'],
-                    'is_score_submitted' => true,
-                ]);
+            $updated = DB::transaction(function () use ($id, $validated) {
+                $submission = Submissions::whereKey($id)->lockForUpdate()->first();
+
+                if (!$submission || $submission->is_score_submitted
+                    || !hash_equals(hash('sha256', $submission->code), $validated['code_hash'])) {
+                    return false;
+                }
+
+                return Submissions::whereKey($id)
+                    ->where('is_score_submitted', false)
+                    ->update([
+                        'score' => $validated['score'],
+                        'is_score_submitted' => true,
+                    ]);
+            });
 
             if (!$updated) {
-                return response()->json(['message' => 'Score has already been submitted.'], 409);
+                return response()->json(['message' => 'Submission changed or was already reviewed. Reload it before scoring.'], 409);
             }
         } catch (\Throwable $e) {
             Log::error('Failed to submit score', [

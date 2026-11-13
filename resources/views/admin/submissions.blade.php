@@ -103,6 +103,7 @@
             // State
             // -----------------------------
             let submissionId = null;
+            let submissionCodeHash = null;
             let maxPoints = null;
             let selectionRequest = 0;
             let currentLanguageId = null;
@@ -165,6 +166,7 @@
             window.view_submission = async (id) => {
                 const requestId = ++selectionRequest;
                 submissionId = null;
+                submissionCodeHash = null;
                 currentLanguageId = null;
                 el.scoreInput.value = '';
                 el.scoreInput.disabled = true;
@@ -184,6 +186,7 @@
                     if (!submission) throw new Error('Submission not found.');
 
                     submissionId = submission.id;
+                    submissionCodeHash = submission.code_hash;
                     currentLanguageId = submission.challenge_language_id;
                     maxPoints = Number(submission.max_points);
                     el.candidateName.textContent = submission.candidate_name;
@@ -242,7 +245,7 @@ Points: ${tc.passed ? tc.points : 0}/${tc.points}${tc.error ? '\nError: ' + tc.e
             // -----------------------------
             document.getElementById('scoreForm').addEventListener('submit', async e => {
                 e.preventDefault();
-                if (!submissionId || el.scoreInput.disabled || savingScore) return;
+                if (!submissionId || !submissionCodeHash || el.scoreInput.disabled || savingScore) return;
                 const score = Number(el.scoreInput.value);
                 if (el.scoreInput.value.trim() === '' || !Number.isInteger(score) || score < 0 || score > maxPoints) {
                     show_alert(`Score must be a whole number between 0 and ${maxPoints}.`);
@@ -260,7 +263,7 @@ Points: ${tc.passed ? tc.points : 0}/${tc.points}${tc.error ? '\nError: ' + tc.e
                             'Accept': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         },
-                        body: JSON.stringify({ score }),
+                        body: JSON.stringify({ score, code_hash: submissionCodeHash }),
                     });
                     const data = await res.json();
                     if (!res.ok) throw new Error(data.errors?.score?.[0] || data.message || 'Failed to submit score.');
