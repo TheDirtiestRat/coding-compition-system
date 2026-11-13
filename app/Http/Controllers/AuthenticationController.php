@@ -96,7 +96,10 @@ class AuthenticationController extends Controller
 
     public function loginUser(Request $request)
     {
-        $credentials = $request->only('username', 'password');
+        $credentials = $request->validate([
+            'username' => 'required|string|max:128',
+            'password' => 'required|string',
+        ]);
 
         if (Auth::attempt(['name' => $credentials['username'], 'password' => $credentials['password']])) {
             $request->session()->regenerate();

@@ -23,6 +23,8 @@ class CandidateController extends Controller
     public function get_challenge_details($id)
     {
         $candidate = Candidates::where('user_id', Auth::id())->firstOrFail();
+        abort_unless($this->candidateHasActiveEvent($candidate), 404);
+
         $challenge = Challenges::with('photos')
             ->select(['id', 'title', 'description', 'difficulty', 'points'])
             ->where('event_id', $candidate->event_id)
@@ -43,7 +45,7 @@ class CandidateController extends Controller
         $user = Auth::user();
         $candidate = Candidates::where('user_id', $user->id)->first();
 
-        if (! $candidate) {
+        if (! $candidate || ! $this->candidateHasActiveEvent($candidate)) {
             return view('pages.code-problems', [
                 'challenges' => collect(),
                 'easy_challenges' => collect(),
@@ -117,9 +119,7 @@ class CandidateController extends Controller
             return redirect('/code-problems');
         }
 
-        $event = Events::where('isActive', true)->first();
-
-        if (! $event) {
+        if (! $this->candidateHasActiveEvent($candidate)) {
             return redirect('/code-problems');
         }
 
@@ -134,7 +134,6 @@ class CandidateController extends Controller
                         challenges.*,
                         submissions.score,
                         submissions.code,
-                        submissions.test_case_results,
                         CASE
                             WHEN submissions.is_score_submitted = 1 THEN 'reviewed'
                             WHEN submissions.id IS NOT NULL THEN 'submitted'
@@ -178,6 +177,13 @@ class CandidateController extends Controller
                 'status' => 'error',
                 'message' => 'Candidate not found.',
             ], 404);
+        }
+
+        if (! $this->candidateHasActiveEvent($candidate)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Your event is not active.',
+            ], 403);
         }
 
         $challenge = Challenges::with('activeTestCases', 'languageModel')
@@ -254,9 +260,11 @@ class CandidateController extends Controller
         ];
 
         $totalAutoScore = min($totalAutoScore, $challenge->points);
+        // Ignore binary rounding noise when fractional case points cover the integer maximum.
+        $autoReviewed = $allPassed && round($totalAutoScore, 10) >= $challenge->points;
 
-        // If all test cases passed, auto-review
-        if ($testCases->isNotEmpty() && $allPassed) {
+        if ($autoReviewed) {
+            $totalAutoScore = $challenge->points;
             $submissionData['score'] = $totalAutoScore;
             $submissionData['is_score_submitted'] = true;
             $submissionData['is_auto_reviewed'] = true;
@@ -266,8 +274,19 @@ class CandidateController extends Controller
             $submissionData['is_auto_reviewed'] = false;
         }
 
-        DB::transaction(function () use ($candidate, $challenge_id, $submissionData) {
-            Candidates::whereKey($candidate->id)->lockForUpdate()->firstOrFail();
+        DB::transaction(function () use ($candidate, $challenge_id, $challenge, $submissionData) {
+            // Serialize first submissions with edits, without holding locks while code executes.
+            $currentChallenge = Challenges::lockForUpdate()->find($challenge_id);
+            abort_if(
+                ! $currentChallenge
+                    || $currentChallenge->getAttributes() !== $challenge->getAttributes()
+                    || $currentChallenge->activeTestCases->toArray() !== $challenge->activeTestCases->toArray(),
+                409,
+                'This challenge changed while your code was running. Reload the challenge and submit again.'
+            );
+
+            $lockedCandidate = Candidates::whereKey($candidate->id)->lockForUpdate()->firstOrFail();
+            abort_if((int) $lockedCandidate->event_id !== (int) $challenge->event_id, 409, 'Your event changed. Reload the challenges before submitting.');
 
             $submission = Submissions::where('candidate_id', $candidate->id)
                 ->where('challenge_id', $challenge_id)
@@ -284,12 +303,16 @@ class CandidateController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => $allPassed && $testCases->isNotEmpty()
+            'message' => $autoReviewed
                 ? 'All test cases passed! Score: '.$totalAutoScore
                 : 'Code submitted successfully. Awaiting review...',
-            'auto_reviewed' => $allPassed && $testCases->isNotEmpty(),
-            'test_case_results' => $testCaseResults,
+            'auto_reviewed' => $autoReviewed,
         ], 200);
+    }
+
+    private function candidateHasActiveEvent(Candidates $candidate): bool
+    {
+        return Events::whereKey($candidate->event_id)->where('isActive', true)->exists();
     }
 
     private function runCodeWithInput($code, $language, $input, $timeout = 5)

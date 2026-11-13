@@ -124,25 +124,25 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($candidates as $candidate)
+                        @foreach ($candidates as $tableCandidate)
                             <tr class="text-center">
-                                <th>{{ $candidate->id }}</th>
-                                <td>{{ $candidate->fullname }}</td>
-                                <td>{{ optional($candidate->user)->name }}</td>
+                                <th>{{ $tableCandidate->id }}</th>
+                                <td>{{ $tableCandidate->fullname }}</td>
+                                <td>{{ optional($tableCandidate->user)->name }}</td>
                                 <td>
                                     <p class="badge badge-primary badge-soft">
-                                        {{ $candidate->group }}
+                                        {{ $tableCandidate->group }}
                                     </p>
                                 </td>
-                                <td>{{ $candidate->title }}</td>
+                                <td>{{ $tableCandidate->title }}</td>
                                 <td class="flex flex-row items-center justify-center gap-2">
-                                    <a href="{{ url('/admin/candidates/view/' . $candidate->id) }}"
+                                    <a href="{{ url('/admin/candidates/view/' . $tableCandidate->id) }}"
                                         class="btn btn-xs btn-info">View</a>
                                     <button class="btn btn-xs"
-                                        data-id="{{ $candidate->id }}" data-event-id="{{ $candidate->event_id }}"
-                                        data-name="{{ $candidate->fullname }}" data-username="{{ optional($candidate->user)->name }}"
+                                        data-id="{{ $tableCandidate->id }}" data-event-id="{{ $tableCandidate->event_id }}"
+                                        data-name="{{ $tableCandidate->fullname }}" data-username="{{ optional($tableCandidate->user)->name }}"
                                         onclick="edit_candidate(this.dataset.id, this.dataset.eventId, this.dataset.name, this.dataset.username)">Edit</button>
-                                    <form action="{{ url('/admin/delete-candidate/' . $candidate->id) }}"
+                                    <form action="{{ url('/admin/delete-candidate/' . $tableCandidate->id) }}"
                                         class="candidate_delete_form" method="POST">
                                         @csrf
                                         @method('DELETE')
@@ -227,6 +227,7 @@
             can_user_id.value = user_id
             can_name.value = name;
             can_username.value = username;
+            can_password.value = '';
 
             edit_tab.checked = true;
         }

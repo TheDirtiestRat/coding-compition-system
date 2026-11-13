@@ -147,6 +147,13 @@
                 @endisset
             </div>
 
+            <div class="card rounded-2xl bg-base-300 shadow-lg p-4 space-y-2">
+                <label for="code_input" class="font-semibold">Program input (stdin)</label>
+                <textarea id="code_input" name="input" rows="4"
+                    class="textarea textarea-bordered w-full font-mono text-sm"
+                    placeholder="Enter input for your program"></textarea>
+            </div>
+
             {{-- Output --}}
             <div class="divider">Code Output</div>
 

@@ -48,7 +48,11 @@ async function runServerCode(code, languageId) {
                         .querySelector('meta[name="csrf-token"]')
                         ?.getAttribute("content") || "",
             },
-            body: JSON.stringify({ code: code, language_id: languageId }),
+            body: JSON.stringify({
+                code: code,
+                language_id: languageId,
+                input: document.getElementById("code_input")?.value ?? "",
+            }),
         });
 
         const data = await response.json();

@@ -30,9 +30,25 @@ class CompetitionTimer
         ];
     }
 
+    public static function transition(callable $callback): mixed
+    {
+        return DB::transaction(function () use ($callback) {
+            // A primary key also serializes first requests before options are seeded.
+            DB::table('options')->insertOrIgnore([
+                'id' => 1,
+                'option_name' => 'competition_timer_lock',
+                'option_value' => '0',
+                'option_datatype' => 'boolean',
+            ]);
+            DB::table('options')->where('id', 1)->lockForUpdate()->first();
+
+            return $callback();
+        }, 5);
+    }
+
     public static function save(array $values): void
     {
-        DB::transaction(function () use ($values) {
+        self::transition(function () use ($values) {
             foreach ($values as $name => $value) {
                 DB::table('options')->updateOrInsert(
                     ['option_name' => $name],

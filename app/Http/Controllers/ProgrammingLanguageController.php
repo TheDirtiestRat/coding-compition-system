@@ -2,21 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Challenges;
 use App\Models\ProgrammingLanguage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class ProgrammingLanguageController extends Controller
 {
     public function index()
     {
         $languages = ProgrammingLanguage::all();
+
         return view('admin.programming-languages', compact('languages'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:programming_languages,name',
+            'name' => 'required|string|max:50|unique:programming_languages,name',
             'compile_command' => 'nullable|string|max:500',
             'run_command' => 'required|string|max:500',
             'file_extension' => 'required|string|max:50',
@@ -29,20 +33,26 @@ class ProgrammingLanguageController extends Controller
 
     public function update(Request $request)
     {
+        $request->validate(['id' => 'required|integer|exists:programming_languages,id']);
+        $language = ProgrammingLanguage::findOrFail($request->integer('id'));
         $validated = $request->validate([
-            'id' => 'required|exists:programming_languages,id',
-            'name' => 'required|string|max:255|unique:programming_languages,name,' . $request->id,
+            'name' => ['required', 'string', 'max:50', Rule::unique('programming_languages', 'name')->ignore($language)],
             'compile_command' => 'nullable|string|max:500',
             'run_command' => 'required|string|max:500',
             'file_extension' => 'required|string|max:50',
         ]);
 
-        ProgrammingLanguage::where('id', $validated['id'])->update([
-            'name' => $validated['name'],
-            'compile_command' => $validated['compile_command'],
-            'run_command' => $validated['run_command'],
-            'file_extension' => $validated['file_extension'],
-        ]);
+        DB::transaction(function () use ($language, $validated) {
+            $language->update([
+                'name' => $validated['name'],
+                'compile_command' => $validated['compile_command'] ?? null,
+                'run_command' => $validated['run_command'],
+                'file_extension' => $validated['file_extension'],
+            ]);
+
+            // The name is also the editor language identifier cached on linked challenges.
+            Challenges::where('language_id', $language->id)->update(['language' => $validated['name']]);
+        });
 
         return redirect('/admin/programming-languages')->with('success', 'Language updated successfully!');
     }
@@ -50,6 +60,7 @@ class ProgrammingLanguageController extends Controller
     public function destroy(string $id)
     {
         ProgrammingLanguage::destroy($id);
+
         return redirect('/admin/programming-languages')->with('success', 'Language deleted successfully.');
     }
 

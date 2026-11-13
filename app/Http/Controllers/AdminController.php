@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class AdminController extends Controller
@@ -39,7 +40,9 @@ class AdminController extends Controller
     private function ranked_candidates()
     {
         return Candidates::select('candidates.*')->selectSub(
-            Submissions::selectRaw('COALESCE(SUM(score), 0)')->whereColumn('candidate_id', 'candidates.id'),
+            Submissions::selectRaw('COALESCE(SUM(score), 0)')
+                ->whereColumn('candidate_id', 'candidates.id')
+                ->whereHas('challenge', fn ($query) => $query->whereColumn('challenges.event_id', 'candidates.event_id')),
             'total_score'
         )->orderByDesc('total_score');
     }
@@ -149,9 +152,28 @@ class AdminController extends Controller
 
     public function delete_event(string $event_id)
     {
-        Events::destroy($event_id);
+        DB::transaction(function () use ($event_id) {
+            $event = Events::findOrFail($event_id);
+            $userIds = $event->candidates()->pluck('user_id');
+            $photoPaths = DB::table('challenge_photos')
+                ->join('challenges', 'challenge_photos.challenge_id', '=', 'challenges.id')
+                ->where('challenges.event_id', $event_id)
+                ->pluck('challenge_photos.photo_path')->all();
 
-        return redirect('/admin/events')->with('success', 'Event and related data deleted successfully.');
+            $event->delete();
+
+            User::whereIn('id', $userIds)
+                ->where('user_type', 'user')
+                ->where('id', '!=', auth()->id())
+                ->whereDoesntHave('candidates')
+                ->delete();
+
+            DB::afterCommit(function () use ($photoPaths) {
+                Storage::disk('public')->delete($photoPaths);
+            });
+        });
+
+        return redirect('/admin/events')->with('success', 'Event, related data, and associated contestant accounts deleted successfully. Accounts used by other events were preserved.');
     }
 
     public function add_candidate(Request $request)
@@ -159,7 +181,7 @@ class AdminController extends Controller
         $validatedData = $request->validate([
             'event_id' => 'required|exists:events,id',
             'candidate_name' => 'required|string|max:255',
-            'username' => 'required|string|max:128',
+            'username' => 'required|string|max:128|unique:users,name',
             'user_password' => 'required|string|min:4',
         ]);
 
@@ -188,17 +210,25 @@ class AdminController extends Controller
 
     public function update_candidate(Request $request)
     {
+        $request->validate(['candidate_id' => 'required|exists:candidates,id']);
+        $candidate = Candidates::findOrFail($request->input('candidate_id'));
+
         $validatedData = $request->validate([
             'event_id' => 'required|exists:events,id',
             'candidate_id' => 'required|exists:candidates,id',
             'edit_name' => 'required|string|max:255',
-            'edit_username' => 'required|string|max:128',
+            'edit_username' => ['required', 'string', 'max:128', Rule::unique('users', 'name')->ignore($candidate->user_id)],
             'edit_user_password' => 'nullable|string|min:4',
         ]);
 
         try {
             DB::transaction(function () use ($validatedData) {
-                $candidate = Candidates::findOrFail($validatedData['candidate_id']);
+                $candidate = Candidates::whereKey($validatedData['candidate_id'])->lockForUpdate()->firstOrFail();
+                if ((int) $candidate->event_id !== (int) $validatedData['event_id'] && $candidate->submissions()->exists()) {
+                    throw ValidationException::withMessages([
+                        'event_id' => 'A competitor with submissions cannot be moved to another event.',
+                    ]);
+                }
                 $user = $candidate->user;
 
                 $user->update([
@@ -217,6 +247,8 @@ class AdminController extends Controller
                     'fullname' => $validatedData['edit_name'],
                 ]);
             });
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             return redirect('/admin/candidates')->with('error', 'Error updating competitor: '.$e->getMessage());
         }
@@ -253,15 +285,22 @@ class AdminController extends Controller
 
     public function delete_candidate(string $candidate_id)
     {
-        $candidate = Candidates::with('user')->findOrFail($candidate_id);
+        DB::transaction(function () use ($candidate_id) {
+            $candidate = Candidates::whereKey($candidate_id)->lockForUpdate()->firstOrFail();
+            $user = User::whereKey($candidate->user_id)->lockForUpdate()->first();
 
-        if ($candidate->user) {
-            $candidate->user->delete();
-        }
+            $candidate->delete();
 
-        $candidate->delete();
+            if ($user) {
+                User::whereKey($user->id)
+                    ->where('user_type', 'user')
+                    ->where('id', '!=', auth()->id())
+                    ->whereDoesntHave('candidates')
+                    ->delete();
+            }
+        });
 
-        return redirect('/admin/candidates')->with('success', 'User and Candidate deleted successfully.');
+        return redirect('/admin/candidates')->with('success', 'Candidate deleted successfully. Unused contestant account removed if eligible.');
     }
 
     public function challenges()
@@ -277,7 +316,9 @@ class AdminController extends Controller
                 ->latest()->get();
         }
 
-        return view('admin.challenges', compact('challenges', 'events', 'languages'));
+        $draftPhotos = Challenges::find(session()->getOldInput('challenge_id'))?->photos ?? collect();
+
+        return view('admin.challenges', compact('challenges', 'events', 'languages', 'draftPhotos'));
     }
 
     public function get_challenge_details($id)
@@ -321,6 +362,7 @@ class AdminController extends Controller
             'photos.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'delete_photos' => 'nullable|array',
             'delete_photos.*' => 'integer|exists:challenge_photos,id',
+            'test_cases_present' => 'sometimes|boolean',
             'test_cases' => 'nullable|array',
             'test_cases.*.input' => 'nullable|string',
             'test_cases.*.expected_output' => 'required_with:test_cases|string',
@@ -332,8 +374,9 @@ class AdminController extends Controller
             throw ValidationException::withMessages(['language_id' => 'Select a matching active programming language.']);
         }
 
-        $testCasePoints = $request->has('test_cases')
-            ? collect($validatedData['test_cases'])->sum('points')
+        $replaceTestCases = $request->boolean('test_cases_present') || $request->has('test_cases');
+        $testCasePoints = $replaceTestCases
+            ? collect($validatedData['test_cases'] ?? [])->sum('points')
             : Challenges::find($validatedData['challenge_id'] ?? null)?->testCases()->sum('points') ?? 0;
         if ($testCasePoints > $validatedData['points']) {
             throw ValidationException::withMessages(['test_cases' => 'Test case points cannot exceed challenge points.']);
@@ -342,10 +385,15 @@ class AdminController extends Controller
         $uploadedPaths = [];
         $deletedPaths = [];
         try {
-            $challenge = DB::transaction(function () use ($request, $validatedData, &$uploadedPaths, &$deletedPaths) {
+            $challenge = DB::transaction(function () use ($request, $validatedData, $replaceTestCases, &$uploadedPaths, &$deletedPaths) {
                 $challenge = ! empty($validatedData['challenge_id'])
-                    ? Challenges::findOrFail($validatedData['challenge_id'])
+                    ? Challenges::lockForUpdate()->findOrFail($validatedData['challenge_id'])
                     : new Challenges;
+                if ($challenge->exists && $challenge->submissions()->exists()) {
+                    throw ValidationException::withMessages([
+                        'challenge_id' => 'Challenges with submissions cannot be edited. Create a new challenge to change the task or grading rubric.',
+                    ]);
+                }
                 $challenge->fill([
                     'event_id' => $validatedData['event_id'],
                     'title' => $validatedData['title'],
@@ -375,7 +423,7 @@ class AdminController extends Controller
                     $challenge->photos()->create(['photo_path' => $path]);
                 }
 
-                if ($request->has('test_cases')) {
+                if ($replaceTestCases) {
                     $challenge->testCases()->delete();
                     foreach ($validatedData['test_cases'] ?? [] as $tc) {
                         $challenge->testCases()->create([
@@ -389,6 +437,8 @@ class AdminController extends Controller
 
                 return $challenge;
             });
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (\Throwable $e) {
             Storage::disk('public')->delete($uploadedPaths);
             Log::error('Failed to save challenge', ['exception' => $e]);
@@ -429,9 +479,10 @@ class AdminController extends Controller
 
         $newValue = $current === '1' ? '0' : '1';
 
-        DB::table('options')
-            ->where('option_name', 'registration_open')
-            ->update(['option_value' => $newValue]);
+        DB::table('options')->updateOrInsert(
+            ['option_name' => 'registration_open'],
+            ['option_value' => $newValue]
+        );
 
         $status = $newValue === '1' ? 'opened' : 'closed';
 
