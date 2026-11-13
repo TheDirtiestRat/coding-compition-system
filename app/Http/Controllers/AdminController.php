@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class AdminController extends Controller
@@ -159,7 +160,7 @@ class AdminController extends Controller
         $validatedData = $request->validate([
             'event_id' => 'required|exists:events,id',
             'candidate_name' => 'required|string|max:255',
-            'username' => 'required|string|max:128',
+            'username' => 'required|string|max:128|unique:users,name',
             'user_password' => 'required|string|min:4',
         ]);
 
@@ -188,11 +189,14 @@ class AdminController extends Controller
 
     public function update_candidate(Request $request)
     {
+        $request->validate(['candidate_id' => 'required|exists:candidates,id']);
+        $candidate = Candidates::findOrFail($request->input('candidate_id'));
+
         $validatedData = $request->validate([
             'event_id' => 'required|exists:events,id',
             'candidate_id' => 'required|exists:candidates,id',
             'edit_name' => 'required|string|max:255',
-            'edit_username' => 'required|string|max:128',
+            'edit_username' => ['required', 'string', 'max:128', Rule::unique('users', 'name')->ignore($candidate->user_id)],
             'edit_user_password' => 'nullable|string|min:4',
         ]);
 
