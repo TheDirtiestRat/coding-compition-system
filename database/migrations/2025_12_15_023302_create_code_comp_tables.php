@@ -13,18 +13,18 @@ return new class extends Migration
     {
         Schema::create('events', function (Blueprint $table) {
             $table->id();
-            $table->string("title")->default("no name");
+            $table->string('title')->default('no name');
             $table->boolean('isActive')->default(false);
             $table->timestamps();
         });
 
         Schema::create('candidates', function (Blueprint $table) {
             $table->id();
-            
+
             $table->foreignId('event_id')->constrained('events')->onDelete('cascade');
 
-            $table->string("fullname")->default("no name");
-            $table->string("group")->default("none");
+            $table->string('fullname')->default('no name');
+            $table->string('group')->default('none');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
@@ -34,11 +34,11 @@ return new class extends Migration
 
             $table->foreignId('event_id')->constrained('events')->onDelete('cascade');
 
-            $table->string("title")->default("A Challenge")->nullable(false);
-            $table->text("description");
-            $table->float("points")->default(100);
-            $table->enum("difficulty", ['easy', 'medium', 'hard', 'challenge'])->default('easy');
-            $table->enum("language", ["java", "python"])->default("java");
+            $table->string('title')->default('A Challenge')->nullable(false);
+            $table->text('description');
+            $table->float('points')->default(100);
+            $table->enum('difficulty', ['easy', 'medium', 'hard', 'challenge'])->default('easy');
+            $table->enum('language', ['java', 'python'])->default('java');
             $table->text('code_solution')->nullable(false);
             $table->timestamps();
         });
@@ -61,7 +61,7 @@ return new class extends Migration
             $table->id();
 
             $table->string('option_name')->default('option_1');
-            $table->enum("option_datatype", ['int', 'float', 'boolean', 'text'])->default('boolean');
+            $table->enum('option_datatype', ['int', 'float', 'boolean', 'text'])->default('boolean');
             $table->text('option_value');
 
             $table->timestamps();
