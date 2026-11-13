@@ -19,7 +19,10 @@ class AdminController extends Controller
 {
     public function dashboard()
     {
-        $candidates = $this->ranked_candidates()->get();
+        $active_event = Events::where('isActive', true)->first();
+        $candidates = $active_event
+            ? $this->ranked_candidates()->where('event_id', $active_event->id)->get()
+            : collect();
 
         return view('admin.dashboard', compact('candidates'));
     }
