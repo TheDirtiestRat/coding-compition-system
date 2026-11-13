@@ -103,7 +103,11 @@
             // State
             // -----------------------------
             let submissionId = null;
+            let submissionCodeHash = null;
             let maxPoints = null;
+            let selectionRequest = 0;
+            let currentLanguageId = null;
+            let savingScore = false;
             let submissionEditor = null;
             let solutionEditor = null;
 
@@ -160,74 +164,68 @@
             // Submission Viewer
             // -----------------------------
             window.view_submission = async (id) => {
-                const res = await fetch(`/admin/api/submissions/${id}`);
-                if (!res.ok) return alert('Failed to load submission');
+                const requestId = ++selectionRequest;
+                submissionId = null;
+                submissionCodeHash = null;
+                currentLanguageId = null;
+                el.scoreInput.value = '';
+                el.scoreInput.disabled = true;
+                el.scoreSection.hidden = true;
+                el.submissionDisplay.hidden = true;
+                el.submissionPlaceholder.hidden = false;
+                document.getElementById('code_output_area').textContent = 'Code Output:';
+                document.getElementById('test_case_results_container').hidden = true;
 
-                const {
-                    submission
-                } = await res.json();
-                if (!submission) return alert('Invalid submission');
+                try {
+                    const res = await fetch(`/admin/api/submissions/${id}`, {
+                        headers: { 'Accept': 'application/json' },
+                    });
+                    if (!res.ok) throw new Error('Failed to load submission.');
+                    const { submission } = await res.json();
+                    if (requestId !== selectionRequest) return;
+                    if (!submission) throw new Error('Submission not found.');
 
-                submissionId = submission.id;
-                maxPoints = submission.max_points;
+                    submissionId = submission.id;
+                    submissionCodeHash = submission.code_hash;
+                    currentLanguageId = submission.challenge_language_id;
+                    maxPoints = Number(submission.max_points);
+                    el.candidateName.textContent = submission.candidate_name;
+                    el.challengeTitle.textContent = submission.challenge_title;
+                    el.submittedAt.textContent = submission.submitted_at;
+                    el.solutionLanguage.textContent = submission.challenge_language;
+                    document.getElementById('codeLanguage').textContent = submission.challenge_language;
+                    el.solutionInstruction.textContent = submission.description;
+                    submissionEditor.setValue(submission.code);
+                    solutionEditor.setValue(submission.code_solution);
+                    monaco.editor.setModelLanguage(submissionEditor.getModel(), submission.challenge_language);
+                    monaco.editor.setModelLanguage(solutionEditor.getModel(), submission.challenge_language);
 
-                el.candidateName.textContent = submission.candidate_name;
-                el.challengeTitle.textContent = submission.challenge_title;
-                el.submittedAt.textContent = submission.submitted_at;
-                el.solutionLanguage.textContent = submission.challenge_language;
-
-                el.solutionInstruction.textContent = submission.description;
-
-                submissionEditor.setValue(submission.code);
-                solutionEditor.setValue(submission.code_solution);
-
-                // Show test case results if available
-                const tcContainer = document.getElementById('test_case_results_container');
-                const tcList = document.getElementById('test_case_results_list');
-                tcList.innerHTML = '';
-                if (submission.test_case_results && submission.test_case_results.length > 0) {
-                    tcContainer.hidden = false;
-                    tcList.innerHTML = '';
                     const results = typeof submission.test_case_results === 'string'
                         ? JSON.parse(submission.test_case_results)
-                        : submission.test_case_results;
+                        : submission.test_case_results || [];
+                    const tcList = document.getElementById('test_case_results_list');
+                    tcList.replaceChildren();
                     results.forEach((tc, idx) => {
-                        const div = document.createElement('div');
-                        div.className = `p-2 rounded-xl text-sm ${tc.passed ? 'bg-success/20' : 'bg-error/20'}`;
-                        div.innerHTML = `
-                            <div class="flex justify-between">
-                                <span class="font-semibold">Test Case #${idx + 1}</span>
-                                <span class="badge ${tc.passed ? 'badge-success' : 'badge-error'} badge-sm">${tc.passed ? 'PASS' : 'FAIL'}</span>
-                            </div>
-                            <div class="text-xs mt-1">
-                                <div>Input: <code class="bg-base-300 px-1 rounded">${tc.input || '(none)'}</code></div>
-                                <div>Expected: <code class="bg-base-300 px-1 rounded">${tc.expected_output}</code></div>
-                                <div>Actual: <code class="bg-base-300 px-1 rounded">${tc.actual_output || '(error)'}</code></div>
-                                ${tc.error ? `<div class="text-error">Error: ${tc.error}</div>` : ''}
-                                <div>Points: ${tc.passed ? tc.points : 0}/${tc.points}</div>
-                            </div>
-                        `;
-                        tcList.appendChild(div);
+                        const result = document.createElement('div');
+                        result.className = `p-2 rounded-xl text-sm whitespace-pre-wrap ${tc.passed ? 'bg-success/20' : 'bg-error/20'}`;
+                        result.textContent = `Test Case #${idx + 1}: ${tc.passed ? 'PASS' : 'FAIL'}
+Input: ${tc.input ?? '(none)'}
+Expected: ${tc.expected_output}
+Actual: ${tc.actual_output ?? '(error)'}
+Points: ${tc.passed ? tc.points : 0}/${tc.points}${tc.error ? '\nError: ' + tc.error : ''}`;
+                        tcList.appendChild(result);
                     });
-                } else {
-                    tcContainer.hidden = true;
+                    document.getElementById('test_case_results_container').hidden = results.length === 0;
+                    el.maxPointsLabel.textContent = `/ ${maxPoints}`;
+                    el.scoreInput.max = maxPoints;
+                    el.scoreInput.min = 0;
+                    el.scoreInput.disabled = submission.is_score_submitted;
+                    el.submissionPlaceholder.hidden = true;
+                    el.submissionDisplay.hidden = false;
+                    el.scoreSection.hidden = false;
+                } catch (error) {
+                    if (requestId === selectionRequest) show_alert(error.message);
                 }
-
-                monaco.editor.setModelLanguage(
-                    submissionEditor.getModel(),
-                    submission.challenge_language
-                );
-                monaco.editor.setModelLanguage(
-                    solutionEditor.getModel(),
-                    submission.challenge_language
-                );
-
-                el.maxPointsLabel.textContent = `/ ${maxPoints}`;
-                el.scoreInput.disabled = submission.is_score_submitted;
-
-                el.submissionPlaceholder.hidden = true;
-                el.submissionDisplay.hidden = false;
-                el.scoreSection.hidden = false;
             };
 
             window.copyCode = () => {
@@ -247,88 +245,103 @@
             // -----------------------------
             document.getElementById('scoreForm').addEventListener('submit', async e => {
                 e.preventDefault();
-
+                if (!submissionId || !submissionCodeHash || el.scoreInput.disabled || savingScore) return;
                 const score = Number(el.scoreInput.value);
-                if (Number.isNaN(score) || score < 0 || score > maxPoints) {
-                    // alert(`Score must be between 0 and ${maxPoints}`);
-                    show_alert(`Score must be between 0 and ${maxPoints}`)
+                if (el.scoreInput.value.trim() === '' || !Number.isInteger(score) || score < 0 || score > maxPoints) {
+                    show_alert(`Score must be a whole number between 0 and ${maxPoints}.`);
                     return;
                 }
 
-                const res = await fetch(
-                    `/admin/api/submissions/${submissionId}/submit-score`, {
+                savingScore = true;
+                const button = e.currentTarget.querySelector('button');
+                button.disabled = true;
+                try {
+                    const res = await fetch(`/admin/api/submissions/${submissionId}/submit-score`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            'Accept': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         },
-                        body: JSON.stringify({
-                            score
-                        }),
-                    }
-                );
-
-                if (!res.ok) return alert('Failed to submit score');
-                window.location.reload();
+                        body: JSON.stringify({ score, code_hash: submissionCodeHash }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.errors?.score?.[0] || data.message || 'Failed to submit score.');
+                    window.location.reload();
+                } catch (error) {
+                    show_alert(error.message);
+                } finally {
+                    savingScore = false;
+                    button.disabled = false;
+                }
             });
 
             // here is the code for the testing of the candidates code
             async function run_code() {
-                const currentLanguage = "Java"
-                const code = submissionEditor.getValue()
-                const url_code_api = "/run-java-code";
+                if (!submissionId || !currentLanguageId) return show_alert("No executable language is configured for this submission.");
+                const currentLanguage = el.solutionLanguage.textContent;
+                const runRequest = selectionRequest;
+                const code = submissionEditor.getValue();
 
                 const outputElement = document.getElementById("code_output_area");
                 outputElement.textContent = `Testing code in the server...`;
 
                 try {
-                    const response = await fetch("/run-java-code", {
+                    const response = await fetch("/run-code", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
+                            "Accept": "application/json",
                             // Ensure the CSRF token element exists before trying to access its attribute
                             "X-CSRF-TOKEN": document
                                 .querySelector('meta[name="csrf-token"]')
                                 ?.getAttribute("content") || "",
                         },
                         body: JSON.stringify({
-                            code: code
+                            code: code,
+                            language_id: currentLanguageId
                         }),
                     });
 
                     const data = await response.json();
+                    if (runRequest !== selectionRequest) return;
 
                     if (response.ok) {
                         outputElement.textContent = `${currentLanguage} Output:\n${data.output}`;
                     } else {
                         // Server-side execution error (e.g., syntax error)
                         outputElement.textContent =
-                            `Server Error (${currentLanguage}):\n${data.error || "Unknown server error"}`;
+                            `Server Error (${currentLanguage}):\n${data.error || data.message || "Unknown server error"}`;
                     }
                 } catch (error) {
                     // Network or fetch error
+                    if (runRequest !== selectionRequest) return;
                     outputElement.textContent = `Network/Fetch Error: ${error.message}`;
                 }
             }
 
             // generate the submission list
-            function getSubmissionList(submissions = []) {
-                const submissionListArea = document.getElementById('codeSubmissionListElem')
-                submissionListArea.innerHTML = '';
-
-                console.log(submissions);
-                submissions.submission.forEach((submission) => {
-                    let subElement = `<div
-                        onclick="view_submission('${submission.id}')"
-                        class="bg-base-300 h-fit rounded-md p-3 hover:bg-base-200 hover:cursor-grab">
-                        <div class="flex flex-row justify-between items-center">
-                            <p class="text-sm">${submission.candidate_name}</p>
-                            <p class="badge badge-xs badge-primary">${submission.challenge_difficulty}</p>
-                        </div>
-                        <p class="">${submission.challenge_title}</p>
-                        <p class="mt-2 text-xs">${submission.submitted_at}</p>
-                    </div>`
-                    submissionListArea.insertAdjacentHTML('beforeend', subElement);
+            function getSubmissionList(submissions) {
+                const submissionListArea = document.getElementById('codeSubmissionListElem');
+                submissionListArea.replaceChildren();
+                submissions.submission.forEach(submission => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'bg-base-300 h-fit rounded-md p-3 hover:bg-base-200 text-left';
+                    button.addEventListener('click', () => window.view_submission(submission.id));
+                    const name = document.createElement('p');
+                    name.className = 'text-sm';
+                    name.textContent = submission.candidate_name;
+                    const difficulty = document.createElement('p');
+                    difficulty.className = 'badge badge-xs badge-primary';
+                    difficulty.textContent = submission.challenge_difficulty;
+                    const title = document.createElement('p');
+                    title.textContent = submission.challenge_title;
+                    const time = document.createElement('p');
+                    time.className = 'mt-2 text-xs';
+                    time.textContent = submission.submitted_at;
+                    button.append(name, difficulty, title, time);
+                    submissionListArea.appendChild(button);
                 });
             }
 
@@ -354,7 +367,6 @@
 
                     const submissions = await res.json();
                     getSubmissionList(submissions);
-                    // console.log(submissions);
                 } catch (error) {
                     console.error('Error fetching submissions:', error);
                 }

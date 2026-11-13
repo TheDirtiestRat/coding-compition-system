@@ -97,11 +97,53 @@ class SubmissionRulesTest extends TestCase
             ->assertConflict();
 
         $this->actingAs(User::factory()->create(['user_type' => 'admin']))
-            ->postJson('/admin/api/submissions/'.$submission->id.'/submit-score', ['score' => 100])
+            ->postJson('/admin/api/submissions/'.$submission->id.'/submit-score', ['score' => 100, 'code_hash' => hash('sha256', 'original')])
             ->assertConflict();
 
         $this->assertSame('original', $submission->fresh()->code);
         $this->assertEquals(75, $submission->fresh()->score);
+    }
+
+    public function test_score_rejects_replaced_code_and_accepts_a_fresh_review(): void
+    {
+        $candidate = $this->candidate();
+        $submission = Submissions::create([
+            'candidate_id' => $candidate->id,
+            'challenge_id' => $this->challenge($candidate->event_id)->id,
+            'code' => 'original',
+        ]);
+        $this->actingAs(User::factory()->create(['user_type' => 'admin']));
+        $url = '/admin/api/submissions/'.$submission->id;
+        $codeHash = $this->getJson($url)->assertOk()->json('submission.code_hash');
+
+        $submission->update(['code' => 'replacement']);
+
+        $this->postJson($url.'/submit-score', ['score' => 75, 'code_hash' => $codeHash])
+            ->assertConflict();
+        $this->assertFalse($submission->fresh()->is_score_submitted);
+        $this->assertEquals(0, $submission->fresh()->score);
+
+        $codeHash = $this->getJson($url)->assertOk()->json('submission.code_hash');
+        $this->postJson($url.'/submit-score', ['score' => 75, 'code_hash' => $codeHash])
+            ->assertOk();
+        $this->assertTrue($submission->fresh()->is_score_submitted);
+        $this->assertEquals(75, $submission->fresh()->score);
+    }
+
+    public function test_score_requires_the_reviewed_code_hash(): void
+    {
+        $candidate = $this->candidate();
+        $submission = Submissions::create([
+            'candidate_id' => $candidate->id,
+            'challenge_id' => $this->challenge($candidate->event_id)->id,
+            'code' => 'original',
+        ]);
+
+        $this->actingAs(User::factory()->create(['user_type' => 'admin']))
+            ->postJson('/admin/api/submissions/'.$submission->id.'/submit-score', ['score' => 75])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('code_hash');
+        $this->assertFalse($submission->fresh()->is_score_submitted);
     }
 
     private function candidate(): Candidates
