@@ -320,24 +320,26 @@
         }
 
         async function run_code() {
-            const currentLanguage = "Java"
-            const code = editorInstance.getValue()
-            const url_code_api = "/run-java-code";
+            const currentLanguage = document.getElementById("language").value;
+            const languageId = document.getElementById("language_id").value;
+            const code = editorInstance.getValue();
 
             const outputElement = document.getElementById("code_output_area");
             outputElement.textContent = `Testing code in the server...`;
 
             try {
-                const response = await fetch("/run-java-code", {
+                const response = await fetch("/run-code", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
+                        "Accept": "application/json",
                         "X-CSRF-TOKEN": document
                             .querySelector('meta[name="csrf-token"]')
                             ?.getAttribute("content") || "",
                     },
                     body: JSON.stringify({
-                        code: code
+                        code: code,
+                        language_id: languageId
                     }),
                 });
 
@@ -347,7 +349,7 @@
                     outputElement.textContent = `${currentLanguage} Output:\n${data.output}`;
                 } else {
                     outputElement.textContent =
-                        `Server Error (${currentLanguage}):\n${data.error || "Unknown server error"}`;
+                        `Server Error (${currentLanguage}):\n${data.error || data.message || "Unknown server error"}`;
                 }
             } catch (error) {
                 outputElement.textContent = `Network/Fetch Error: ${error.message}`;
