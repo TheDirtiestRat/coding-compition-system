@@ -32,7 +32,7 @@ class CodeRunnerTest extends TestCase
     {
         return new ProgrammingLanguage([
             'file_extension' => '.php',
-            'run_command' => '"' . PHP_BINARY . '" {file}',
+            'run_command' => '"'.PHP_BINARY.'" {file}',
         ]);
     }
 

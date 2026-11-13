@@ -4,8 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Candidates;
 use App\Models\Challenges;
-use App\Models\ProgrammingLanguage;
 use App\Models\Events;
+use App\Models\ProgrammingLanguage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -107,7 +107,7 @@ class DataConsistencyTest extends TestCase
         });
 
         try {
-            $this->actingAs($admin)->delete('/admin/delete-challenge/' . $challenge->id)->assertStatus(500);
+            $this->actingAs($admin)->delete('/admin/delete-challenge/'.$challenge->id)->assertStatus(500);
 
             $this->assertDatabaseHas('challenges', ['id' => $challenge->id]);
             Storage::disk('public')->assertExists('challenge-photos/example.png');
@@ -115,5 +115,4 @@ class DataConsistencyTest extends TestCase
             Challenges::flushEventListeners();
         }
     }
-
 }

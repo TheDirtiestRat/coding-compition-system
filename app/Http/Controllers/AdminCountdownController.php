@@ -29,7 +29,7 @@ class AdminCountdownController extends Controller
     public function pause()
     {
         $timer = CompetitionTimer::state();
-        if (!$timer['started'] || !$timer['endTime'] || $timer['isTime']) {
+        if (! $timer['started'] || ! $timer['endTime'] || $timer['isTime']) {
             return response()->json(['status' => 'not_running']);
         }
 

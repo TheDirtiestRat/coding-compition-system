@@ -18,7 +18,7 @@ class CompetitionTimer
 
         return [
             'started' => $started,
-            'paused' => !$started && $remaining !== '',
+            'paused' => ! $started && $remaining !== '',
             'current_time' => $now->format('H:i:s'),
             'curTimeInMils' => $now->timestamp,
             'serverTime' => $now->getTimestampMs(),

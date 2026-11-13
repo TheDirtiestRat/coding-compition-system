@@ -46,7 +46,7 @@ return new class extends Migration
             $table->foreignId('language_id')->nullable()->constrained('programming_languages')->nullOnDelete();
         });
 
-        if (!Schema::hasColumn('submissions', 'test_case_results')) {
+        if (! Schema::hasColumn('submissions', 'test_case_results')) {
             Schema::table('submissions', function (Blueprint $table) {
                 $table->json('test_case_results')->nullable()->after('code');
                 $table->boolean('is_auto_reviewed')->default(false)->after('is_score_submitted');

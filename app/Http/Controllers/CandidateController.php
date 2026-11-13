@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Challenges;
 use App\Models\Candidates;
+use App\Models\Challenges;
 use App\Models\Events;
 use App\Models\Submissions;
-use App\Models\ProgrammingLanguage;
-use Illuminate\Support\Facades\Auth;
+use App\Services\CodeRunner;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class CandidateController extends Controller
@@ -31,7 +31,7 @@ class CandidateController extends Controller
         $challenge->photos_list = $challenge->photos->map(function ($photo) {
             return [
                 'id' => $photo->id,
-                'url' => $photo->photo_path ? asset('storage/' . $photo->photo_path) : null,
+                'url' => $photo->photo_path ? asset('storage/'.$photo->photo_path) : null,
             ];
         });
 
@@ -43,7 +43,7 @@ class CandidateController extends Controller
         $user = Auth::user();
         $candidate = Candidates::where('user_id', $user->id)->first();
 
-        if (!$candidate) {
+        if (! $candidate) {
             return view('pages.code-problems', [
                 'challenges' => collect(),
                 'easy_challenges' => collect(),
@@ -54,13 +54,12 @@ class CandidateController extends Controller
             ]);
         }
 
-        $baseQuery = fn($difficulty) =>
-            Challenges::where('challenges.difficulty', $difficulty)->where('challenges.event_id', $candidate->event_id)
-                ->leftJoin('submissions', function ($join) use ($candidate) {
-                    $join->on('submissions.challenge_id', '=', 'challenges.id')
-                        ->where('submissions.candidate_id', '=', $candidate->id);
-                })
-                ->selectRaw("
+        $baseQuery = fn ($difficulty) => Challenges::where('challenges.difficulty', $difficulty)->where('challenges.event_id', $candidate->event_id)
+            ->leftJoin('submissions', function ($join) use ($candidate) {
+                $join->on('submissions.challenge_id', '=', 'challenges.id')
+                    ->where('submissions.candidate_id', '=', $candidate->id);
+            })
+            ->selectRaw("
                     challenges.*,
                     submissions.score,
                     CASE
@@ -69,7 +68,7 @@ class CandidateController extends Controller
                         ELSE 'not_started'
                     END AS status
                 ")
-                ->get();
+            ->get();
 
         $easy_challenges = $baseQuery('easy');
         $medium_challenges = $baseQuery('medium');
@@ -109,18 +108,18 @@ class CandidateController extends Controller
         ));
     }
 
-    public function open_code_editor(string $challenge_id = "-1")
+    public function open_code_editor(string $challenge_id = '-1')
     {
         $user = Auth::user();
         $candidate = Candidates::where('user_id', $user->id)->first();
 
-        if (!$candidate) {
+        if (! $candidate) {
             return redirect('/code-problems');
         }
 
         $event = Events::where('isActive', true)->first();
 
-        if (!$event) {
+        if (! $event) {
             return redirect('/code-problems');
         }
 
@@ -145,7 +144,7 @@ class CandidateController extends Controller
                 ->where('challenges.id', $challenge_id)
                 ->first();
 
-            if (!$details) {
+            if (! $details) {
                 return redirect('/code-problems');
             }
 
@@ -174,10 +173,10 @@ class CandidateController extends Controller
 
         $challenge_id = $request->input('challenge_id');
 
-        if (!$candidate) {
+        if (! $candidate) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Candidate not found.'
+                'message' => 'Candidate not found.',
             ], 404);
         }
 
@@ -185,10 +184,10 @@ class CandidateController extends Controller
             ->where('event_id', $candidate->event_id)
             ->find($challenge_id);
 
-        if (!$challenge) {
+        if (! $challenge) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Challenge not found.'
+                'message' => 'Challenge not found.',
             ], 404);
         }
 
@@ -241,7 +240,7 @@ class CandidateController extends Controller
                 }
 
                 $testCaseResults[] = $result;
-                if (!$result['passed']) {
+                if (! $result['passed']) {
                     $allPassed = false;
                 }
             }
@@ -286,7 +285,7 @@ class CandidateController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => $allPassed && $testCases->isNotEmpty()
-                ? 'All test cases passed! Score: ' . $totalAutoScore
+                ? 'All test cases passed! Score: '.$totalAutoScore
                 : 'Code submitted successfully. Awaiting review...',
             'auto_reviewed' => $allPassed && $testCases->isNotEmpty(),
             'test_case_results' => $testCaseResults,
@@ -295,6 +294,6 @@ class CandidateController extends Controller
 
     private function runCodeWithInput($code, $language, $input, $timeout = 5)
     {
-        return app(\App\Services\CodeRunner::class)->run($code, $language, $input, $timeout);
+        return app(CodeRunner::class)->run($code, $language, $input, $timeout);
     }
 }

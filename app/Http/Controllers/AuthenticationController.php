@@ -29,7 +29,7 @@ class AuthenticationController extends Controller
 
         $activeEvent = Events::where('isActive', true)->first();
 
-        if (!$activeEvent) {
+        if (! $activeEvent) {
             return view('authentication.registration-closed');
         }
 
@@ -48,7 +48,7 @@ class AuthenticationController extends Controller
 
         $activeEvent = Events::where('isActive', true)->first();
 
-        if (!$activeEvent) {
+        if (! $activeEvent) {
             return redirect('/register')->with('error', 'No active event available for registration.');
         }
 
@@ -62,7 +62,7 @@ class AuthenticationController extends Controller
             $user = DB::transaction(function () use ($validated, $activeEvent) {
                 $user = User::create([
                     'name' => trim($validated['username']),
-                    'email' => trim(strtolower($validated['username'])) . '@hungergame.com',
+                    'email' => trim(strtolower($validated['username'])).'@hungergame.com',
                     'password' => Hash::make($validated['password']),
                     'user_type' => 'user',
                 ]);
@@ -81,7 +81,7 @@ class AuthenticationController extends Controller
 
             return redirect('/code-problems');
         } catch (\Exception $e) {
-            return back()->withInput()->withErrors(['error' => 'Registration failed: ' . $e->getMessage()]);
+            return back()->withInput()->withErrors(['error' => 'Registration failed: '.$e->getMessage()]);
         }
     }
 
