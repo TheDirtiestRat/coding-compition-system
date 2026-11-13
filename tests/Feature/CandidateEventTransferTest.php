@@ -95,6 +95,41 @@ class CandidateEventTransferTest extends TestCase
         $this->assertDatabaseCount('submissions', 2);
     }
 
+    public function test_leaderboards_only_list_candidates_from_the_active_event(): void
+    {
+        $candidate = $this->candidate();
+        $other = Candidates::create([
+            'event_id' => Events::create(['title' => 'Other'])->id,
+            'fullname' => 'Other contestant',
+            'user_id' => User::factory()->create()->id,
+        ]);
+        Submissions::create([
+            'candidate_id' => $other->id,
+            'challenge_id' => $this->challenge($other->event_id)->id,
+            'code' => 'original',
+            'score' => 90,
+            'is_score_submitted' => true,
+        ]);
+        $this->actingAs(User::factory()->create(['user_type' => 'admin']));
+
+        foreach (['/admin/dashboard', '/admin/results'] as $url) {
+            $this->get($url)->assertOk()
+                ->assertViewHas('candidates', fn ($candidates) => $candidates->modelKeys() === [$candidate->id]);
+        }
+    }
+
+    public function test_leaderboards_are_empty_without_an_active_event(): void
+    {
+        $candidate = $this->candidate();
+        Events::findOrFail($candidate->event_id)->update(['isActive' => false]);
+        $this->actingAs(User::factory()->create(['user_type' => 'admin']));
+
+        foreach (['/admin/dashboard', '/admin/results'] as $url) {
+            $this->get($url)->assertOk()
+                ->assertViewHas('candidates', fn ($candidates) => $candidates->isEmpty());
+        }
+    }
+
     public function test_candidate_moved_during_code_execution_cannot_save_old_event_submission(): void
     {
         $candidate = $this->candidate();

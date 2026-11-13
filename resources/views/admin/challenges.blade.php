@@ -51,9 +51,9 @@
                         <legend class="fieldset-legend">Challenge Title</legend>
                         <input type="text" class="input w-full" name="title" id="title" value="{{ old('title') }}" placeholder="Type here" />
                         <legend class="fieldset-legend">Description</legend>
-                        <textarea class="textarea h-[200px] w-full" name="description" id="description"
+                        <textarea class="textarea h-[200px] w-full" name="description" id="description" required
                             placeholder="What is the Challenge about?">{{ old('description') }}</textarea>
-                        <p class="label">Optional</p>
+                        <p class="label">Required</p>
 
                         <div class="flex flex-row gap-3">
                             <fieldset class="fieldset w-full">
@@ -287,11 +287,7 @@
 
             editorInstance = monaco.editor.create(container, {
                 language: document.getElementById('language').value || 'java',
-                value: Object.hasOwn(challengeDraft, 'code_solution') ? (challengeDraft.code_solution ?? '') : `class Main {
-    public static void main(String[] args) {
-        // code here ...
-    }
-}`,
+                value: challengeDraft.code_solution ?? '',
                 automaticLayout: true,
                 theme: 'vs-dark',
                 minimap: {

@@ -160,7 +160,7 @@
                     <!-- Username Field -->
                     <div class="mb-6">
                         <label class="block text-gray-900 text-sm font-semibold mb-2" for="username">
-                            Username or Email
+                            Username
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -171,7 +171,7 @@
                                 </svg>
                             </div>
                             <input type="text" id="username" name="username"
-                                placeholder="Enter your username or email"
+                                placeholder="Enter your username"
                                 class="w-full pl-10 pr-4 py-3 border border-gray-700 rounded-lg focus:ring-2 bg-white text-gray-900 placeholder-gray-500 focus:ring-blue-900 focus:border-blue-500 transition duration-200 outline-none"
                                 value="{{ old('username') }}" />
                         </div>

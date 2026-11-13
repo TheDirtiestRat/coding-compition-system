@@ -73,6 +73,7 @@ form.listeners.submit({ preventDefault() {} });
 assert.equal(form.submitted, true);
 assert.equal(document.getElementById('challenge_id').value, '7');
 assert.equal(document.getElementById('code_solution').value, code);
+assert.equal(initialize({}).editorOptions.value, '', 'a new Python solution must not start with Java code');
 assert.equal(initialize({ code_solution: null }).editorOptions.value, '', 'empty invalid code must stay empty');
 assert.equal(initialize({ test_cases_present: '1' }).document.getElementById('test_cases_container').children.length, 0);
 console.log('Challenge draft editor, test cases, photo intent and edit resubmission checks passed.');
