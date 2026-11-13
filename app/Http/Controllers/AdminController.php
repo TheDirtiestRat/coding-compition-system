@@ -149,9 +149,28 @@ class AdminController extends Controller
 
     public function delete_event(string $event_id)
     {
-        Events::destroy($event_id);
+        DB::transaction(function () use ($event_id) {
+            $event = Events::findOrFail($event_id);
+            $userIds = $event->candidates()->pluck('user_id');
+            $photoPaths = DB::table('challenge_photos')
+                ->join('challenges', 'challenge_photos.challenge_id', '=', 'challenges.id')
+                ->where('challenges.event_id', $event_id)
+                ->pluck('challenge_photos.photo_path')->all();
 
-        return redirect('/admin/events')->with('success', 'Event and related data deleted successfully.');
+            $event->delete();
+
+            User::whereIn('id', $userIds)
+                ->where('user_type', 'user')
+                ->where('id', '!=', auth()->id())
+                ->whereDoesntHave('candidates')
+                ->delete();
+
+            DB::afterCommit(function () use ($photoPaths) {
+                Storage::disk('public')->delete($photoPaths);
+            });
+        });
+
+        return redirect('/admin/events')->with('success', 'Event, related data, and associated contestant accounts deleted successfully. Accounts used by other events were preserved.');
     }
 
     public function add_candidate(Request $request)
