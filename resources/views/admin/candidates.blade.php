@@ -139,7 +139,9 @@
                                     <a href="{{ url('/admin/candidates/view/' . $candidate->id) }}"
                                         class="btn btn-xs btn-info">View</a>
                                     <button class="btn btn-xs"
-                                        onclick="edit_candidate('{{ $candidate->id }}','{{ $candidate->event_id }}','{{ $candidate->fullname }}','{{ optional($candidate->user)->name }}')">Edit</button>
+                                        data-id="{{ $candidate->id }}" data-event-id="{{ $candidate->event_id }}"
+                                        data-name="{{ $candidate->fullname }}" data-username="{{ optional($candidate->user)->name }}"
+                                        onclick="edit_candidate(this.dataset.id, this.dataset.eventId, this.dataset.name, this.dataset.username)">Edit</button>
                                     <form action="{{ url('/admin/delete-candidate/' . $candidate->id) }}"
                                         class="candidate_delete_form" method="POST">
                                         @csrf

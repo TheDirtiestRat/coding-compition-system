@@ -105,7 +105,8 @@
                                 
                                 <td class="flex flex-row items-center justify-center gap-2">
                                     <button class="btn btn-xs"
-                                        onclick="edit_event_input('{{ $event->id }}','{{ $event->title }}')">Edit</button>
+                                        data-id="{{ $event->id }}" data-title="{{ $event->title }}"
+                                        onclick="edit_event_input(this.dataset.id, this.dataset.title)">Edit</button>
                                     <form action="{{ url('/admin/delete-event/' . $event->id) }}"
                                         class="candidate_delete_form" method="POST">
                                         @csrf
@@ -131,8 +132,6 @@
             const edit_tab = document.getElementById("edit_tabs");
             const edit_event_id = document.getElementById("edit_event_id");
             const event_title = document.getElementById("edit_title");
-
-            console.log(ev_id);
 
             edit_event_id.value = ev_id;
             event_title.value = title;
