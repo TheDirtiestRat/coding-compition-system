@@ -277,7 +277,9 @@ class AdminController extends Controller
                 ->latest()->get();
         }
 
-        return view('admin.challenges', compact('challenges', 'events', 'languages'));
+        $draftPhotos = Challenges::find(session()->getOldInput('challenge_id'))?->photos ?? collect();
+
+        return view('admin.challenges', compact('challenges', 'events', 'languages', 'draftPhotos'));
     }
 
     public function get_challenge_details($id)
