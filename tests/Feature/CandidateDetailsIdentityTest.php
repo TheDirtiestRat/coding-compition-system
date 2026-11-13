@@ -19,8 +19,8 @@ class CandidateDetailsIdentityTest extends TestCase
         $aliceUser = User::factory()->create(['name' => 'alice', 'email' => 'alice@example.com']);
         $bob = Candidates::create(['event_id' => $event->id, 'fullname' => 'Bob Candidate', 'group' => 'Blue', 'user_id' => $bobUser->id]);
         $alice = Candidates::create(['event_id' => $event->id, 'fullname' => 'Alice Candidate', 'group' => 'Red', 'user_id' => $aliceUser->id]);
-        $bob->forceFill(['created_at' => now()->subDay()])->save();
-        $alice->forceFill(['created_at' => now()])->save();
+        $bob->forceFill(['created_at' => now()])->save();
+        $alice->forceFill(['created_at' => now()->subDay()])->save();
 
         $challenge = Challenges::create([
             'event_id' => $event->id,
@@ -28,7 +28,7 @@ class CandidateDetailsIdentityTest extends TestCase
             'description' => 'Solve it',
             'code_solution' => 'echo "solution";',
             'points' => 10,
-            'difficulty' => 'Easy',
+            'difficulty' => 'easy',
             'language' => 'php',
         ]);
         Submissions::create([
