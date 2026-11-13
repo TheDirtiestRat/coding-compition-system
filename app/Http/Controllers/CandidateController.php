@@ -284,7 +284,8 @@ class CandidateController extends Controller
                 'This challenge changed while your code was running. Reload the challenge and submit again.'
             );
 
-            Candidates::whereKey($candidate->id)->lockForUpdate()->firstOrFail();
+            $lockedCandidate = Candidates::whereKey($candidate->id)->lockForUpdate()->firstOrFail();
+            abort_if((int) $lockedCandidate->event_id !== (int) $challenge->event_id, 409, 'Your event changed. Reload the challenges before submitting.');
 
             $submission = Submissions::where('candidate_id', $candidate->id)
                 ->where('challenge_id', $challenge_id)
