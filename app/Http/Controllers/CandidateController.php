@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Challenges;
 use App\Models\Candidates;
+use App\Models\Challenges;
 use App\Models\Events;
 use App\Models\Submissions;
-use App\Models\ProgrammingLanguage;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\Process\Process;
 use Illuminate\Support\Facades\File;
-use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Illuminate\Support\Str;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
+use Symfony\Component\Process\Process;
 
 class CandidateController extends Controller
 {
@@ -26,12 +25,16 @@ class CandidateController extends Controller
 
     public function get_challenge_details($id)
     {
-        $challenge = Challenges::with('photos')->select(['title', 'description', 'difficulty', 'points'])->where('id', $id)->first();
+        $candidate = Candidates::where('user_id', Auth::id())->firstOrFail();
+        $challenge = Challenges::with('photos')
+            ->select(['id', 'title', 'description', 'difficulty', 'points'])
+            ->where('event_id', $candidate->event_id)
+            ->findOrFail($id);
 
         $challenge->photos_list = $challenge->photos->map(function ($photo) {
             return [
                 'id' => $photo->id,
-                'url' => $photo->photo_path ? asset('storage/' . $photo->photo_path) : null,
+                'url' => $photo->photo_path ? asset('storage/'.$photo->photo_path) : null,
             ];
         });
 
@@ -43,17 +46,23 @@ class CandidateController extends Controller
         $user = Auth::user();
         $candidate = Candidates::where('user_id', $user->id)->first();
 
-        if (!$candidate) {
-            return view('pages.code-problems', compact('challenges', 'easy_challenges', 'medium_challenges', 'hard_challenges', 'unsolved_challenge_id') ?? []);
+        if (! $candidate) {
+            return view('pages.code-problems', [
+                'challenges' => collect(),
+                'easy_challenges' => collect(),
+                'medium_challenges' => collect(),
+                'hard_challenges' => collect(),
+                'unsolved_challenge_id' => null,
+                'competition_started' => false,
+            ]);
         }
 
-        $baseQuery = fn($difficulty) =>
-            Challenges::where('challenges.difficulty', $difficulty)->where('challenges.event_id', $candidate->event_id)
-                ->leftJoin('submissions', function ($join) use ($candidate) {
-                    $join->on('submissions.challenge_id', '=', 'challenges.id')
-                        ->where('submissions.candidate_id', '=', $candidate->id);
-                })
-                ->selectRaw("
+        $baseQuery = fn ($difficulty) => Challenges::where('challenges.difficulty', $difficulty)->where('challenges.event_id', $candidate->event_id)
+            ->leftJoin('submissions', function ($join) use ($candidate) {
+                $join->on('submissions.challenge_id', '=', 'challenges.id')
+                    ->where('submissions.candidate_id', '=', $candidate->id);
+            })
+            ->selectRaw("
                     challenges.*,
                     submissions.score,
                     CASE
@@ -62,7 +71,7 @@ class CandidateController extends Controller
                         ELSE 'not_started'
                     END AS status
                 ")
-                ->get();
+            ->get();
 
         $easy_challenges = $baseQuery('easy');
         $medium_challenges = $baseQuery('medium');
@@ -102,18 +111,18 @@ class CandidateController extends Controller
         ));
     }
 
-    public function open_code_editor(string $challenge_id = "-1")
+    public function open_code_editor(string $challenge_id = '-1')
     {
         $user = Auth::user();
         $candidate = Candidates::where('user_id', $user->id)->first();
 
-        if (!$candidate) {
+        if (! $candidate) {
             return redirect('/code-problems');
         }
 
         $event = Events::where('isActive', true)->first();
 
-        if (!$event) {
+        if (! $event) {
             return redirect('/code-problems');
         }
 
@@ -138,12 +147,12 @@ class CandidateController extends Controller
                 ->where('challenges.id', $challenge_id)
                 ->first();
 
-            if (!$details) {
+            if (! $details) {
                 return redirect('/code-problems');
             }
 
             $next_id = Challenges::where('id', '>', $challenge_id)
-                ->where('event_id', $event->id)
+                ->where('event_id', $candidate->event_id)
                 ->orderBy('id', 'asc')
                 ->first('id');
 
@@ -161,24 +170,27 @@ class CandidateController extends Controller
         $candidate = Candidates::where('user_id', $user->id)->first();
 
         $request->validate([
-            'challenge_id' => 'required|string',
+            'challenge_id' => 'required|integer',
             'code' => 'required|string',
         ]);
 
         $challenge_id = $request->input('challenge_id');
-        $challenge = Challenges::with('activeTestCases', 'languageModel')->find($challenge_id);
 
-        if (!$candidate) {
+        if (! $candidate) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Candidate not found.'
+                'message' => 'Candidate not found.',
             ], 404);
         }
 
-        if (!$challenge) {
+        $challenge = Challenges::with('activeTestCases', 'languageModel')
+            ->where('event_id', $candidate->event_id)
+            ->find($challenge_id);
+
+        if (! $challenge) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Challenge not found.'
+                'message' => 'Challenge not found.',
             ], 404);
         }
 
@@ -198,10 +210,11 @@ class CandidateController extends Controller
         // Auto-check test cases
         $testCases = $challenge->activeTestCases;
         $testCaseResults = [];
-        $allPassed = true;
+        $canAutoGrade = $testCases->isNotEmpty() && $challenge->languageModel?->is_active;
+        $allPassed = (bool) $canAutoGrade;
         $totalAutoScore = 0;
 
-        if ($testCases->isNotEmpty() && $challenge->languageModel) {
+        if ($canAutoGrade) {
             $language = $challenge->languageModel;
             $executionTimeout = 5;
 
@@ -230,7 +243,7 @@ class CandidateController extends Controller
                 }
 
                 $testCaseResults[] = $result;
-                if (!$result['passed']) {
+                if (! $result['passed']) {
                     $allPassed = false;
                 }
             }
@@ -240,8 +253,10 @@ class CandidateController extends Controller
             'candidate_id' => $candidate->id,
             'challenge_id' => $challenge_id,
             'code' => $code,
-            'test_case_results' => json_encode($testCaseResults),
+            'test_case_results' => $testCaseResults,
         ];
+
+        $totalAutoScore = min($totalAutoScore, $challenge->points);
 
         // If all test cases passed, auto-review
         if ($testCases->isNotEmpty() && $allPassed) {
@@ -254,16 +269,26 @@ class CandidateController extends Controller
             $submissionData['is_auto_reviewed'] = false;
         }
 
-        Submissions::upsert(
-            $submissionData,
-            uniqueBy: ['candidate_id', 'challenge_id'],
-            update: ['code', 'score', 'is_score_submitted', 'is_auto_reviewed', 'test_case_results']
-        );
+        DB::transaction(function () use ($candidate, $challenge_id, $submissionData) {
+            Candidates::whereKey($candidate->id)->lockForUpdate()->firstOrFail();
+
+            $submission = Submissions::where('candidate_id', $candidate->id)
+                ->where('challenge_id', $challenge_id)
+                ->lockForUpdate()
+                ->first();
+
+            abort_if($submission?->is_score_submitted, 409, 'This submission has already been reviewed.');
+
+            Submissions::updateOrCreate(
+                ['candidate_id' => $candidate->id, 'challenge_id' => $challenge_id],
+                $submissionData
+            );
+        });
 
         return response()->json([
             'status' => 'success',
             'message' => $allPassed && $testCases->isNotEmpty()
-                ? 'All test cases passed! Score: ' . $totalAutoScore
+                ? 'All test cases passed! Score: '.$totalAutoScore
                 : 'Code submitted successfully. Awaiting review...',
             'auto_reviewed' => $allPassed && $testCases->isNotEmpty(),
             'test_case_results' => $testCaseResults,
@@ -273,11 +298,11 @@ class CandidateController extends Controller
     private function runCodeWithInput($code, $language, $input, $timeout = 5)
     {
         $uniqueId = Str::random(10);
-        $tempDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'auto_test_' . $uniqueId;
+        $tempDir = sys_get_temp_dir().DIRECTORY_SEPARATOR.'auto_test_'.$uniqueId;
         File::makeDirectory($tempDir);
 
         $className = 'Main';
-        $sourceFile = $tempDir . DIRECTORY_SEPARATOR . $className . $language->file_extension;
+        $sourceFile = $tempDir.DIRECTORY_SEPARATOR.$className.$language->file_extension;
         File::put($sourceFile, $code);
 
         try {
@@ -287,12 +312,12 @@ class CandidateController extends Controller
                 $compileProcess->setTimeout($timeout);
                 $compileProcess->run();
 
-                if (!$compileProcess->isSuccessful()) {
-                    throw new \RuntimeException("Compilation Error:\n" . $compileProcess->getErrorOutput());
+                if (! $compileProcess->isSuccessful()) {
+                    throw new \RuntimeException("Compilation Error:\n".$compileProcess->getErrorOutput());
                 }
             }
 
-            $filename = $className . $language->file_extension;
+            $filename = $className.$language->file_extension;
             $runCmd = str_replace('{file}', $filename, $language->run_command);
             $runCmd = str_replace('{dir}', $tempDir, $runCmd);
             $runProcess = Process::fromShellCommandline($runCmd, $tempDir);
@@ -302,7 +327,7 @@ class CandidateController extends Controller
             }
             $runProcess->run();
 
-            if (!$runProcess->isSuccessful()) {
+            if (! $runProcess->isSuccessful()) {
                 throw new \RuntimeException($runProcess->getErrorOutput() ?: 'Execution error');
             }
 
