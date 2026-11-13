@@ -56,10 +56,16 @@ class SubmissionsController extends Controller
         ]);
 
         try {
-            $submission->update([
-                'score' => $validated['score'],
-                'is_score_submitted' => true,
-            ]);
+            $updated = Submissions::whereKey($submission->id)
+                ->where('is_score_submitted', false)
+                ->update([
+                    'score' => $validated['score'],
+                    'is_score_submitted' => true,
+                ]);
+
+            if (!$updated) {
+                return response()->json(['message' => 'Score has already been submitted.'], 409);
+            }
         } catch (\Throwable $e) {
             Log::error('Failed to submit score', [
                 'submission_id' => $id,
