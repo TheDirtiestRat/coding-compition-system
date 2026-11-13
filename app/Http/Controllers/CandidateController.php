@@ -260,9 +260,11 @@ class CandidateController extends Controller
         ];
 
         $totalAutoScore = min($totalAutoScore, $challenge->points);
+        // Ignore binary rounding noise when fractional case points cover the integer maximum.
+        $autoReviewed = $allPassed && round($totalAutoScore, 10) >= $challenge->points;
 
-        // If all test cases passed, auto-review
-        if ($testCases->isNotEmpty() && $allPassed) {
+        if ($autoReviewed) {
+            $totalAutoScore = $challenge->points;
             $submissionData['score'] = $totalAutoScore;
             $submissionData['is_score_submitted'] = true;
             $submissionData['is_auto_reviewed'] = true;
@@ -301,10 +303,10 @@ class CandidateController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => $allPassed && $testCases->isNotEmpty()
+            'message' => $autoReviewed
                 ? 'All test cases passed! Score: '.$totalAutoScore
                 : 'Code submitted successfully. Awaiting review...',
-            'auto_reviewed' => $allPassed && $testCases->isNotEmpty(),
+            'auto_reviewed' => $autoReviewed,
         ], 200);
     }
 
