@@ -134,7 +134,6 @@ class CandidateController extends Controller
                         challenges.*,
                         submissions.score,
                         submissions.code,
-                        submissions.test_case_results,
                         CASE
                             WHEN submissions.is_score_submitted = 1 THEN 'reviewed'
                             WHEN submissions.id IS NOT NULL THEN 'submitted'
@@ -308,7 +307,6 @@ class CandidateController extends Controller
                 ? 'All test cases passed! Score: '.$totalAutoScore
                 : 'Code submitted successfully. Awaiting review...',
             'auto_reviewed' => $autoReviewed,
-            'test_case_results' => $testCaseResults,
         ], 200);
     }
 
