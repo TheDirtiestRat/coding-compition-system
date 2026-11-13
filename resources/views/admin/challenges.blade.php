@@ -287,11 +287,7 @@
 
             editorInstance = monaco.editor.create(container, {
                 language: document.getElementById('language').value || 'java',
-                value: Object.hasOwn(challengeDraft, 'code_solution') ? (challengeDraft.code_solution ?? '') : `class Main {
-    public static void main(String[] args) {
-        // code here ...
-    }
-}`,
+                value: challengeDraft.code_solution ?? '',
                 automaticLayout: true,
                 theme: 'vs-dark',
                 minimap: {
