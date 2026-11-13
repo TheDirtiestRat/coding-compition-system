@@ -7,8 +7,8 @@
             
             <form method="dialog" class="flex justify-center w-full gap-4">
                 <!-- if there is a button in form, it will close the modal -->
-                <button class="btn w-20" id="accept_alert_btn">Accept</button>
-                <button class="btn w-20">Close</button>
+                <button class="btn w-20" id="accept_alert_btn" value="accept">Accept</button>
+                <button class="btn w-20" value="cancel">Close</button>
             </form>
         </div>
     </div>
