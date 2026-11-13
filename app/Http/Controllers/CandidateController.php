@@ -266,7 +266,17 @@ class CandidateController extends Controller
             $submissionData['is_auto_reviewed'] = false;
         }
 
-        DB::transaction(function () use ($candidate, $challenge_id, $submissionData) {
+        DB::transaction(function () use ($candidate, $challenge_id, $challenge, $submissionData) {
+            // Serialize first submissions with edits, without holding locks while code executes.
+            $currentChallenge = Challenges::lockForUpdate()->find($challenge_id);
+            abort_if(
+                ! $currentChallenge
+                    || $currentChallenge->getAttributes() !== $challenge->getAttributes()
+                    || $currentChallenge->activeTestCases->toArray() !== $challenge->activeTestCases->toArray(),
+                409,
+                'This challenge changed while your code was running. Reload the challenge and submit again.'
+            );
+
             Candidates::whereKey($candidate->id)->lockForUpdate()->firstOrFail();
 
             $submission = Submissions::where('candidate_id', $candidate->id)
