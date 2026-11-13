@@ -266,8 +266,9 @@ class CandidateController extends Controller
             $submissionData['is_auto_reviewed'] = false;
         }
 
-        DB::transaction(function () use ($candidate, $challenge_id, $submissionData) {
-            Candidates::whereKey($candidate->id)->lockForUpdate()->firstOrFail();
+        DB::transaction(function () use ($candidate, $challenge, $challenge_id, $submissionData) {
+            $lockedCandidate = Candidates::whereKey($candidate->id)->lockForUpdate()->firstOrFail();
+            abort_if((int) $lockedCandidate->event_id !== (int) $challenge->event_id, 409, 'Your event changed. Reload the challenges before submitting.');
 
             $submission = Submissions::where('candidate_id', $candidate->id)
                 ->where('challenge_id', $challenge_id)

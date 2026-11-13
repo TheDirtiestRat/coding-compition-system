@@ -39,7 +39,9 @@ class AdminController extends Controller
     private function ranked_candidates()
     {
         return Candidates::select('candidates.*')->selectSub(
-            Submissions::selectRaw('COALESCE(SUM(score), 0)')->whereColumn('candidate_id', 'candidates.id'),
+            Submissions::selectRaw('COALESCE(SUM(score), 0)')
+                ->whereColumn('candidate_id', 'candidates.id')
+                ->whereHas('challenge', fn ($query) => $query->whereColumn('challenges.event_id', 'candidates.event_id')),
             'total_score'
         )->orderByDesc('total_score');
     }
@@ -198,7 +200,12 @@ class AdminController extends Controller
 
         try {
             DB::transaction(function () use ($validatedData) {
-                $candidate = Candidates::findOrFail($validatedData['candidate_id']);
+                $candidate = Candidates::whereKey($validatedData['candidate_id'])->lockForUpdate()->firstOrFail();
+                if ((int) $candidate->event_id !== (int) $validatedData['event_id'] && $candidate->submissions()->exists()) {
+                    throw ValidationException::withMessages([
+                        'event_id' => 'A competitor with submissions cannot be moved to another event.',
+                    ]);
+                }
                 $user = $candidate->user;
 
                 $user->update([
@@ -217,6 +224,8 @@ class AdminController extends Controller
                     'fullname' => $validatedData['edit_name'],
                 ]);
             });
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             return redirect('/admin/candidates')->with('error', 'Error updating competitor: '.$e->getMessage());
         }
