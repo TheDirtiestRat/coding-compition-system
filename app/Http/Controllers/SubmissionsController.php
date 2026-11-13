@@ -45,7 +45,7 @@ class SubmissionsController extends Controller
         $maxPoints = $submission->challenge->points;
 
         $validated = $request->validate([
-            'score' => ['required', 'integer', 'min:0', 'max:' . $maxPoints],
+            'score' => ['required', 'integer', 'min:0', 'max:'.$maxPoints],
         ]);
 
         try {
@@ -56,7 +56,7 @@ class SubmissionsController extends Controller
                     'is_score_submitted' => true,
                 ]);
 
-            if (!$updated) {
+            if (! $updated) {
                 return response()->json(['message' => 'Score has already been submitted.'], 409);
             }
         } catch (\Throwable $e) {

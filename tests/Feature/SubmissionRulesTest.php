@@ -6,8 +6,10 @@ use App\Http\Middleware\IsTimerStop;
 use App\Models\Candidates;
 use App\Models\Challenges;
 use App\Models\Events;
+use App\Models\ProgrammingLanguage;
 use App\Models\Submissions;
 use App\Models\User;
+use App\Services\CodeRunner;
 use Tests\TestCase;
 
 class SubmissionRulesTest extends TestCase
@@ -20,11 +22,11 @@ class SubmissionRulesTest extends TestCase
         $otherChallenge = $this->challenge(Events::create(['title' => 'Other'])->id);
 
         $this->actingAs($candidate->user)
-            ->getJson('/api/get-challenge-details/' . $challenge->id)
+            ->getJson('/api/get-challenge-details/'.$challenge->id)
             ->assertOk()
             ->assertJsonCount(1, 'photos_list');
 
-        $this->getJson('/api/get-challenge-details/' . $otherChallenge->id)->assertNotFound();
+        $this->getJson('/api/get-challenge-details/'.$otherChallenge->id)->assertNotFound();
     }
 
     public function test_missing_language_leaves_test_cases_awaiting_review(): void
@@ -62,7 +64,7 @@ class SubmissionRulesTest extends TestCase
     {
         $candidate = $this->candidate();
         $challenge = $this->challenge($candidate->event_id);
-        $language = \App\Models\ProgrammingLanguage::create([
+        $language = ProgrammingLanguage::create([
             'name' => 'python',
             'file_extension' => '.py',
             'run_command' => 'python {file}',
@@ -70,7 +72,7 @@ class SubmissionRulesTest extends TestCase
         ]);
         $challenge->update(['language_id' => $language->id]);
         $challenge->testCases()->create(['expected_output' => 'hello', 'points' => 100]);
-        $this->mock(\App\Services\CodeRunner::class)->shouldNotReceive('run');
+        $this->mock(CodeRunner::class)->shouldNotReceive('run');
 
         $this->withoutMiddleware(IsTimerStop::class)->actingAs($candidate->user)
             ->postJson('/api/submit-code-for-review', ['challenge_id' => $challenge->id, 'code' => 'print("hello")'])
@@ -95,7 +97,7 @@ class SubmissionRulesTest extends TestCase
             ->assertConflict();
 
         $this->actingAs(User::factory()->create(['user_type' => 'admin']))
-            ->postJson('/admin/api/submissions/' . $submission->id . '/submit-score', ['score' => 100])
+            ->postJson('/admin/api/submissions/'.$submission->id.'/submit-score', ['score' => 100])
             ->assertConflict();
 
         $this->assertSame('original', $submission->fresh()->code);
