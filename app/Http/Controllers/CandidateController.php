@@ -10,10 +10,6 @@ use App\Models\ProgrammingLanguage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\Process\Process;
-use Illuminate\Support\Facades\File;
-use Symfony\Component\Process\Exception\ProcessTimedOutException;
-use Illuminate\Support\Str;
 
 class CandidateController extends Controller
 {
@@ -298,45 +294,6 @@ class CandidateController extends Controller
 
     private function runCodeWithInput($code, $language, $input, $timeout = 5)
     {
-        $uniqueId = Str::random(10);
-        $tempDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'auto_test_' . $uniqueId;
-        File::makeDirectory($tempDir);
-
-        $className = 'Main';
-        $sourceFile = $tempDir . DIRECTORY_SEPARATOR . $className . $language->file_extension;
-        File::put($sourceFile, $code);
-
-        try {
-            if ($language->compile_command) {
-                $compileCmd = str_replace('{file}', $sourceFile, $language->compile_command);
-                $compileProcess = Process::fromShellCommandline($compileCmd, $tempDir);
-                $compileProcess->setTimeout($timeout);
-                $compileProcess->run();
-
-                if (!$compileProcess->isSuccessful()) {
-                    throw new \RuntimeException("Compilation Error:\n" . $compileProcess->getErrorOutput());
-                }
-            }
-
-            $filename = $className . $language->file_extension;
-            $runCmd = str_replace('{file}', $filename, $language->run_command);
-            $runCmd = str_replace('{dir}', $tempDir, $runCmd);
-            $runProcess = Process::fromShellCommandline($runCmd, $tempDir);
-            $runProcess->setTimeout($timeout);
-            if ($input) {
-                $runProcess->setInput($input);
-            }
-            $runProcess->run();
-
-            if (!$runProcess->isSuccessful()) {
-                throw new \RuntimeException($runProcess->getErrorOutput() ?: 'Execution error');
-            }
-
-            return $runProcess->getOutput();
-        } catch (ProcessTimedOutException $e) {
-            throw new \RuntimeException("Process timed out (Max {$timeout}s)");
-        } finally {
-            File::deleteDirectory($tempDir);
-        }
+        return app(\App\Services\CodeRunner::class)->run($code, $language, $input, $timeout);
     }
 }
