@@ -99,23 +99,8 @@
                         {{-- Test Cases --}}
                         <fieldset class="fieldset">
                             <legend class="fieldset-legend">Test Cases (for auto-grading)</legend>
-                            <div id="test_cases_container">
-                                <div class="test-case-entry flex flex-row gap-2 items-end mb-2">
-                                    <div class="basis-1/4">
-                                        <label class="label-text text-xs">Input</label>
-                                        <textarea class="textarea textarea-bordered w-full text-sm" name="test_cases[0][input]" placeholder="stdin input"></textarea>
-                                    </div>
-                                    <div class="basis-1/3">
-                                        <label class="label-text text-xs">Expected Output</label>
-                                        <textarea class="textarea textarea-bordered w-full text-sm" name="test_cases[0][expected_output]" placeholder="Expected output" required></textarea>
-                                    </div>
-                                    <div class="basis-1/6">
-                                        <label class="label-text text-xs">Points</label>
-                                        <input type="number" class="input input-bordered w-full input-sm" name="test_cases[0][points]" value="0" min="0" step="0.5" required />
-                                    </div>
-                                    <button type="button" class="btn btn-sm btn-error remove-test-case" disabled>-</button>
-                                </div>
-                            </div>
+                            <input type="hidden" name="test_cases_present" value="1" />
+                            <div id="test_cases_container"></div>
                             <button type="button" id="add_test_case" class="btn btn-sm btn-ghost mt-1">+ Add Test Case</button>
                         </fieldset>
 
@@ -154,7 +139,7 @@
         let codeLanguage;
         let editorInstance;
 
-        let testCaseIndex = 1;
+        let testCaseIndex = 0;
 
         function edit_challenge(challenge_id) {
             const challenge_id_elem = document.getElementById("challenge_id");
@@ -235,9 +220,6 @@
                             addTestCaseEntry(tc, idx);
                             testCaseIndex = idx + 1;
                         });
-                    } else {
-                        addTestCaseEntry(null, 0);
-                        testCaseIndex = 1;
                     }
                 })
                 .catch(error => alert(error.message));
@@ -268,9 +250,7 @@
             div.querySelector('[name$="[points]"]').value = data?.points ?? 0;
             container.appendChild(div);
             div.querySelector('.remove-test-case').addEventListener('click', function() {
-                if (container.children.length > 1) {
-                    div.remove();
-                }
+                div.remove();
             });
             if (index === null) testCaseIndex++;
         }
@@ -393,16 +373,6 @@
             // Test cases
             document.getElementById('add_test_case').addEventListener('click', function() {
                 addTestCaseEntry();
-            });
-
-            // Set initial test case remove
-            document.querySelectorAll('.remove-test-case').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const container = document.getElementById('test_cases_container');
-                    if (container.children.length > 1) {
-                        this.closest('.test-case-entry').remove();
-                    }
-                });
             });
 
             const test_btn = document.getElementById('testCodeBtn');
