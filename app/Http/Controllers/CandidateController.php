@@ -26,7 +26,11 @@ class CandidateController extends Controller
 
     public function get_challenge_details($id)
     {
-        $challenge = Challenges::with('photos')->select(['title', 'description', 'difficulty', 'points'])->where('id', $id)->first();
+        $candidate = Candidates::where('user_id', Auth::id())->firstOrFail();
+        $challenge = Challenges::with('photos')
+            ->select(['id', 'title', 'description', 'difficulty', 'points'])
+            ->where('event_id', $candidate->event_id)
+            ->findOrFail($id);
 
         $challenge->photos_list = $challenge->photos->map(function ($photo) {
             return [
@@ -44,7 +48,14 @@ class CandidateController extends Controller
         $candidate = Candidates::where('user_id', $user->id)->first();
 
         if (!$candidate) {
-            return view('pages.code-problems', compact('challenges', 'easy_challenges', 'medium_challenges', 'hard_challenges', 'unsolved_challenge_id') ?? []);
+            return view('pages.code-problems', [
+                'challenges' => collect(),
+                'easy_challenges' => collect(),
+                'medium_challenges' => collect(),
+                'hard_challenges' => collect(),
+                'unsolved_challenge_id' => null,
+                'competition_started' => false,
+            ]);
         }
 
         $baseQuery = fn($difficulty) =>
@@ -143,7 +154,7 @@ class CandidateController extends Controller
             }
 
             $next_id = Challenges::where('id', '>', $challenge_id)
-                ->where('event_id', $event->id)
+                ->where('event_id', $candidate->event_id)
                 ->orderBy('id', 'asc')
                 ->first('id');
 
@@ -161,12 +172,11 @@ class CandidateController extends Controller
         $candidate = Candidates::where('user_id', $user->id)->first();
 
         $request->validate([
-            'challenge_id' => 'required|string',
+            'challenge_id' => 'required|integer',
             'code' => 'required|string',
         ]);
 
         $challenge_id = $request->input('challenge_id');
-        $challenge = Challenges::with('activeTestCases', 'languageModel')->find($challenge_id);
 
         if (!$candidate) {
             return response()->json([
@@ -174,6 +184,10 @@ class CandidateController extends Controller
                 'message' => 'Candidate not found.'
             ], 404);
         }
+
+        $challenge = Challenges::with('activeTestCases', 'languageModel')
+            ->where('event_id', $candidate->event_id)
+            ->find($challenge_id);
 
         if (!$challenge) {
             return response()->json([
