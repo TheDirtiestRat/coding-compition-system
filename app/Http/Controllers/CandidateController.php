@@ -23,6 +23,8 @@ class CandidateController extends Controller
     public function get_challenge_details($id)
     {
         $candidate = Candidates::where('user_id', Auth::id())->firstOrFail();
+        abort_unless($this->candidateHasActiveEvent($candidate), 404);
+
         $challenge = Challenges::with('photos')
             ->select(['id', 'title', 'description', 'difficulty', 'points'])
             ->where('event_id', $candidate->event_id)
@@ -43,7 +45,7 @@ class CandidateController extends Controller
         $user = Auth::user();
         $candidate = Candidates::where('user_id', $user->id)->first();
 
-        if (! $candidate) {
+        if (! $candidate || ! $this->candidateHasActiveEvent($candidate)) {
             return view('pages.code-problems', [
                 'challenges' => collect(),
                 'easy_challenges' => collect(),
@@ -117,9 +119,7 @@ class CandidateController extends Controller
             return redirect('/code-problems');
         }
 
-        $event = Events::where('isActive', true)->first();
-
-        if (! $event) {
+        if (! $this->candidateHasActiveEvent($candidate)) {
             return redirect('/code-problems');
         }
 
@@ -178,6 +178,13 @@ class CandidateController extends Controller
                 'status' => 'error',
                 'message' => 'Candidate not found.',
             ], 404);
+        }
+
+        if (! $this->candidateHasActiveEvent($candidate)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Your event is not active.',
+            ], 403);
         }
 
         $challenge = Challenges::with('activeTestCases', 'languageModel')
@@ -290,6 +297,11 @@ class CandidateController extends Controller
             'auto_reviewed' => $allPassed && $testCases->isNotEmpty(),
             'test_case_results' => $testCaseResults,
         ], 200);
+    }
+
+    private function candidateHasActiveEvent(Candidates $candidate): bool
+    {
+        return Events::whereKey($candidate->event_id)->where('isActive', true)->exists();
     }
 
     private function runCodeWithInput($code, $language, $input, $timeout = 5)
