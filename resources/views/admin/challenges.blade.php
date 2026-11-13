@@ -37,41 +37,37 @@
                     <fieldset class="fieldset">
                         <legend class="fieldset-legend">Challenge ID</legend>
                         <input type="text" class="input" name="challenge_id" id="challenge_id"
-                            value="" placeholder="Assigned when created" readonly />
+                            value="{{ old('challenge_id') }}" placeholder="Assigned when created" readonly />
 
                         <legend class="fieldset-legend">for waht Event?</legend>
                         <select class="select" name="event_id" id="event_id">
                             @forelse  ($events as $event)
-                                @if ($event->isActive)
-                                    <option value="{{ $event->id }}" selected>{{ $event->title }}</option>
-                                @else
-                                    <option value="{{ $event->id }}">{{ $event->title }}</option>
-                                @endif
+                                <option value="{{ $event->id }}" @selected((string) old('event_id', $events->firstWhere('isActive', true)?->id) === (string) $event->id)>{{ $event->title }}</option>
                             @empty
                                 <option disabled selected>Pick a Event</option>
                             @endforelse
                         </select>
 
                         <legend class="fieldset-legend">Challenge Title</legend>
-                        <input type="text" class="input w-full" name="title" id="title" placeholder="Type here" />
+                        <input type="text" class="input w-full" name="title" id="title" value="{{ old('title') }}" placeholder="Type here" />
                         <legend class="fieldset-legend">Description</legend>
                         <textarea class="textarea h-[200px] w-full" name="description" id="description"
-                            placeholder="What is the Challenge about?"></textarea>
+                            placeholder="What is the Challenge about?">{{ old('description') }}</textarea>
                         <p class="label">Optional</p>
 
                         <div class="flex flex-row gap-3">
                             <fieldset class="fieldset w-full">
                                 <legend class="fieldset-legend">Equivalent Points</legend>
-                                <input type="number" class="input w-full" name="points" id="points"
+                                <input type="number" class="input w-full" name="points" id="points" value="{{ old('points') }}"
                                     placeholder="Type here" />
                             </fieldset>
                             <fieldset class="fieldset basis-full">
                                 <legend class="fieldset-legend">Difficulty</legend>
                                 <select class="select" id="difficulty" name="difficulty">
-                                    <option value="easy">Easy</option>
-                                    <option value="medium">Medium</option>
-                                    <option value="hard">Hard</option>
-                                    <option value="challenge">Challenge</option>
+                                    <option value="easy" @selected(old('difficulty', 'easy') === 'easy')>Easy</option>
+                                    <option value="medium" @selected(old('difficulty', 'easy') === 'medium')>Medium</option>
+                                    <option value="hard" @selected(old('difficulty', 'easy') === 'hard')>Hard</option>
+                                    <option value="challenge" @selected(old('difficulty', 'easy') === 'challenge')>Challenge</option>
                                 </select>
                             </fieldset>
 
@@ -79,10 +75,10 @@
                                 <legend class="fieldset-legend">Language</legend>
                                 <select class="select" id="language" name="language">
                                     @foreach ($languages as $lang)
-                                        <option value="{{ $lang->name }}" data-lang-id="{{ $lang->id }}">{{ ucfirst($lang->name) }}</option>
+                                        <option value="{{ $lang->name }}" data-lang-id="{{ $lang->id }}" @selected(old('language', $languages->first()?->name) === $lang->name)>{{ ucfirst($lang->name) }}</option>
                                     @endforeach
                                 </select>
-                                <input type="hidden" name="language_id" id="language_id" value="{{ $languages->first()?->id }}" />
+                                <input type="hidden" name="language_id" id="language_id" value="{{ old('language_id', $languages->first()?->id) }}" />
                             </fieldset>
 
                             <input type="hidden" name="code_solution" id="code_solution">
@@ -92,6 +88,9 @@
                         <fieldset class="fieldset">
                             <legend class="fieldset-legend">Challenge Photos (optional, multiple)</legend>
                             <input type="file" class="file-input file-input-bordered w-full" name="photos[]" id="photos" accept="image/*" multiple />
+                            @if (session()->hasOldInput())
+                                <p class="label">If you selected new photos, please select them again before saving.</p>
+                            @endif
                             <div id="photo_preview_container" class="mt-2 flex flex-wrap gap-2"></div>
                             <div id="existing_photos" class="mt-2 flex flex-wrap gap-2"></div>
                         </fieldset>
@@ -105,7 +104,7 @@
                         </fieldset>
 
                         <div class="divider"></div>
-                        <button type="submit" id="challenge_submit_btn" class="btn btn-primary">Add Challenge</button>
+                        <button type="submit" id="challenge_submit_btn" class="btn btn-primary">{{ old('challenge_id') ? 'Update Challenge' : 'Add Challenge' }}</button>
                     </fieldset>
                 </form>
             </div>
@@ -136,6 +135,8 @@
 
 @section('admin-scripts')
     <script>
+        const challengeDraft = {{ Illuminate\Support\Js::from(session()->getOldInput()) }};
+        const draftPhotos = {{ Illuminate\Support\Js::from($draftPhotos->map(fn ($photo) => ['id' => $photo->id, 'url' => $photo->url])->values()) }};
         let codeLanguage;
         let editorInstance;
 
@@ -185,31 +186,7 @@
                     monaco.editor.setModelLanguage(editorInstance.getModel(), data['language']);
                     codeLanguage.innerText = data['language']
 
-                    // Load existing photos
-                    const container = document.getElementById('existing_photos');
-                    container.innerHTML = '';
-                    if (data['photos_list'] && data['photos_list'].length > 0) {
-                        data['photos_list'].forEach(photo => {
-                            const wrapper = document.createElement('div');
-                            wrapper.className = 'relative group';
-                            wrapper.innerHTML = `
-                                <img class="h-24 w-24 object-cover rounded-xl" />
-                                <label class="absolute top-0 right-0 bg-red-600 text-white text-xs p-1 rounded cursor-pointer opacity-0 group-hover:opacity-100 transition">
-                                    <input type="checkbox" name="delete_photos[]" class="hidden" />
-                                    ✕
-                                </label>
-                            `;
-                            wrapper.querySelector('img').src = photo.url;
-                            wrapper.querySelector('input').value = photo.id;
-                            wrapper.addEventListener('click', function(event) {
-                                event.preventDefault();
-                                const cb = this.querySelector('input[type="checkbox"]');
-                                cb.checked = !cb.checked;
-                                this.classList.toggle('opacity-50');
-                            });
-                            container.appendChild(wrapper);
-                        });
-                    }
+                    renderExistingPhotos(data['photos_list']);
 
                     // Load test cases
                     const tcContainer = document.getElementById('test_cases_container');
@@ -223,6 +200,36 @@
                     }
                 })
                 .catch(error => alert(error.message));
+        }
+
+        function renderExistingPhotos(photos = [], deletedIds = []) {
+            const container = document.getElementById('existing_photos');
+            const deletedPhotoIds = Array.isArray(deletedIds) ? deletedIds.map(String) : [];
+            container.innerHTML = '';
+            if (photos && photos.length > 0) {
+                photos.forEach(photo => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'relative group';
+                    wrapper.innerHTML = `
+                        <img class="h-24 w-24 object-cover rounded-xl" />
+                        <label class="absolute top-0 right-0 bg-red-600 text-white text-xs p-1 rounded cursor-pointer opacity-0 group-hover:opacity-100 transition">
+                            <input type="checkbox" name="delete_photos[]" class="hidden" />
+                            ✕
+                        </label>
+                    `;
+                    wrapper.querySelector('img').src = photo.url;
+                    wrapper.querySelector('input').value = photo.id;
+                    wrapper.querySelector('input').checked = deletedPhotoIds.includes(String(photo.id));
+                    wrapper.classList.toggle('opacity-50', wrapper.querySelector('input').checked);
+                    wrapper.addEventListener('click', function(event) {
+                        event.preventDefault();
+                        const cb = this.querySelector('input[type="checkbox"]');
+                        cb.checked = !cb.checked;
+                        this.classList.toggle('opacity-50');
+                    });
+                    container.appendChild(wrapper);
+                });
+            }
         }
 
         function addTestCaseEntry(data = null, index = null) {
@@ -267,8 +274,8 @@
             if (!container) return;
 
             editorInstance = monaco.editor.create(container, {
-                language: codeLanguage ?? 'java',
-                value: `class Main {
+                language: document.getElementById('language').value || 'java',
+                value: Object.hasOwn(challengeDraft, 'code_solution') ? (challengeDraft.code_solution ?? '') : `class Main {
     public static void main(String[] args) {
         // code here ...
     }
@@ -340,6 +347,13 @@
         document.addEventListener("DOMContentLoaded", () => {
             initCodeEditor();
             attachSubmitChallengeListener();
+            document.getElementById('codeLanguage').innerText = document.getElementById('language').value;
+            if (Object.keys(challengeDraft).length > 0) {
+                document.getElementById('test_cases_container').innerHTML = '';
+                testCaseIndex = 0;
+                Object.values(challengeDraft.test_cases ?? {}).forEach(tc => addTestCaseEntry(tc));
+                renderExistingPhotos(draftPhotos, challengeDraft.delete_photos ?? []);
+            }
 
             // Photo preview for multiple files
             const photoInput = document.getElementById('photos');
