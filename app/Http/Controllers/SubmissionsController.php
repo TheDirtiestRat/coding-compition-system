@@ -26,6 +26,7 @@ class SubmissionsController extends Controller
                 'challenges.points as max_points',
                 'challenges.difficulty as challenge_difficulty',
                 'challenges.language as challenge_language',
+                'challenges.language_id as challenge_language_id',
                 'challenges.code_solution',
                 'challenges.description',
             )
@@ -39,7 +40,13 @@ class SubmissionsController extends Controller
         $submission = Submissions::with('challenge')->findOrFail($id);
 
         if ($submission->is_score_submitted) {
-            return response()->json(['message' => 'Score has already been submitted.'], 409);
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Score has already been submitted for this submission.'], 409);
+            }
+
+            return redirect()
+                ->back()
+                ->with('error', 'Score has already been submitted for this submission.');
         }
 
         $maxPoints = $submission->challenge->points;
@@ -66,10 +73,18 @@ class SubmissionsController extends Controller
                 'exception' => $e,
             ]);
 
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Something went wrong while saving the score.'], 500);
+            }
+
             return redirect()
                 ->back()
                 ->withInput()
                 ->with('error', 'Something went wrong while saving the score.');
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Score submitted successfully!']);
         }
 
         return redirect('/admin/submissions')
