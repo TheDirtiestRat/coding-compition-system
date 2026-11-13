@@ -36,7 +36,7 @@ class CompilerController extends Controller
             'input' => 'nullable|string',
         ]);
 
-        if (!$language) {
+        if (! $language) {
             return response()->json(['error' => 'Programming language not found or inactive'], 404);
         }
 

@@ -12,16 +12,16 @@ class CodeRunner
 {
     public function run(string $code, ProgrammingLanguage $language, ?string $input = '', int $timeout = 5): string
     {
-        if (!preg_match('/^\.[a-zA-Z0-9]+$/', $language->file_extension) || !$language->run_command) {
+        if (! preg_match('/^\.[a-zA-Z0-9]+$/', $language->file_extension) || ! $language->run_command) {
             throw new \RuntimeException('Invalid programming language configuration.', 422);
         }
 
-        $tempDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'code_exec_' . Str::random(16);
+        $tempDir = sys_get_temp_dir().DIRECTORY_SEPARATOR.'code_exec_'.Str::random(16);
         File::makeDirectory($tempDir);
 
         try {
-            $filename = 'Main' . $language->file_extension;
-            File::put($tempDir . DIRECTORY_SEPARATOR . $filename, $code);
+            $filename = 'Main'.$language->file_extension;
+            File::put($tempDir.DIRECTORY_SEPARATOR.$filename, $code);
 
             // Symfony escapes placeholder values for the current platform's shell.
             $placeholders = ['{file}' => '"${:CODE_FILE}"', '{dir}' => '"${:CODE_DIR}"'];
@@ -33,8 +33,8 @@ class CodeRunner
                 );
                 $compileProcess->run();
 
-                if (!$compileProcess->isSuccessful()) {
-                    throw new \RuntimeException("Compilation Error:\n" . $compileProcess->getErrorOutput(), 400);
+                if (! $compileProcess->isSuccessful()) {
+                    throw new \RuntimeException("Compilation Error:\n".$compileProcess->getErrorOutput(), 400);
                 }
             }
 
@@ -43,7 +43,7 @@ class CodeRunner
             );
             $runProcess->run();
 
-            if (!$runProcess->isSuccessful()) {
+            if (! $runProcess->isSuccessful()) {
                 throw new \RuntimeException($runProcess->getErrorOutput() ?: 'Execution error', 500);
             }
 
