@@ -162,7 +162,6 @@
         let testCaseIndex = 1;
 
         function edit_challenge(challenge_id) {
-            const form = document.getElementById('challenge_form')
             const challenge_id_elem = document.getElementById("challenge_id");
             const challenge_event_elem = document.getElementById("event_id");
             const challenge_title = document.getElementById("title");
@@ -175,14 +174,13 @@
 
             const codeLanguage = document.getElementById("codeLanguage");
 
-            challenge_id_elem.value = challenge_id
-
-            let challenge_data = {}
-
             fetch('/admin/api/get-challenge-details/' + challenge_id)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to load challenge.');
+                    return response.json();
+                })
                 .then(data => {
-                    challenge_data = data
+                    challenge_id_elem.value = data.id;
                     challenge_event_elem.value = data['event_id']
                     challenge_title.value = data['title']
                     challenge_description.value = data['description']
@@ -215,13 +213,16 @@
                             const wrapper = document.createElement('div');
                             wrapper.className = 'relative group';
                             wrapper.innerHTML = `
-                                <img src="${photo.url}" class="h-24 w-24 object-cover rounded-xl" />
+                                <img class="h-24 w-24 object-cover rounded-xl" />
                                 <label class="absolute top-0 right-0 bg-red-600 text-white text-xs p-1 rounded cursor-pointer opacity-0 group-hover:opacity-100 transition">
-                                    <input type="checkbox" name="delete_photos[]" value="${photo.id}" class="hidden" />
+                                    <input type="checkbox" name="delete_photos[]" class="hidden" />
                                     ✕
                                 </label>
                             `;
-                            wrapper.addEventListener('click', function() {
+                            wrapper.querySelector('img').src = photo.url;
+                            wrapper.querySelector('input').value = photo.id;
+                            wrapper.addEventListener('click', function(event) {
+                                event.preventDefault();
                                 const cb = this.querySelector('input[type="checkbox"]');
                                 cb.checked = !cb.checked;
                                 this.classList.toggle('opacity-50');
@@ -243,7 +244,8 @@
                         addTestCaseEntry(null, 0);
                         testCaseIndex = 1;
                     }
-                });
+                })
+                .catch(error => alert(error.message));
         }
 
         function addTestCaseEntry(data = null, index = null) {
@@ -254,18 +256,21 @@
             div.innerHTML = `
                 <div class="basis-1/4">
                     <label class="label-text text-xs">Input</label>
-                    <textarea class="textarea textarea-bordered w-full text-sm" name="test_cases[${idx}][input]" placeholder="stdin input">${data ? (data.input || '') : ''}</textarea>
+                    <textarea class="textarea textarea-bordered w-full text-sm" name="test_cases[${idx}][input]" placeholder="stdin input"></textarea>
                 </div>
                 <div class="basis-1/3">
                     <label class="label-text text-xs">Expected Output</label>
-                    <textarea class="textarea textarea-bordered w-full text-sm" name="test_cases[${idx}][expected_output]" placeholder="Expected output" required>${data ? (data.expected_output || '') : ''}</textarea>
+                    <textarea class="textarea textarea-bordered w-full text-sm" name="test_cases[${idx}][expected_output]" placeholder="Expected output" required></textarea>
                 </div>
                 <div class="basis-1/6">
                     <label class="label-text text-xs">Points</label>
-                    <input type="number" class="input input-bordered w-full input-sm" name="test_cases[${idx}][points]" value="${data ? data.points : 0}" min="0" step="0.5" required />
+                    <input type="number" class="input input-bordered w-full input-sm" name="test_cases[${idx}][points]" value="0" min="0" step="0.5" required />
                 </div>
                 <button type="button" class="btn btn-sm btn-error remove-test-case">-</button>
             `;
+            div.querySelector('[name$="[input]"]').value = data?.input ?? '';
+            div.querySelector('[name$="[expected_output]"]').value = data?.expected_output ?? '';
+            div.querySelector('[name$="[points]"]').value = data?.points ?? 0;
             container.appendChild(div);
             div.querySelector('.remove-test-case').addEventListener('click', function() {
                 if (container.children.length > 1) {
