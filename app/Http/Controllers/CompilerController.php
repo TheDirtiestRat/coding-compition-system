@@ -45,7 +45,7 @@ class CompilerController extends Controller
 
             return response()->json(['output' => $output]);
         } catch (\RuntimeException $e) {
-            $status = in_array($e->getCode(), [400, 408, 422, 500], true) ? $e->getCode() : 500;
+            $status = in_array($e->getCode(), [400, 408, 422, 500, 503], true) ? $e->getCode() : 500;
 
             return response()->json(['error' => $e->getMessage()], $status);
         } catch (\Throwable $e) {
