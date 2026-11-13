@@ -212,7 +212,7 @@ class CandidateController extends Controller
         // Auto-check test cases
         $testCases = $challenge->activeTestCases;
         $testCaseResults = [];
-        $allPassed = true;
+        $allPassed = $testCases->isNotEmpty() && $challenge->languageModel !== null;
         $totalAutoScore = 0;
 
         if ($testCases->isNotEmpty() && $challenge->languageModel) {
@@ -254,8 +254,10 @@ class CandidateController extends Controller
             'candidate_id' => $candidate->id,
             'challenge_id' => $challenge_id,
             'code' => $code,
-            'test_case_results' => json_encode($testCaseResults),
+            'test_case_results' => $testCaseResults,
         ];
+
+        $totalAutoScore = min($totalAutoScore, $challenge->points);
 
         // If all test cases passed, auto-review
         if ($testCases->isNotEmpty() && $allPassed) {
@@ -268,11 +270,21 @@ class CandidateController extends Controller
             $submissionData['is_auto_reviewed'] = false;
         }
 
-        Submissions::upsert(
-            $submissionData,
-            uniqueBy: ['candidate_id', 'challenge_id'],
-            update: ['code', 'score', 'is_score_submitted', 'is_auto_reviewed', 'test_case_results']
-        );
+        DB::transaction(function () use ($candidate, $challenge_id, $submissionData) {
+            Candidates::whereKey($candidate->id)->lockForUpdate()->firstOrFail();
+
+            $submission = Submissions::where('candidate_id', $candidate->id)
+                ->where('challenge_id', $challenge_id)
+                ->lockForUpdate()
+                ->first();
+
+            abort_if($submission?->is_score_submitted, 409, 'This submission has already been reviewed.');
+
+            Submissions::updateOrCreate(
+                ['candidate_id' => $candidate->id, 'challenge_id' => $challenge_id],
+                $submissionData
+            );
+        });
 
         return response()->json([
             'status' => 'success',
