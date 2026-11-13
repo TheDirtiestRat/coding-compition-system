@@ -11,33 +11,46 @@ class AdminCountdownController extends Controller
 {
     public function start(Request $request)
     {
-        $timer = CompetitionTimer::state();
-        if ($timer['paused']) {
-            $durationMs = $timer['remainingMs'];
-        } else {
-            $validated = $request->validate(['duration_ms' => 'required|integer|min:1']);
-            $durationMs = (int) $validated['duration_ms'];
-        }
+        $result = CompetitionTimer::transition(function () use ($request) {
+            $timer = CompetitionTimer::state();
+            if ($timer['paused']) {
+                $durationMs = $timer['remainingMs'];
+            } else {
+                $validated = $request->validate(['duration_ms' => 'required|integer|min:1']);
+                $durationMs = (int) $validated['duration_ms'];
+            }
 
-        if ($durationMs <= 0) {
-            return response()->json(['error' => 'Invalid duration'], 422);
-        }
+            if ($durationMs <= 0) {
+                return null;
+            }
 
-        return $this->start_timer($durationMs, $timer['paused'] ? 'resume' : 'start');
+            return $this->start_timer($durationMs, $timer['paused'] ? 'resume' : 'start');
+        });
+
+        return $this->started_response($result);
     }
 
     public function pause()
     {
-        $timer = CompetitionTimer::state();
-        if (! $timer['started'] || ! $timer['endTime'] || $timer['isTime']) {
+        $remaining = CompetitionTimer::transition(function () {
+            $timer = CompetitionTimer::state();
+            if (! $timer['started'] || ! $timer['endTime'] || $timer['isTime']) {
+                return null;
+            }
+
+            $remaining = max(0, $timer['endTime'] - $timer['serverTime']);
+            CompetitionTimer::save([
+                'start_compition' => '0',
+                'competition_remaining_ms' => $remaining,
+            ]);
+
+            return $remaining;
+        });
+
+        if ($remaining === null) {
             return response()->json(['status' => 'not_running']);
         }
 
-        $remaining = max(0, $timer['endTime'] - $timer['serverTime']);
-        CompetitionTimer::save([
-            'start_compition' => '0',
-            'competition_remaining_ms' => $remaining,
-        ]);
         broadcast(new CountdownEvent('paused', ['remainingMs' => $remaining]));
 
         return response()->json(['remainingMs' => $remaining]);
@@ -70,7 +83,9 @@ class AdminCountdownController extends Controller
             return response()->json(['error' => 'Invalid duration'], 422);
         }
 
-        return $this->start_timer($durationMs);
+        $result = CompetitionTimer::transition(fn () => $this->start_timer($durationMs));
+
+        return $this->started_response($result);
     }
 
     public function get_timer()
@@ -88,13 +103,23 @@ class AdminCountdownController extends Controller
             'start_compition' => '1',
             'competition_remaining_ms' => '',
         ]);
-        broadcast(new CountdownEvent($type, ['endTime' => $endTime->getTimestampMs()]));
 
-        return response()->json([
+        return ['type' => $type, 'data' => [
             'endTime' => $endTime->getTimestampMs(),
             'current_time' => $now->format('H:i:s'),
             'formatted_set_time' => $now->format('H:i:s'),
             'formatted_end_time' => $endTime->format('H:i:s'),
-        ]);
+        ]];
+    }
+
+    private function started_response(?array $result)
+    {
+        if ($result === null) {
+            return response()->json(['error' => 'Invalid duration'], 422);
+        }
+
+        broadcast(new CountdownEvent($result['type'], ['endTime' => $result['data']['endTime']]));
+
+        return response()->json($result['data']);
     }
 }
