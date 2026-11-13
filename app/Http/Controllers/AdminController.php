@@ -268,7 +268,6 @@ class AdminController extends Controller
     {
         $event = Events::where('isActive', true)->first();
         $challenges = collect();
-        $last_id = Challenges::latest()->first('id');
         $events = Events::all();
         $languages = ProgrammingLanguage::where('is_active', true)->get();
 
@@ -278,7 +277,7 @@ class AdminController extends Controller
                 ->latest()->get();
         }
 
-        return view('admin.challenges', compact('challenges', 'last_id', 'events', 'languages'));
+        return view('admin.challenges', compact('challenges', 'events', 'languages'));
     }
 
     public function get_challenge_details($id)
@@ -310,7 +309,7 @@ class AdminController extends Controller
     {
         $validatedData = $request->validate([
             'event_id' => 'required|exists:events,id',
-            'challenge_id' => 'required',
+            'challenge_id' => 'nullable|integer|min:1',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'difficulty' => 'required|in:easy,medium,hard,challenge',
@@ -335,7 +334,7 @@ class AdminController extends Controller
 
         $testCasePoints = $request->has('test_cases')
             ? collect($validatedData['test_cases'])->sum('points')
-            : Challenges::find($validatedData['challenge_id'])?->testCases()->sum('points') ?? 0;
+            : Challenges::find($validatedData['challenge_id'] ?? null)?->testCases()->sum('points') ?? 0;
         if ($testCasePoints > $validatedData['points']) {
             throw ValidationException::withMessages(['test_cases' => 'Test case points cannot exceed challenge points.']);
         }
@@ -344,19 +343,20 @@ class AdminController extends Controller
         $deletedPaths = [];
         try {
             $challenge = DB::transaction(function () use ($request, $validatedData, &$uploadedPaths, &$deletedPaths) {
-                $challenge = Challenges::updateOrCreate(
-                    ['id' => $validatedData['challenge_id']],
-                    [
-                        'event_id' => $validatedData['event_id'],
-                        'title' => $validatedData['title'],
-                        'description' => $validatedData['description'],
-                        'difficulty' => $validatedData['difficulty'],
-                        'language' => $validatedData['language'],
-                        'language_id' => $validatedData['language_id'],
-                        'points' => $validatedData['points'],
-                        'code_solution' => $validatedData['code_solution'],
-                    ]
-                );
+                $challenge = !empty($validatedData['challenge_id'])
+                    ? Challenges::findOrFail($validatedData['challenge_id'])
+                    : new Challenges;
+                $challenge->fill([
+                    'event_id' => $validatedData['event_id'],
+                    'title' => $validatedData['title'],
+                    'description' => $validatedData['description'],
+                    'difficulty' => $validatedData['difficulty'],
+                    'language' => $validatedData['language'],
+                    'language_id' => $validatedData['language_id'],
+                    'points' => $validatedData['points'],
+                    'code_solution' => $validatedData['code_solution'],
+                ]);
+                $challenge->save();
 
                 if (!empty($validatedData['delete_photos'])) {
                     $photosToDelete = $challenge->photos()->whereIn('id', $validatedData['delete_photos'])->get();
@@ -409,15 +409,14 @@ class AdminController extends Controller
 
     public function delete_challenge(string $id)
     {
-        $challenge = Challenges::with('photos')->find($id);
-        if ($challenge) {
-            foreach ($challenge->photos as $photo) {
-                Storage::disk('public')->delete($photo->photo_path);
-            }
-            $challenge->photos()->delete();
-            $challenge->testCases()->delete();
-        }
-        Challenges::destroy($id);
+        $photoPaths = DB::transaction(function () use ($id) {
+            $challenge = Challenges::with('photos')->findOrFail($id);
+            $photoPaths = $challenge->photos->pluck('photo_path')->all();
+            $challenge->delete();
+
+            return $photoPaths;
+        });
+        Storage::disk('public')->delete($photoPaths);
 
         return redirect('/admin/challenges')->with('success', 'A Challenge is deleted successfully.');
     }
