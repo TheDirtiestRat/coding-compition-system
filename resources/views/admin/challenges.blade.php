@@ -166,6 +166,10 @@
                 .then(data => {
                     if (requestId !== selectionRequest) return;
 
+                    if (challenge_id_elem.value !== String(data.id)) {
+                        document.getElementById('photos').value = '';
+                        document.getElementById('photo_preview_container').innerHTML = '';
+                    }
                     challenge_id_elem.value = data.id;
                     challenge_event_elem.value = data['event_id']
                     challenge_title.value = data['title']
