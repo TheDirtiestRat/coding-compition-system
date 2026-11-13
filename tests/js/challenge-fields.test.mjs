@@ -10,8 +10,11 @@ const document = {
     createElement: () => {
         const fields = new Map();
         return {
+            remove() { entries.splice(entries.indexOf(this), 1); },
             querySelector: selector => {
-                if (!fields.has(selector)) fields.set(selector, { addEventListener() {} });
+                if (!fields.has(selector)) fields.set(selector, {
+                    addEventListener(event, callback) { this[event] = callback; },
+                });
                 return fields.get(selector);
             },
         };
@@ -29,4 +32,11 @@ assert.equal(entries[0].querySelector('[name$="[expected_output]"]').value, mark
 assert.equal(entries[0].querySelector('[name$="[points]"]').value, 0);
 assert.ok(!entries[0].innerHTML.includes(markup));
 assert.equal(context.testCaseIndex, 1);
+entries[0].querySelector('.remove-test-case').click();
+assert.equal(entries.length, 0, 'The final test case can be removed for manual grading.');
+vm.runInContext('addTestCaseEntry();', context);
+assert.equal(entries[0].querySelector('[name$="[expected_output]"]').value, '');
+assert.ok(entries[0].innerHTML.includes('required'), 'Added cases still require an expected output.');
+assert.match(source, /name="test_cases_present" value="1"/);
+assert.match(source, /<div id="test_cases_container"><\/div>/);
 console.log('Test case markup remains field data.');

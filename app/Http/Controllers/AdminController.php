@@ -321,6 +321,7 @@ class AdminController extends Controller
             'photos.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'delete_photos' => 'nullable|array',
             'delete_photos.*' => 'integer|exists:challenge_photos,id',
+            'test_cases_present' => 'sometimes|boolean',
             'test_cases' => 'nullable|array',
             'test_cases.*.input' => 'nullable|string',
             'test_cases.*.expected_output' => 'required_with:test_cases|string',
@@ -332,8 +333,9 @@ class AdminController extends Controller
             throw ValidationException::withMessages(['language_id' => 'Select a matching active programming language.']);
         }
 
-        $testCasePoints = $request->has('test_cases')
-            ? collect($validatedData['test_cases'])->sum('points')
+        $replaceTestCases = $request->boolean('test_cases_present') || $request->has('test_cases');
+        $testCasePoints = $replaceTestCases
+            ? collect($validatedData['test_cases'] ?? [])->sum('points')
             : Challenges::find($validatedData['challenge_id'] ?? null)?->testCases()->sum('points') ?? 0;
         if ($testCasePoints > $validatedData['points']) {
             throw ValidationException::withMessages(['test_cases' => 'Test case points cannot exceed challenge points.']);
@@ -342,7 +344,7 @@ class AdminController extends Controller
         $uploadedPaths = [];
         $deletedPaths = [];
         try {
-            $challenge = DB::transaction(function () use ($request, $validatedData, &$uploadedPaths, &$deletedPaths) {
+            $challenge = DB::transaction(function () use ($request, $validatedData, $replaceTestCases, &$uploadedPaths, &$deletedPaths) {
                 $challenge = ! empty($validatedData['challenge_id'])
                     ? Challenges::findOrFail($validatedData['challenge_id'])
                     : new Challenges;
@@ -375,7 +377,7 @@ class AdminController extends Controller
                     $challenge->photos()->create(['photo_path' => $path]);
                 }
 
-                if ($request->has('test_cases')) {
+                if ($replaceTestCases) {
                     $challenge->testCases()->delete();
                     foreach ($validatedData['test_cases'] ?? [] as $tc) {
                         $challenge->testCases()->create([
