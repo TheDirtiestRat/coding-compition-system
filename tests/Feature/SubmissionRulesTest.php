@@ -58,6 +58,26 @@ class SubmissionRulesTest extends TestCase
         $this->assertDatabaseCount('submissions', 0);
     }
 
+    public function test_inactive_language_does_not_execute_test_cases(): void
+    {
+        $candidate = $this->candidate();
+        $challenge = $this->challenge($candidate->event_id);
+        $language = \App\Models\ProgrammingLanguage::create([
+            'name' => 'python',
+            'file_extension' => '.py',
+            'run_command' => 'python {file}',
+            'is_active' => false,
+        ]);
+        $challenge->update(['language_id' => $language->id]);
+        $challenge->testCases()->create(['expected_output' => 'hello', 'points' => 100]);
+        $this->mock(\App\Services\CodeRunner::class)->shouldNotReceive('run');
+
+        $this->withoutMiddleware(IsTimerStop::class)->actingAs($candidate->user)
+            ->postJson('/api/submit-code-for-review', ['challenge_id' => $challenge->id, 'code' => 'print("hello")'])
+            ->assertOk()
+            ->assertJsonPath('auto_reviewed', false);
+    }
+
     public function test_reviewed_submission_cannot_be_resubmitted_or_scored_again(): void
     {
         $candidate = $this->candidate();

@@ -208,10 +208,11 @@ class CandidateController extends Controller
         // Auto-check test cases
         $testCases = $challenge->activeTestCases;
         $testCaseResults = [];
-        $allPassed = $testCases->isNotEmpty() && $challenge->languageModel !== null;
+        $canAutoGrade = $testCases->isNotEmpty() && $challenge->languageModel?->is_active;
+        $allPassed = (bool) $canAutoGrade;
         $totalAutoScore = 0;
 
-        if ($testCases->isNotEmpty() && $challenge->languageModel) {
+        if ($canAutoGrade) {
             $language = $challenge->languageModel;
             $executionTimeout = 5;
 
