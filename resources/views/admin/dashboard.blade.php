@@ -39,10 +39,10 @@
 
                 <div class="space-x-4">
                     <button id="getTimerBtn" class="btn btn-primary btn-lg" type="button">Get</button>
-                    <button id="startStopButton" class="btn btn-primary btn-lg" type="button"
-                        onclick="setCurrentTimer()">Set Timer</button>
+                    <button id="setTimerBtn" class="btn btn-primary btn-lg" type="button"
+                        >Set Timer</button>
                     <button class="btn btn-secondary btn-soft btn-lg" type="button"
-                        onclick="resetCountdown()">Reset</button>
+                        id="resetTimerBtn">Reset</button>
                 </div>
             </div>
         </div>
@@ -109,133 +109,6 @@
     </div>
 @endsection
 
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        let endTime = null;
-        let tickInterval = null;
-        let pollInterval = null;
-
-        const countdown = document.getElementById("countdown");
-        const hourInput = document.getElementById("hourInput");
-        const minuteInput = document.getElementById("minInput");
-        const secondInput = document.getElementById("secInput");
-        const getTimerBtn = document.getElementById("getTimerBtn");
-
-        function formatHMS(ms) {
-            const totalSeconds = Math.floor(ms / 1000);
-            const h = Math.floor(totalSeconds / 3600);
-            const m = Math.floor((totalSeconds % 3600) / 60);
-            const s = totalSeconds % 60;
-
-            return [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
-        }
-
-        async function checkServerTimer() {
-            try {
-                const res = await fetch('/admin/timer/get_timer', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    },
-                    body: JSON.stringify({}),
-                });
-                const data = await res.json();
-
-                if (!data.started) {
-                    if (tickInterval) {
-                        clearInterval(tickInterval);
-                        tickInterval = null;
-                    }
-                    endTime = null;
-                    countdown.innerText = "00:00:00";
-                    return;
-                }
-
-                endTime = data.endTimeInMils;
-
-                if (data.isTime) {
-                    countdown.innerText = "!00:00:00!";
-                    if (tickInterval) {
-                        clearInterval(tickInterval);
-                        tickInterval = null;
-                    }
-                    return;
-                }
-
-                if (!tickInterval) {
-                    startCountdownTick();
-                }
-            } catch {}
-        }
-
-        function startCountdownTick() {
-            if (tickInterval) clearInterval(tickInterval);
-
-            tickInterval = setInterval(() => {
-                if (!endTime) return;
-
-                const nowMs = Date.now();
-                const endTimeMs = endTime * 1000;
-                const remaining = Math.max(0, endTimeMs - nowMs);
-
-                if (remaining <= 0) {
-                    countdown.innerText = "!00:00:00!";
-                    clearInterval(tickInterval);
-                    tickInterval = null;
-                    endTime = null;
-                    return;
-                }
-
-                countdown.innerText = formatHMS(remaining);
-            }, 1000);
-        }
-
-        function setCurrentTimer() {
-            const hours = Number(hourInput.value) || 0;
-            const minutes = Number(minuteInput.value) || 0;
-            const seconds = Number(secondInput.value) || 0;
-
-            if (hours === 0 && minutes === 0 && seconds === 0) return;
-
-            fetch('/admin/timer/set_timer', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                },
-                body: JSON.stringify({
-                    setHours: hours,
-                    setMinutes: minutes,
-                    setSeconds: seconds
-                }),
-            }).then(() => checkServerTimer());
-        }
-
-        function resetCountdown() {
-            if (tickInterval) {
-                clearInterval(tickInterval);
-                tickInterval = null;
-            }
-            hourInput.value = '';
-            minuteInput.value = '';
-            secondInput.value = '';
-            countdown.innerText = "00:00:00";
-            endTime = null;
-
-            fetch('/admin/countdown/reset', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                },
-            });
-        }
-
-        getTimerBtn.addEventListener('click', checkServerTimer);
-
-        pollInterval = setInterval(checkServerTimer, 8000);
-
-        window.setCurrentTimer = setCurrentTimer;
-        window.resetCountdown = resetCountdown;
-    });
-</script>
+@section('admin-scripts')
+    @include('components.countdown-script')
+@endsection

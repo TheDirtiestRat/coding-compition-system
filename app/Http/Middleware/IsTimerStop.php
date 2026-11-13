@@ -2,37 +2,26 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\CompetitionTimer;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class IsTimerStop
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $started = DB::table('options')
-            ->where('option_name', 'start_compition')
-            ->value('option_value');
-
-        if ($started !== '1') {
-            return redirect('/code-problems');
+        $timer = CompetitionTimer::state();
+        if (! $timer['started']) {
+            return $request->expectsJson()
+                ? response()->json(['message' => 'The competition is not running.'], 409)
+                : redirect('/code-problems');
         }
 
-        $current_time = Carbon::now();
-        $curTimeInMils = $current_time->timestamp;
-
-        $get_end_time = DB::table('options')
-            ->where('option_name', "expected_end_time")->value('option_value');
-
-        if ($get_end_time && $get_end_time !== '00:00:00') {
-            $endTimeInMils = Carbon::parse($get_end_time)->timestamp;
-
-            if ($curTimeInMils >= $endTimeInMils) {
-                return redirect('/competition-ended');
-            }
+        if ($timer['isTime']) {
+            return $request->expectsJson()
+                ? response()->json(['message' => 'The competition has ended.'], 409)
+                : redirect('/competition-ended');
         }
 
         return $next($request);
