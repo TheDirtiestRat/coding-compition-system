@@ -29,3 +29,39 @@ If the page renders without styles, run `npm run build` again and refresh the br
 The seeder creates only an `Admin` account. Use the password configured in
 `database/seeders/DatabaseSeeder.php` for your local setup. It does not create a
 contestant account; create one through the admin page or open registration.
+
+## Isolated code execution
+
+Code execution requires a current, patched Docker Engine running Linux containers.
+Build the Python 3 / Java 25 sandbox once before accepting submissions:
+
+```sh
+docker build -t coding-competition-sandbox:1 docker/code-runner
+```
+
+The application uses `CODE_RUNNER_IMAGE` (default `coding-competition-sandbox:1`)
+and never pulls an image during a request. If Docker or the image is unavailable,
+execution fails closed with HTTP 503; no submitted code runs on the application host.
+Do not mount application files, credentials, or the Docker socket into the sandbox.
+Only the trusted application process needs Docker access. Keep Docker access away
+from contestants and use a dedicated worker host for production contests.
+
+Each request runs as a nonroot user with no network, a read-only image, a 64 MB
+writable workspace, 512 MB memory, one CPU, 64 processes and a 1 MB output limit.
+Compilation and execution share that workspace and each have the requested timeout.
+The container is force-removed after success, errors or timeouts. Language commands
+configured by administrators run inside this Linux image: use `javac {file}` /
+`java -cp {dir} Main` for Java and `python {file}` for Python. The original seeded
+Windows JDK 23 commands are translated to these Java commands; other host-specific
+paths must be updated. Additional languages require installing their runtime in
+the trusted image before configuring them. No environment variables from the
+application are forwarded to submitted code.
+
+Run the actual sandbox acceptance tests after building the image (these tests are
+skipped by default, and process-fake tests do not establish live isolation):
+
+```powershell
+$env:RUN_SANDBOX_TESTS = '1'
+php artisan test --filter=CodeRunnerSandboxTest
+Remove-Item Env:RUN_SANDBOX_TESTS
+```

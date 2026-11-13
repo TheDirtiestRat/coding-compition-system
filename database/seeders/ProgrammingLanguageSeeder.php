@@ -9,12 +9,10 @@ class ProgrammingLanguageSeeder extends Seeder
 {
     public function run(): void
     {
-        $javaPath = 'C:\Program Files\Java\jdk-23\bin';
-
         ProgrammingLanguage::create([
             'name' => 'java',
-            'compile_command' => '"' . $javaPath . '\javac.exe" {file}',
-            'run_command' => '"' . $javaPath . '\java.exe" -cp {dir} Main',
+            'compile_command' => 'javac {file}',
+            'run_command' => 'java -cp {dir} Main',
             'file_extension' => '.java',
             'is_active' => true,
         ]);
