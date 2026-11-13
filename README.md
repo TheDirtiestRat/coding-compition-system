@@ -4,7 +4,7 @@ This system is created soely to have a one outlet for use to held a coding compi
 
 ## Local Setup
 
-Use PHP 8.3 or later and Composer.
+Use PHP 8.3 or later with PDO SQLite enabled, and Composer. Check `php -v` and `php --ri pdo_sqlite` first. If multiple PHP versions are installed, put the supported PHP directory first on `PATH` so Composer and Artisan use the same executable.
 
 1. Install PHP dependencies:
    `composer install`
@@ -14,11 +14,12 @@ Use PHP 8.3 or later and Composer.
 3. Install frontend dependencies:
    `npm install`
 4. Use SQLite for local development (no MySQL required):
-   set `DB_CONNECTION=sqlite`
-   set `DB_DATABASE=database/database.sqlite`
+   the template already sets `DB_CONNECTION=sqlite`. Leave `DB_DATABASE` unset to
+   use this project's `database/database.sqlite`. For another file, set
+   `DB_DATABASE` to its quoted absolute path (use forward slashes on Windows).
 5. Prepare database:
-   `New-Item -ItemType File -Path database\database.sqlite -Force`
-   `php artisan migrate:fresh --seed`
+   `if (!(Test-Path database\database.sqlite)) { New-Item -ItemType File -Path database\database.sqlite }`
+   `php artisan migrate --seed`
 6. Build assets for Blade pages:
    `npm run build`
 7. Start the app:
