@@ -141,8 +141,10 @@
         let editorInstance;
 
         let testCaseIndex = 0;
+        let selectionRequest = 0;
 
         function edit_challenge(challenge_id) {
+            const requestId = ++selectionRequest;
             const challenge_id_elem = document.getElementById("challenge_id");
             const challenge_event_elem = document.getElementById("event_id");
             const challenge_title = document.getElementById("title");
@@ -152,6 +154,7 @@
             const challenge_language_id = document.getElementById("language_id");
             const challenge_points = document.getElementById("points");
             const submitButton = document.getElementById("challenge_submit_btn");
+            submitButton.disabled = true;
 
             const codeLanguage = document.getElementById("codeLanguage");
 
@@ -161,6 +164,8 @@
                     return response.json();
                 })
                 .then(data => {
+                    if (requestId !== selectionRequest) return;
+
                     if (challenge_id_elem.value !== String(data.id)) {
                         document.getElementById('photos').value = '';
                         document.getElementById('photo_preview_container').innerHTML = '';
@@ -202,8 +207,11 @@
                             testCaseIndex = idx + 1;
                         });
                     }
+                    submitButton.disabled = false;
                 })
-                .catch(error => alert(error.message));
+                .catch(error => {
+                    if (requestId === selectionRequest) alert(error.message);
+                });
         }
 
         function renderExistingPhotos(photos = [], deletedIds = []) {
@@ -302,6 +310,7 @@
 
             form.addEventListener('submit', event => {
                 event.preventDefault();
+                if (document.getElementById('challenge_submit_btn').disabled) return;
 
                 const codeSolution = editorInstance.getValue();
                 document.getElementById('code_solution').value = codeSolution;
