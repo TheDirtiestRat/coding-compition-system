@@ -19,7 +19,7 @@ const context = vm.createContext({
     fetch: async (url, options) => {
         fetchCount++;
         assert.equal(options.headers.Accept, 'application/json');
-        assert.equal(button.disabled, true);
+        if (url === '/api/submit-code-for-review') assert.equal(button.disabled, true);
         return { ok: false, status: 422, json: async () => ({ errors: { code: ['Code is required.'] } }) };
     },
     window: { location: { reload: () => { reloadCount++; } } },
@@ -36,4 +36,6 @@ elements.submittedCode = { value: code };
 context.restoredCode = null;
 vm.runInContext('editorInstance = { setValue: value => { restoredCode = value; } }; initWithSubmittedCode();', context);
 assert.equal(context.restoredCode, code, 'submitted code whitespace must survive initialization');
+await context.runServerCode('', '1');
+assert.match(output.textContent, /Code is required\./);
 console.log('Editor initialization, validation feedback and code preservation checks passed.');

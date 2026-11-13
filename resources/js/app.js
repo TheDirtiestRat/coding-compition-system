@@ -56,8 +56,9 @@ async function runServerCode(code, languageId) {
         if (response.ok) {
             outputArea.textContent = `${currentLanguage} Output:\n${data.output}`;
         } else {
+            const errors = Object.values(data.errors || {}).flat().join("\n");
             outputArea.textContent = `Server Error (${currentLanguage}):\n${
-                data.error || "Unknown server error"
+                errors || data.error || data.message || "Unknown server error"
             }`;
         }
     } catch (error) {
