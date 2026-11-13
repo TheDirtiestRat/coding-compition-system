@@ -4,6 +4,8 @@ This system is created soely to have a one outlet for use to held a coding compi
 
 ## Local Setup
 
+Use PHP 8.3 or later and Composer.
+
 1. Install PHP dependencies:
    `composer install`
 2. Prepare environment file and key:
@@ -23,6 +25,6 @@ This system is created soely to have a one outlet for use to held a coding compi
    `php artisan serve --no-reload`
 
 If the page renders without styles, run `npm run build` again and refresh the browser.
-Default seeded logins:
-`Admin / admin`
-`User / user`
+The seeder creates only an `Admin` account. Use the password configured in
+`database/seeders/DatabaseSeeder.php` for your local setup. It does not create a
+contestant account; create one through the admin page or open registration.
