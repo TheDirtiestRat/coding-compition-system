@@ -13,6 +13,7 @@ class ProgrammingLanguageController extends Controller
     public function index()
     {
         $languages = ProgrammingLanguage::all();
+
         return view('admin.programming-languages', compact('languages'));
     }
 
@@ -59,6 +60,7 @@ class ProgrammingLanguageController extends Controller
     public function destroy(string $id)
     {
         ProgrammingLanguage::destroy($id);
+
         return redirect('/admin/programming-languages')->with('success', 'Language deleted successfully.');
     }
 
