@@ -3,12 +3,7 @@
 @section('code-content')
 
 
-    <!-- Hidden Fields hehe -->
-    <textarea hidden name="submittedCode" id="submittedCode">
-        @isset($details->code)
-            {{ $details->code }}
-        @endisset
-    </textarea>
+    <textarea hidden name="submittedCode" id="submittedCode">{{ $details->code ?? '' }}</textarea>
 
      @isset($details->code)
     @if ($details->status === 'submitted')
@@ -56,7 +51,8 @@
                     <option value="vs-dark" selected>Dark</option>
                 </select>
 
-                <select class="select select-sm select-bordered basis-full" id="language-selector">
+                <select class="select select-sm select-bordered basis-full" id="language-selector"
+                    data-language="{{ $details->language ?? '' }}" data-language-id="{{ $details->language_id ?? '' }}">
                     <option value="">Loading...</option>
                 </select>
 
