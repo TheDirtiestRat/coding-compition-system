@@ -1,8 +1,6 @@
-@props(['challenge'])
+@props(['challenge', 'canSolve' => false])
 
 @php
-    $canSolve = $competition_started ?? true;
-
     $statusStyles = match (true) {
         !$canSolve => [
             'card' => 'border border-base-300 opacity-60',
