@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->trimStrings(except: ['code', 'input']);
+
         //
         // Register the middleware with a short alias for use in routes
         $middleware->alias([
