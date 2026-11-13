@@ -24,7 +24,7 @@ class CodeRunner
             File::put($tempDir . DIRECTORY_SEPARATOR . $filename, $code);
 
             // Symfony escapes placeholder values for the current platform's shell.
-            $placeholders = ['{file}' => '${:CODE_FILE}', '{dir}' => '${:CODE_DIR}'];
+            $placeholders = ['{file}' => '"${:CODE_FILE}"', '{dir}' => '"${:CODE_DIR}"'];
             $environment = ['CODE_FILE' => $filename, 'CODE_DIR' => $tempDir];
 
             if ($language->compile_command) {
