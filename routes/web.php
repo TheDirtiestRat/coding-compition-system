@@ -11,8 +11,7 @@ use App\Http\Controllers\AdminCountdownController;
 use App\Http\Controllers\CountdownController;
 use App\Http\Controllers\SubmissionsController;
 use App\Http\Controllers\ProgrammingLanguageController;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use App\Support\CompetitionTimer;
 
 
 Route::get('/', function () {
@@ -110,19 +109,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/timer/get_timer', [AdminCountdownController::class, 'get_timer']);
 
     Route::get('/competition-ended', function () {
-        $started = DB::table('options')
-            ->where('option_name', 'start_compition')
-            ->value('option_value');
-
-        if ($started !== '1') {
-            return redirect('/code-problems');
-        }
-
-        $end_time = DB::table('options')
-            ->where('option_name', 'expected_end_time')
-            ->value('option_value');
-
-        if (!$end_time || Carbon::now()->timestamp < Carbon::parse($end_time)->timestamp) {
+        if (!CompetitionTimer::state()['isTime']) {
             return redirect('/code-problems');
         }
 
