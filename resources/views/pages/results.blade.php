@@ -1,80 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Results</title>
-
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @endif
-</head>
-
-<body class="w-screen h-screen flex justify-center">
-    <div class="flex flex-row gap-3 p-3 basis-full h-dvh">
-        {{-- top ranks --}}
-        <div class="basis-full grid grid-cols-1 grid-rows-3 gap-3">
-            @php
-                $rank = 0;
-            @endphp
+<x-admin-display-layout title="Results">
+    <div class="mb-6">
+        <h1 class="text-2xl font-semibold tracking-tight">Competition results</h1>
+        <p class="mt-2 text-sm admin-muted wrap-anywhere">@include('components.title')</p>
+    </div>
+    <div class="grid min-w-0 items-start gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
+        <section aria-label="Top competitors" class="grid gap-4 sm:grid-cols-3 xl:grid-cols-1">
             @foreach ($candidates->take(3) as $candidate)
-                @php
-                    $rank += 1;
-                @endphp
-                <div class="bg-base-300 rounded-xl p-3 w-full grid grid-cols-2 grid-rows-2">
-                    <span class="text-5xl col-start-1 row-span-full">
-                        @if ($candidate->total_score == 0)
-                            N/A
-                        @else
-                            {{ $rank }}
-                        @endif
-                    </span>
-                    <span class="text-2xl col-start-2">{{ $candidate->fullname }}</span>
-                    <span class="text-5xl col-span-2 text-center">{{ $candidate->total_score }}pts</span>
-                </div>
+                <article class="admin-card min-w-0 p-5 sm:p-6">
+                    <p class="text-xs font-medium admin-muted">Rank {{ $candidate->total_score == 0 ? 'N/A' : $loop->iteration }}</p>
+                    <h2 class="mt-3 text-lg font-semibold wrap-anywhere">{{ $candidate->fullname }}</h2>
+                    <p class="mt-4 text-3xl font-mono tabular-nums">{{ $candidate->total_score }} <span class="text-sm font-sans admin-muted">points</span></p>
+                </article>
             @endforeach
-
-        </div>
-        {{-- all ranks --}}
-        <div class="basis-full bg-base-100 rounded-xl overflow-y-auto">
+        </section>
+        <section aria-labelledby="results-title" class="admin-card overflow-hidden">
+            <h2 id="results-title" class="border-b border-base-300 p-5 text-base font-semibold">Standings</h2>
+            <div class="overflow-x-auto">
             <table class="table table-zebra">
                 <!-- head -->
-                <thead class=" text-center text-neutral-200">
+                <thead class=" text-center admin-muted">
                     <tr>
-                        <th class="bg-slate-700/50 rounded-tl-xl">Ranking</th>
-                        <th class="bg-slate-700/50">Name</th>
-                        <th class="bg-slate-700/50 rounded-tr-xl">Points</th>
-                        {{-- <th class="bg-slate-700/50 rounded-tr-xl">Group</th> --}}
+                        <th class="bg-base-200 rounded-tl-xl">Ranking</th>
+                        <th class="bg-base-200">Name</th>
+                        <th class="bg-base-200 rounded-tr-xl">Points</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {{-- genereates the rank --}}
                     @php
                         $rank = 0;
                     @endphp
-                    @foreach ($candidates as $candidate)
+                    @forelse ($candidates as $candidate)
                         @php
                             $rank += 1;
                         @endphp
                         <tr class="text-center">
                             @if ($candidate->total_score == 0)
-                                <th class="text-neutral-400 font-light">N/A</th>
+                                <th class="admin-muted font-light">N/A</th>
                             @else
                                 <th>{{ $rank }}</th>
                             @endif
                             <td>{{ $candidate->fullname }}</td>
                             <td>{{ $candidate->total_score }}</td>
-                            {{-- <td>
-                            <p class="badge badge-primary badge-soft">{{ $candidate->group }}</p>
-                        </td> --}}
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr><td colspan="3" class="admin-muted">No competitors in the active event yet.</td></tr>
+                    @endforelse
                 </tbody>
             </table>
-        </div>
+            </div>
+        </section>
     </div>
-</body>
-
-</html>
+</x-admin-display-layout>

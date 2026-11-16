@@ -1,5 +1,8 @@
 @extends('layouts.admin')
 
+@section('admin-title', 'Overview')
+@section('admin-description', 'Control the competition timer, registration and standings.')
+
 @section('admin-content')
     @if (session('success'))
         <div role="alert" class="alert alert-success w-full mb-3">
@@ -12,50 +15,51 @@
         </div>
     @endif
 
-    <div class="flex flex-row gap-3 w-full">
-        {{-- candidate ranking --}}
-        <div class="basis-full bg-base-100 rounded-xl p-3 h-80 flex flex-col items-center justify-center gap-8">
-            <!-- Countdown display -->
-            <div>
-                <h3 id="countdown"
-                    class="text-8xl font-mono font-semibold text-center underline decoration-2 decoration-indigo-400 decoration-double">
-                    00:00:00
-                </h3>
+    <div class="grid min-w-0 gap-6 xl:grid-cols-2">
+        <section aria-labelledby="timer-title" class="admin-card flex flex-col items-center justify-center gap-6 p-5 sm:p-6">
+            <div class="flex w-full items-center gap-3">
+                <span class="admin-icon-badge"><x-admin-icon name="timer" /></span>
+                <h2 id="timer-title" class="text-base font-semibold">Competition timer</h2>
             </div>
-
-
-
-            <div class="flex flex-col items-center justify-center gap-4">
-                <div id="timeInputContainer" class="space-x-4 flex flex-row gap-2">
-                    <input type="number" class="input min-w-24" name="" id="hourInput" placeholder="Hour"
-                        min="0" max="23">
-
-                    <input type="number" class="input min-w-24" name="" id="minInput" placeholder="Minute"
-                        min="0" max="59">
-
-                    <input type="number" class="input min-w-24" name="" id="secInput" placeholder="Second"
-                        min="0" max="59">
+            <p id="countdown" role="timer" aria-label="Time remaining" class="text-4xl sm:text-6xl font-mono font-semibold tracking-tight text-center tabular-nums">00:00:00</p>
+            <div class="flex w-full max-w-sm flex-col items-center gap-5">
+                <div id="timeInputContainer" class="grid w-full grid-cols-3 gap-3">
+                    <label for="hourInput" class="text-xs font-medium admin-muted">Hours
+                        <input type="number" class="input mt-2" id="hourInput" placeholder="00" min="0" max="23">
+                    </label>
+                    <label for="minInput" class="text-xs font-medium admin-muted">Minutes
+                        <input type="number" class="input mt-2" id="minInput" placeholder="00" min="0" max="59">
+                    </label>
+                    <label for="secInput" class="text-xs font-medium admin-muted">Seconds
+                        <input type="number" class="input mt-2" id="secInput" placeholder="00" min="0" max="59">
+                    </label>
                 </div>
+                <div class="flex flex-wrap justify-center gap-3">
+                    <button id="getTimerBtn" class="btn btn-outline" type="button">Refresh</button>
+                    <button id="setTimerBtn" class="btn btn-primary" type="button">Set timer</button>
+                    <button id="resetTimerBtn" class="btn btn-outline" type="button">Reset</button>
+                </div>
+                <p class="text-sm text-center admin-muted">Setting a duration starts the competition timer.</p>
+            </div>
+        </section>
 
-                <div class="space-x-4">
-                    <button id="getTimerBtn" class="btn btn-primary btn-lg" type="button">Get</button>
-                    <button id="setTimerBtn" class="btn btn-primary btn-lg" type="button"
-                        >Set Timer</button>
-                    <button class="btn btn-secondary btn-soft btn-lg" type="button"
-                        id="resetTimerBtn">Reset</button>
+        <section aria-labelledby="standings-title" class="admin-card overflow-hidden">
+            <div class="flex items-center gap-3 border-b border-base-300 p-5 sm:p-6">
+                <span class="admin-icon-badge"><x-admin-icon name="trophy" /></span>
+                <div class="min-w-0">
+                    <h2 id="standings-title" class="text-base font-semibold">Standings</h2>
+                    <p class="mt-1 text-sm admin-muted wrap-anywhere">@include('components.title')</p>
                 </div>
             </div>
-        </div>
-
-        <div class="basis-full bg-base-100 rounded-xl p-3 h-80 overflow-y-auto">
+            <div class="max-h-96 overflow-auto">
             <table class="table table-zebra">
                 <!-- head -->
-                <thead class=" text-center text-neutral-200">
+                <thead class=" text-center admin-muted">
                     <tr>
-                        <th class="bg-slate-700/50 rounded-tl-xl">Ranking</th>
-                        <th class="bg-slate-700/50">Name</th>
-                        <th class="bg-slate-700/50">Points</th>
-                        <th class="bg-slate-700/50 rounded-tr-xl">Group</th>
+                        <th class="bg-base-200 rounded-tl-xl">Ranking</th>
+                        <th class="bg-base-200">Name</th>
+                        <th class="bg-base-200">Points</th>
+                        <th class="bg-base-200 rounded-tr-xl">Group</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -63,13 +67,13 @@
                     @php
                         $rank = 0;
                     @endphp
-                    @foreach ($candidates as $candidate)
+                    @forelse ($candidates as $candidate)
                         @php
                             $rank += 1;
                         @endphp
                         <tr class="text-center">
                             @if ($candidate->total_score == 0)
-                                <th class="text-neutral-400 font-light">N/A</th>
+                                <th class="admin-muted font-light">N/A</th>
                             @else
                                 <th>{{ $rank }}</th>
                             @endif
@@ -79,34 +83,33 @@
                                 <p class="badge badge-primary badge-soft">{{ $candidate->group }}</p>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr><td colspan="4" class="admin-muted">No competitors in the active event yet.</td></tr>
+                    @endforelse
                 </tbody>
             </table>
-        </div>
+            </div>
+        </section>
     </div>
 
-    <div class="flex flex-col bg-base-100 rounded-xl p-3 mt-3">
-        <div class="flex flex-col">
-            @php
-                $regOpen = DB::table('options')->where('option_name', 'registration_open')->value('option_value');
-            @endphp
-            <div class="flex items-center gap-3 mb-2 p-2 bg-base-300 rounded-xl">
-                <span class="text-sm">Registration:
-                    @if ($regOpen === '1')
-                        <span class="badge btn btn-sm btn-success">Open</span>
-                    @else
-                        <span class="badge btn btn-sm btn-ghost">Closed</span>
-                    @endif
-                </span>
-                <form method="POST" action="{{ url('/admin/toggle-registration') }}">
-                    @csrf
-                    <button type="submit" class="btn btn-sm {{ $regOpen === '1' ? 'btn-error' : 'btn-success' }}">
-                        {{ $regOpen === '1' ? 'Close' : 'Open' }}
-                    </button>
-                </form>
-            </div>
+    @php
+        $regOpen = DB::table('options')->where('option_name', 'registration_open')->value('option_value');
+    @endphp
+    <section aria-labelledby="registration-title" class="admin-card mt-6 flex flex-wrap items-center justify-between gap-5 p-5 sm:p-6">
+        <div>
+            <h2 id="registration-title" class="text-base font-semibold">Registration</h2>
+            <p class="mt-2 text-sm admin-muted">Allow competitors to create accounts for the active event.</p>
         </div>
-    </div>
+        <div class="flex flex-wrap items-center gap-3">
+            <span class="badge">{{ $regOpen === '1' ? 'Open' : 'Closed' }}</span>
+            <form method="POST" action="{{ url('/admin/toggle-registration') }}">
+                @csrf
+                <button type="submit" class="btn {{ $regOpen === '1' ? 'btn-outline' : 'btn-primary' }}">
+                    {{ $regOpen === '1' ? 'Close registration' : 'Open registration' }}
+                </button>
+            </form>
+        </div>
+    </section>
 @endsection
 
 @section('admin-scripts')

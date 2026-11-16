@@ -1,5 +1,8 @@
 @extends('layouts.admin')
 
+@section('admin-title', 'Competitors')
+@section('admin-description', 'Manage competitor accounts and review their solved problems.')
+
 @section('admin-content')
     {{-- alert --}}
     @if (session('success') || session('error') || $errors->any())
@@ -26,18 +29,18 @@
         </div>
     @endif
 
-    <div class="flex flex-row gap-3 w-full">
-        <div class="tabs tabs-lift w-[450px]">
+    <div class="grid min-w-0 items-start gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
+        <div class="tabs tabs-lift min-w-0">
             <input type="radio" name="my_tabs_3" class="tab font-medium" aria-label="Add Candidate" checked="checked" />
-            <div class="tab-content bg-base-100 border-base-300 p-3">
+            <div class="tab-content bg-base-100 border-base-300 p-5">
                 {{-- for adding new candidates --}}
-                <span class="text-2xl font-bold">Add new Candidate</span>
+                <h2 class="text-lg font-semibold">Add new Candidate</h2>
                 <form method="POST" action="{{ url('/admin/add-candidate') }}">
                     @csrf
                     {{-- form --}}
                     <fieldset class="fieldset mt-2">
-                        <legend class="fieldset-legend">for waht Event?</legend>
-                        <select class="select" name="event_id">
+                        <label class="fieldset-legend" for="add_candidates_event_id">Event</label>
+                        <select id="add_candidates_event_id" class="select" name="event_id">
                             @forelse  ($events as $event)
                                 @if ($event->isActive)
                                     <option value="{{ $event->id }}" selected>{{ $event->title }}</option>
@@ -45,18 +48,18 @@
                                     <option value="{{ $event->id }}">{{ $event->title }}</option>
                                 @endif
                             @empty
-                                <option disabled selected>Pick a Event</option>
+                                <option disabled selected>Choose an event</option>
                             @endforelse
                         </select>
 
-                        <legend class="fieldset-legend">Candidates name?</legend>
-                        <input type="text" class="input" name="candidate_name" placeholder="Type here" />
+                        <label class="fieldset-legend" for="add_candidates_candidate_name">Full name</label>
+                        <input id="add_candidates_candidate_name" type="text" class="input" name="candidate_name" placeholder="Type here" />
                         {{-- <p class="label">Optional</p> --}}
-                        <legend class="fieldset-legend">Candidates username?</legend>
-                        <input type="text" class="input" name="username" placeholder="Type here" />
+                        <label class="fieldset-legend" for="add_candidates_username">Username</label>
+                        <input id="add_candidates_username" type="text" class="input" name="username" placeholder="Type here" />
                         <p class="label">Optional</p>
-                        <legend class="fieldset-legend">Candidates password to use?</legend>
-                        <input type="text" class="input" name="user_password" placeholder="Type here" />
+                        <label class="fieldset-legend" for="add_candidates_user_password">Password</label>
+                        <input id="add_candidates_user_password" type="text" class="input" name="user_password" placeholder="Type here" />
                         <div class="divider"></div>
                         <button class="btn btn-primary">Add Candidate</button>
                     </fieldset>
@@ -64,18 +67,18 @@
             </div>
 
             <input type="radio" name="my_tabs_3" id="edit_tabs" class="tab font-medium" aria-label="Edit Candidate" />
-            <div class="tab-content bg-base-100 border-base-300 p-3">
+            <div class="tab-content bg-base-100 border-base-300 p-5">
                 {{-- for editing candidates details --}}
-                <span class="text-2xl font-bold">Edit Candidate</span>
+                <h2 class="text-lg font-semibold">Edit Candidate</h2>
                 <form method="POST" action="{{ url('/admin/update-candidate') }}">
                     @csrf
                     {{-- form --}}
                     <fieldset class="fieldset mt-2">
-                        <legend class="fieldset-legend text-md">Candidate ID: </legend>
+                        <label class="fieldset-legend" for="candidate_id">Candidate ID: </label>
                         <input type="text" class="input" name="candidate_id" id="candidate_id" placeholder="User Id"
                             readonly />
 
-                        <legend class="fieldset-legend">New Event?</legend>
+                        <label class="fieldset-legend" for="event_id">Event</label>
                         <select class="select" name="event_id" id="event_id">
                             @forelse  ($events as $event)
                                 @if ($event->isActive)
@@ -84,18 +87,18 @@
                                     <option value="{{ $event->id }}">{{ $event->title }}</option>
                                 @endif
                             @empty
-                                <option disabled selected>Pick a Event</option>
+                                <option disabled selected>Choose an event</option>
                             @endforelse
                         </select>
 
-                        <legend class="fieldset-legend">New name?</legend>
+                        <label class="fieldset-legend" for="edit_name">Full name</label>
                         <input type="text" class="input" name="edit_name" id="edit_name" placeholder="Type here" />
                         {{-- <p class="label">Optional</p> --}}
-                        <legend class="fieldset-legend">New username?</legend>
+                        <label class="fieldset-legend" for="edit_username">Username</label>
                         <input type="text" class="input" name="edit_username" id="edit_username"
                             placeholder="Type here" />
                         <p class="label">Optional</p>
-                        <legend class="fieldset-legend">New password to use?</legend>
+                        <label class="fieldset-legend" for="edit_user_password">New password</label>
                         <input type="text" class="input" name="edit_user_password" id="edit_user_password"
                             placeholder="Type here" />
                         <div class="divider"></div>
@@ -104,27 +107,27 @@
                 </form>
             </div>
         </div>
-        {{-- <div class="basis-auto bg-base-100 rounded-xl p-3">
+        {{-- <div class="basis-auto admin-card p-5 sm:p-6">
 
 
         </div> --}}
-        <div class="basis-full bg-base-100 rounded-xl p-3">
+        <div class="basis-full admin-card p-5 sm:p-6">
             {{-- list of candidates --}}
             <div class="overflow-x-auto">
                 <table class="table table-zebra">
                     <!-- head -->
-                    <thead class=" text-neutral-200 text-center">
+                    <thead class=" admin-muted text-center">
                         <tr>
-                            <th class="bg-slate-700/50 rounded-tl-xl">ID</th>
-                            <th class="bg-slate-700/50">Name</th>
-                            <th class="bg-slate-700/50">Username</th>
-                            <th class="bg-slate-700/50">Group</th>
-                            <th class="bg-slate-700/50">Event</th>
-                            <th class="bg-slate-700/50 rounded-tr-xl">Actions</th>
+                            <th class="bg-base-200 rounded-tl-xl">ID</th>
+                            <th class="bg-base-200">Name</th>
+                            <th class="bg-base-200">Username</th>
+                            <th class="bg-base-200">Group</th>
+                            <th class="bg-base-200">Event</th>
+                            <th class="bg-base-200 rounded-tr-xl">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($candidates as $tableCandidate)
+                        @forelse ($candidates as $tableCandidate)
                             <tr class="text-center">
                                 <th>{{ $tableCandidate->id }}</th>
                                 <td>{{ $tableCandidate->fullname }}</td>
@@ -150,7 +153,9 @@
                                     </form>
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr><td colspan="6" class="admin-muted">No competitors yet. Add an account to get started.</td></tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -159,30 +164,29 @@
 
     {{-- candidate info --}}
     @isset($solved_challenges)
-        <div class="flex flex-row gap-3 w-full bg-base-100 rounded-xl p-3 mt-3">
-            <div class="p-2 basis-auto flex flex-col gap-2">
-                <span class="text-2xl font-bold text-nowrap">Candidate Details</span>
+        <div class="grid min-w-0 gap-6 xl:grid-cols-[280px_minmax(0,1fr)] admin-card p-5 sm:p-6 mt-6">
+            <div class="min-w-0 p-2 flex flex-col gap-2 wrap-anywhere">
+                <span class="text-lg font-semibold wrap-anywhere">Candidate Details</span>
                 <strong><span>Name: {{ $candidate->fullname }}</span></strong>
                 <span>Username: {{ optional($candidate->user)->name }}</span>
                 <span>Email: {{ optional($candidate->user)->email }}</span>
                 <span>Group: {{ $candidate->group }}</span>
             </div>
-            <div class="divider lg:divider-horizontal">*</div>
-            <div class="p-2 basis-full">
-                <span class="text-2xl font-bold">Solved Problems ({{ count($solved_challenges) }})</span>
+            <div class="min-w-0 p-2">
+                <h2 class="text-lg font-semibold">Solved Problems ({{ count($solved_challenges) }})</h2>
                 {{-- list --}}
-                <div class="grid grid-cols-3 gap-3 mt-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-3 mt-3">
                     @foreach ($solved_challenges as $challenges)
-                        <div class="bg-base-300 h-fit rounded-2xl p-4 hover:bg-base-200 hover:cursor-grab"
+                        <button type="button" class="admin-submission h-fit"
                             onclick="show_code_solutions({{ $challenges->id }})">
-                            <div class="flex flex-row justify-between items-center mb-1">
-                                <p class="badge badge-xs badge-primary">{{ $challenges->difficulty }}</p>
-                                <p class="badge badge-xs badge-primary">Points: {{ $challenges->score }} /
-                                    {{ $challenges->points }}</p>
-                            </div>
-                            <p class="">{{ $challenges->title }}</p>
-                            <p class="mt-2 text-xs">Date: {{ $challenges->created_at }}</p>
-                        </div>
+                            <span class="flex flex-row flex-wrap gap-2 justify-between items-center mb-1">
+                                <span class="badge badge-xs badge-primary">{{ $challenges->difficulty }}</span>
+                                <span class="badge badge-xs badge-primary">Points: {{ $challenges->score }} /
+                                    {{ $challenges->points }}</span>
+                            </span>
+                            <span class="mt-2 block font-medium">{{ $challenges->title }}</span>
+                            <span class="mt-2 block text-xs admin-muted">Date: {{ $challenges->created_at }}</span>
+                        </button>
                     @endforeach
                 </div>
             </div>
@@ -190,14 +194,14 @@
     @endisset
 
     {{-- modal --}}
-    <dialog id="code_modal" class="modal">
+    <dialog id="code_modal" class="modal" aria-labelledby="code-modal-title">
         <div class="modal-box w-11/12 max-w-5xl">
-            <h3 class="text-lg font-bold">Code Output</h3>
+            <h3 id="code-modal-title" class="text-lg font-semibold">Code output</h3>
             <p class="basis-full bg-base-300 p-3 rounded-xl w-full whitespace-pre-wrap break-all mb-2"
                 id="code_instruction">
                 Instructions Code sits here...
             </p>
-            <div class="grid grid-cols-2 gap-3 h-full">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 h-full">
                 <p class="basis-full bg-base-300 p-3 rounded-xl w-full whitespace-pre-wrap break-all font-mono"
                     id="candidate_code">
                     Candidates Code sits here...
