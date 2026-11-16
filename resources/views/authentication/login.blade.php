@@ -1,45 +1,6 @@
-<!DOCTYPE html>
-<html lang="en" data-theme="light">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log in | @include('components.title')</title>
-
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css'])
-    @endif
-
-    <style>
-        a:focus-visible,
-        button:focus-visible,
-        input:focus-visible {
-            outline: 3px solid #171717;
-            outline-offset: 4px;
-        }
-    </style>
-</head>
-
-<body class="min-h-screen flex flex-col bg-neutral-50 text-neutral-900 font-sans">
-    <a href="#main-content" class="sr-only focus:not-sr-only focus:block focus:bg-white focus:p-4">Skip to content</a>
-
-    <header class="border-b border-neutral-200 bg-white">
-        <nav aria-label="Main navigation" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-4 flex items-center justify-between gap-4">
-            <a href="{{ url('/') }}" class="flex min-w-0 items-center gap-3 rounded-lg">
-                <span class="w-9 h-9 shrink-0 rounded-xl bg-black flex items-center justify-center" aria-hidden="true">
-                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                    </svg>
-                </span>
-                <span class="text-base font-semibold">Coding competition</span>
-            </a>
-            <a href="{{ url('/') }}" class="shrink-0 rounded-lg px-3 py-3 text-sm font-medium hover:bg-neutral-100">Home</a>
-        </nav>
-    </header>
-
-    <main id="main-content" tabindex="-1" class="flex-1 grid place-items-center px-4 py-10 sm:px-6 sm:py-14">
-        <section aria-labelledby="login-title" class="w-full min-w-0 max-w-lg rounded-3xl border border-neutral-200 bg-white p-6 sm:p-8 shadow-sm">
+<x-public-layout title="Log in" active="login">
+    <section aria-labelledby="login-title" class="max-w-lg mx-auto px-6 py-10 sm:py-14">
+        <div class="motion-enter rounded-3xl border border-neutral-200 bg-white p-6 sm:p-8 shadow-sm">
             <p class="mb-3 text-sm text-neutral-600 wrap-anywhere">@include('components.title')</p>
             <h1 id="login-title" class="text-3xl font-medium tracking-tight">Log in to compete</h1>
             <p class="mt-3 text-sm leading-relaxed text-neutral-600">Enter your username and password to continue.</p>
@@ -89,13 +50,10 @@
             <p class="mt-8 border-t border-neutral-200 pt-6 text-sm text-neutral-600">
                 Need an account? <a href="{{ url('/register') }}" class="rounded-sm font-semibold text-neutral-900 underline underline-offset-4">Register</a>
             </p>
-        </section>
-    </main>
+        </div>
+    </section>
 
-    <footer class="px-6 pb-8 text-center text-sm leading-relaxed text-neutral-600">
-        Need help signing in? Contact your competition organizer.
-    </footer>
-
+    @push('scripts')
     <script>
         const passwordInput = document.getElementById('password');
         const togglePassword = document.getElementById('togglePassword');
@@ -108,6 +66,5 @@
             togglePassword.setAttribute('aria-pressed', String(showPassword));
         });
     </script>
-</body>
-
-</html>
+    @endpush
+</x-public-layout>
