@@ -1,5 +1,8 @@
 @extends('layouts.admin')
 
+@section('admin-title', 'Overview')
+@section('admin-description', 'Control the competition timer, registration and standings.')
+
 @section('admin-content')
     @if (session('success'))
         <div role="alert" class="alert alert-success w-full mb-3">

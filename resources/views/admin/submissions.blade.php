@@ -1,5 +1,12 @@
 @extends('layouts.admin')
 
+@section('admin-title', 'Submissions')
+@section('admin-description', 'Review submitted code, test results and scores.')
+
+@section('admin-editor-assets')
+    @vite(['resources/js/monaco.js'])
+@endsection
+
 @section('admin-content')
     {{-- Alerts --}}
     @if (session('success') || session('error') || $errors->any())
@@ -150,7 +157,7 @@
             function editorConfig() {
                 return {
                     language: 'java',
-                    theme: 'vs-dark',
+                    theme: document.documentElement?.dataset.theme === 'light' ? 'vs' : 'vs-dark',
                     readOnly: true,
                     automaticLayout: true,
                     minimap: {

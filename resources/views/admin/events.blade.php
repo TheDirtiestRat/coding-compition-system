@@ -1,5 +1,8 @@
 @extends('layouts.admin')
 
+@section('admin-title', 'Event details')
+@section('admin-description', 'Create events and choose the active competition.')
+
 @section('admin-content')
     {{-- alert --}}
     @if (session('success') || session('error') || $errors->any())

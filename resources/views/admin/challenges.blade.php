@@ -1,5 +1,12 @@
 @extends('layouts.admin')
 
+@section('admin-title', 'Challenges')
+@section('admin-description', 'Write coding problems, solutions and test cases for each event.')
+
+@section('admin-editor-assets')
+    @vite(['resources/js/monaco.js'])
+@endsection
+
 @section('admin-content')
     {{-- alert --}}
     @if (session('success') || session('error') || $errors->any())
@@ -226,7 +233,7 @@
                         <img class="h-24 w-24 object-cover rounded-xl" />
                         <label class="absolute top-0 right-0 bg-red-600 text-white text-xs p-1 rounded cursor-pointer opacity-0 group-hover:opacity-100 transition">
                             <input type="checkbox" name="delete_photos[]" class="hidden" />
-                            ✕
+                            âœ•
                         </label>
                     `;
                     wrapper.querySelector('img').src = photo.url;
@@ -289,7 +296,7 @@
                 language: document.getElementById('language').value || 'java',
                 value: challengeDraft.code_solution ?? '',
                 automaticLayout: true,
-                theme: 'vs-dark',
+                theme: document.documentElement?.dataset.theme === 'light' ? 'vs' : 'vs-dark',
                 minimap: {
                     enabled: false
                 },

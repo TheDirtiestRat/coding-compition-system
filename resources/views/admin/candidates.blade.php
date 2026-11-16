@@ -1,5 +1,8 @@
 @extends('layouts.admin')
 
+@section('admin-title', 'Competitors')
+@section('admin-description', 'Manage competitor accounts and review their solved problems.')
+
 @section('admin-content')
     {{-- alert --}}
     @if (session('success') || session('error') || $errors->any())

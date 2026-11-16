@@ -1,5 +1,8 @@
 @extends('layouts.admin')
 
+@section('admin-title', 'Languages')
+@section('admin-description', 'Manage the languages and commands available to coding challenges.')
+
 @section('admin-content')
     @if (session('success') || session('error') || $errors->any())
         <div id="alert_container" class="w-full flex-col gap-1 flex mb-3">

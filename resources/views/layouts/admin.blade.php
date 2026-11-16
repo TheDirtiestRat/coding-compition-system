@@ -1,37 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
+    <script src="{{ asset('js/admin-theme.js') }}"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Admin</title>
-
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('admin-title', 'Admin') | Coding Competition</title>
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/admin.js', 'resources/js/monaco.js'])
+        @vite(['resources/css/app.css', 'resources/js/admin.js'])
+        @yield('admin-editor-assets')
     @endif
+    @include('components.public-styles')
+    @include('components.admin-styles')
 </head>
-
-<body>
-    {{-- layout --}}
-    <div class="drawer lg:drawer-open">
-        <input id="my-drawer-4" type="checkbox" class="drawer-toggle" />
-        <div class="drawer-content p-2 ps-2 md:ps-0">
-            @include('components.admin-nav-bar')
-
-            <!-- Page content here -->
-            <div class="p-3 rounded-2xl bg-base-300 mt-2">
-                @yield('admin-content')
-            </div>
-        </div>
-
-        @include('components.admin-side-bar')
+<body class="admin-shell min-h-screen">
+    <a href="#admin-content" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:bg-base-100 focus:p-3">Skip to content</a>
+    @include('components.admin-side-bar')
+    <div class="lg:pl-64">
+        @include('components.admin-nav-bar')
+        <main id="admin-content" class="min-w-0 p-4 sm:p-6" tabindex="-1">
+            <p class="mb-5 max-w-2xl text-sm leading-6 admin-muted">@yield('admin-description')</p>
+            @yield('admin-content')
+        </main>
     </div>
-
-    {{-- alert modal --}}
     @include('components.alert-modal')
     @yield('admin-scripts')
 </body>
-
 </html>
