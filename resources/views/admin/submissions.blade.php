@@ -76,6 +76,22 @@
         <div id="test_case_results_list" class="flex flex-col gap-2"></div>
     </div>
 
+    <section aria-labelledby="ai-review-title" class="admin-card mt-6 p-5 sm:p-6">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+            <div class="max-w-2xl">
+                <h2 id="ai-review-title" class="text-base font-semibold">Local AI review</h2>
+                <p class="mt-2 text-sm admin-muted">Optional feedback on the approach and possible bugs. AI can make mistakes; use execution evidence and your judgment for the official score.</p>
+            </div>
+            <button id="aiReviewButton" type="button" class="btn btn-outline" data-enabled="{{ config('local_ai.enabled') ? 'true' : 'false' }}" disabled>Request AI review</button>
+        </div>
+        <p id="aiReviewStatus" role="status" class="mt-4 text-sm admin-muted">Select a submission to request a review.</p>
+        <div id="aiReviewResult" hidden class="mt-4 space-y-3 text-sm leading-relaxed wrap-anywhere">
+            <p id="aiReviewSummary"></p>
+            <ul id="aiReviewFindings" class="list-disc space-y-2 pl-5"></ul>
+            <p id="aiReviewLimitations" class="admin-muted"></p>
+        </div>
+    </section>
+
     {{-- Score Section --}}
     <div id="scoreSection" hidden class="bg-base-100 rounded-xl mt-3 p-5 flex flex-col gap-3">
         <form id="scoreForm" class="flex flex-wrap items-center gap-3 ">
@@ -106,6 +122,7 @@
 @endsection
 
 @section('admin-scripts')
+    <script src="{{ asset('js/submission-ai-review.js') }}" defer></script>
     <script>
         (() => {
             // -----------------------------
@@ -173,6 +190,7 @@
             // Submission Viewer
             // -----------------------------
             window.view_submission = async (id) => {
+                window.setAiReviewSubmission?.(null);
                 const requestId = ++selectionRequest;
                 submissionId = null;
                 submissionCodeHash = null;
@@ -232,6 +250,7 @@ Points: ${tc.passed ? tc.points : 0}/${tc.points}${tc.error ? '\nError: ' + tc.e
                     el.submissionPlaceholder.hidden = true;
                     el.submissionDisplay.hidden = false;
                     el.scoreSection.hidden = false;
+                    window.setAiReviewSubmission?.({ id: submission.id, codeHash: submission.code_hash });
                 } catch (error) {
                     if (requestId === selectionRequest) show_alert(error.message);
                 }

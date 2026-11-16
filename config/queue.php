@@ -31,6 +31,15 @@ return [
 
     'connections' => [
 
+        'ai-reviews' => [
+            'driver' => 'database',
+            'connection' => env('DB_QUEUE_CONNECTION'),
+            'table' => env('DB_QUEUE_TABLE', 'jobs'),
+            'queue' => 'ai-reviews',
+            'retry_after' => 240,
+            'after_commit' => false,
+        ],
+
         'sync' => [
             'driver' => 'sync',
         ],
