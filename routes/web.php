@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminCountdownController;
+use App\Http\Controllers\AiReviewController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\CompilerController;
@@ -76,6 +77,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/api/submissions_list', [AdminController::class, 'submissions_api']);
         Route::get('/admin/api/submissions/{id}', [SubmissionsController::class, 'show']);
         Route::post('/admin/api/submissions/{id}/submit-score', [SubmissionsController::class, 'submit_score']);
+        Route::post('/admin/api/submissions/{id}/ai-review', [AiReviewController::class, 'store'])->whereNumber('id')->middleware('throttle:6,1');
+        Route::get('/admin/api/ai-reviews/{reviewId}', [AiReviewController::class, 'show'])->whereUuid('reviewId');
 
         Route::get('/admin/api/get-languages', [ProgrammingLanguageController::class, 'api_list']);
         Route::post('/admin/programming-languages/store', [ProgrammingLanguageController::class, 'store']);

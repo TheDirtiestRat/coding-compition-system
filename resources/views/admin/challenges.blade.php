@@ -91,6 +91,22 @@
                             <input type="hidden" name="code_solution" id="code_solution">
                         </div>
 
+                        <div class="grid min-w-0 grid-cols-1 sm:grid-cols-2 gap-3">
+                            <fieldset class="fieldset">
+                                <label class="fieldset-legend" for="output_mode">Output Checking</label>
+                                <select class="select w-full" name="output_mode" id="output_mode">
+                                    <option value="exact" @selected(old('output_mode', $draftChallenge?->output_mode ?? 'exact') === 'exact')>Exact (trimmed)</option>
+                                    <option value="tokens" @selected(old('output_mode', $draftChallenge?->output_mode ?? 'exact') === 'tokens')>Tokens (ignore whitespace)</option>
+                                    <option value="numeric" @selected(old('output_mode', $draftChallenge?->output_mode ?? 'exact') === 'numeric')>Numeric (floating point)</option>
+                                </select>
+                            </fieldset>
+                            <fieldset class="fieldset">
+                                <label class="fieldset-legend" for="output_tolerance">Absolute Numeric Tolerance</label>
+                                <input type="number" class="input w-full" name="output_tolerance" id="output_tolerance" value="{{ old('output_tolerance', $draftChallenge?->output_tolerance ?? '0.000001') }}" min="0" max="1" step="any" required />
+                            </fieldset>
+                        </div>
+                        <p class="text-sm admin-muted">Numeric mode compares numbers within the tolerance. Use exact or tokens for large integers; tokens keep their order.</p>
+
                         {{-- Multiple Photos --}}
                         <fieldset class="fieldset">
                             <label class="fieldset-legend" for="photos">Challenge Photos (optional, multiple)</label>
@@ -185,6 +201,8 @@
                     challenge_language.value = data['language']
                     challenge_language_id.value = data['language_id'] || ''
                     challenge_points.value = data['points']
+                    document.getElementById('output_mode').value = data.output_mode ?? 'exact';
+                    document.getElementById('output_tolerance').value = data.output_tolerance ?? 0.000001;
 
                     // Select the correct language option and update its hidden id
                     const langOptions = challenge_language.options;

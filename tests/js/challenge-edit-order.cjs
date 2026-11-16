@@ -54,6 +54,7 @@ function setup() {
 const payload = id => ({
     id, event_id: id + 10, title: `Challenge ${id}`, description: `Description ${id}`,
     difficulty: 'hard', language: 'python', language_id: '10', points: id * 100,
+    output_mode: id === 1 ? 'tokens' : 'numeric', output_tolerance: id / 10,
     code_solution: `print(${id})`, photos_list: [{ id, url: `/photo-${id}.png` }],
     test_cases_list: [{ input: `${id}`, expected_output: `${id * 2}`, points: id }],
 });
@@ -68,7 +69,7 @@ function submit(test) {
 function assertChallenge(test, id, title = `Challenge ${id}`) {
     const get = key => test.document.getElementById(key);
     const expected = payload(id);
-    for (const key of ['event_id', 'description', 'difficulty', 'language', 'language_id', 'points']) {
+    for (const key of ['event_id', 'description', 'difficulty', 'language', 'language_id', 'points', 'output_mode', 'output_tolerance']) {
         assert.equal(get(key).value, expected[key], key);
     }
     assert.equal(get('challenge_id').value, id);

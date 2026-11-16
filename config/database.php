@@ -37,10 +37,11 @@ return [
             'database' => env('DB_DATABASE', database_path('database.sqlite')),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
-            'busy_timeout' => null,
+            'busy_timeout' => 5000,
             'journal_mode' => null,
             'synchronous' => null,
-            'transaction_mode' => 'DEFERRED',
+            // Reserve writes before reading so queue workers can wait for concurrent requests.
+            'transaction_mode' => 'IMMEDIATE',
         ],
 
         'mysql' => [
