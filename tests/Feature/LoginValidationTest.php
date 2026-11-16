@@ -63,6 +63,27 @@ class LoginValidationTest extends TestCase
         $this->assertAuthenticatedAs($user);
     }
 
+    public function test_login_error_page_preserves_username_but_never_refills_password(): void
+    {
+        User::factory()->create(['name' => 'someone']);
+
+        $this->from('/login')->post('/login', ['username' => 'someone', 'password' => 'wrong-secret'])
+            ->assertRedirect('/login');
+
+        $this->get('/login')->assertOk()
+            ->assertSee('value="someone"', false)
+            ->assertSee('The provided credentials do not match our records.')
+            ->assertDontSee('wrong-secret');
+    }
+
+    public function test_login_page_can_render_malformed_old_username_input(): void
+    {
+        $this->from('/login')->post('/login', ['username' => ['someone'], 'password' => 'wrong-secret'])
+            ->assertRedirect('/login');
+
+        $this->get('/login')->assertOk()->assertDontSee('wrong-secret');
+    }
+
     public static function loginRoles(): array
     {
         return [
