@@ -40,25 +40,25 @@
         <div class="flex flex-col w-full gap-3">
             {{-- Code Instruction --}}
             <div class="basis-auto bg-base-100 px-3 p-2 flex flex-col gap-2 rounded-xl">
-                <p class="text-xl basis-full">Challenge Description</p>
-                <p id="solutionInstruction" class="text-gray-400 w-full whitespace-pre-wrap break-all"></p>
+                <p class="text-base font-semibold basis-full">Challenge Description</p>
+                <p id="solutionInstruction" class="admin-muted w-full whitespace-pre-wrap break-all"></p>
             </div>
 
-            <div class="basis-full flex flex-row gap-3">
+            <div class="grid min-w-0 gap-6 xl:grid-cols-2">
                 @include('components.submission-placeholder')
                 @include('components.submission-display')
 
                 {{-- Code Solution --}}
-                <div class="basis-full flex flex-col shadow rounded-xl">
+                <div class="admin-card min-w-0 flex flex-col overflow-hidden">
 
 
-                    <div class="basis-auto bg-base-100 px-3 p-2 flex gap-2 rounded-t-xl">
-                        <p class="text-xl basis-full">Challenge Code Solution</p>
-                        <p id="solutionLanguage" class="text-gray-400 font-mono"></p>
+                    <div class="basis-auto bg-base-100 px-3 p-5 flex flex-wrap gap-2 rounded-t-xl">
+                        <p class="text-base font-semibold basis-full">Challenge Code Solution</p>
+                        <p id="solutionLanguage" class="admin-muted font-mono"></p>
                     </div>
                     <div id="solutionEditor" class="h-[500px]"></div>
                     <div class="basis-auto bg-base-100 px-3 p-2 flex gap-2 rounded-b-xl">
-                        <span class="text-gray-400 mb-2">
+                        <span class="admin-muted mb-2">
                             the challenge solution code will appear here...
                         </span>
                     </div>
@@ -77,27 +77,29 @@
     </div>
 
     {{-- Score Section --}}
-    <div id="scoreSection" hidden class="bg-base-100 rounded-xl mt-3 p-3 flex flex-row gap-3">
-        <form id="scoreForm" class="flex items-center gap-3 px-3 ">
+    <div id="scoreSection" hidden class="bg-base-100 rounded-xl mt-3 p-5 flex flex-col gap-3">
+        <form id="scoreForm" class="flex flex-wrap items-center gap-3 ">
             @csrf
-            <label class="font-semibold">Score</label>
+            <label for="scoreInput" class="font-semibold">Score</label>
             <input id="scoreInput" type="number" class="input input-sm max-w-32" required />
-            <span id="maxPointsLabel" class="ml-2 text-sm text-gray-500 w-[90px]"></span>
+            <span id="maxPointsLabel" class="ml-2 text-sm admin-muted w-[90px]"></span>
             <button class="btn btn-sm btn-primary ml-4">Submit</button>
         </form>
 
         <div id="code_output_area"
-            class="basis-full bg-gray-400 p-3 rounded-xl w-full font-mono whitespace-pre-wrap break-all">Code Output:</div>
+            class="basis-full bg-base-200 p-3 rounded-xl w-full font-mono whitespace-pre-wrap break-all">Code Output:</div>
     </div>
 
     {{-- Submissions --}}
     <div class="bg-base-100 rounded-xl mt-3 p-3">
-        <p class="text-2xl font-medium text-center mb-2">Submissions</p>
-        <div class="h-[400px] overflow-y-auto">
-            <div id="codeSubmissionListElem" class="grid grid-cols-2 gap-2">
-                @foreach ($submissions as $submission)
+        <p class="text-lg font-semibold text-center mb-2">Submissions</p>
+        <div class="max-h-[400px] overflow-y-auto">
+            <div id="codeSubmissionListElem" class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-3">
+                @forelse ($submissions as $submission)
                     @include('components.submission', ['submission' => $submission])
-                @endforeach
+                @empty
+                    <p class="admin-muted p-3 text-sm">No submissions awaiting review.</p>
+                @endforelse
             </div>
         </div>
     </div>
@@ -331,21 +333,28 @@ Points: ${tc.passed ? tc.points : 0}/${tc.points}${tc.error ? '\nError: ' + tc.e
             function getSubmissionList(submissions) {
                 const submissionListArea = document.getElementById('codeSubmissionListElem');
                 submissionListArea.replaceChildren();
+                if (!submissions.submission.length) {
+                    const empty = document.createElement('p');
+                    empty.className = 'admin-muted p-3 text-sm';
+                    empty.textContent = 'No submissions awaiting review.';
+                    submissionListArea.appendChild(empty);
+                }
                 submissions.submission.forEach(submission => {
                     const button = document.createElement('button');
                     button.type = 'button';
-                    button.className = 'bg-base-300 h-fit rounded-md p-3 hover:bg-base-200 text-left';
+                    button.className = 'admin-submission h-fit';
                     button.addEventListener('click', () => window.view_submission(submission.id));
-                    const name = document.createElement('p');
-                    name.className = 'text-sm';
+                    const name = document.createElement('span');
+                    name.className = 'block text-sm';
                     name.textContent = submission.candidate_name;
-                    const difficulty = document.createElement('p');
+                    const difficulty = document.createElement('span');
                     difficulty.className = 'badge badge-xs badge-primary';
                     difficulty.textContent = submission.challenge_difficulty;
-                    const title = document.createElement('p');
+                    const title = document.createElement('span');
+                    title.className = 'mt-2 block font-medium';
                     title.textContent = submission.challenge_title;
-                    const time = document.createElement('p');
-                    time.className = 'mt-2 text-xs';
+                    const time = document.createElement('span');
+                    time.className = 'mt-2 block text-xs admin-muted';
                     time.textContent = submission.submitted_at;
                     button.append(name, difficulty, title, time);
                     submissionListArea.appendChild(button);

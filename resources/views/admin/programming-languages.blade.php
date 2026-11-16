@@ -28,26 +28,26 @@
         </div>
     @endif
 
-    <div class="space-y-4">
-        <div class="bg-base-100 rounded-xl p-3">
+    <div class="grid min-w-0 items-start gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
+        <div class="admin-card p-5 sm:p-6">
             <form method="POST" action="{{ url('/admin/programming-languages/store') }}" id="language_form">
                 @csrf
                 <fieldset class="fieldset">
                     <legend class="fieldset-legend">Programming Language Details</legend>
 
-                    <legend class="fieldset-legend">Name</legend>
+                    <label class="fieldset-legend" for="name">Name</label>
                     <input type="text" class="input w-full" name="name" id="name" placeholder="e.g. java, python" required />
 
-                    <legend class="fieldset-legend">File Extension</legend>
+                    <label class="fieldset-legend" for="file_extension">File Extension</label>
                     <input type="text" class="input w-full" name="file_extension" id="file_extension" placeholder="e.g. .java, .py" required />
 
-                    <legend class="fieldset-legend">Compile Command (optional)</legend>
+                    <label class="fieldset-legend" for="compile_command">Compile Command (optional)</label>
                     <input type="text" class="input w-full" name="compile_command" id="compile_command" placeholder="e.g. javac {file}" />
-                    <p class="label-text text-xs text-gray-500">Use <code>{file}</code> as placeholder for the source file path.</p>
+                    <p class="label-text text-xs admin-muted">Use <code>{file}</code> as placeholder for the source file path.</p>
 
-                    <legend class="fieldset-legend">Run Command</legend>
+                    <label class="fieldset-legend" for="run_command">Run Command</label>
                     <input type="text" class="input w-full" name="run_command" id="run_command" placeholder="e.g. java -cp {dir} Main" required />
-                    <p class="label-text text-xs text-gray-500">Use <code>{dir}</code> as placeholder for the temp directory, <code>{file}</code> for the file (without extension).</p>
+                    <p class="label-text text-xs admin-muted">Use <code>{dir}</code> as placeholder for the temp directory, <code>{file}</code> for the file (without extension).</p>
 
                     <div class="divider"></div>
                     <button type="submit" class="btn btn-primary">Add Language</button>
@@ -55,21 +55,21 @@
             </form>
         </div>
 
-        <div class="bg-base-100 rounded-xl overflow-hidden p-3">
+        <div class="admin-card overflow-x-auto">
             <table class="table table-zebra">
                 <thead>
-                    <tr class="text-center text-neutral-200">
-                        <th class="bg-slate-700/50 rounded-tl-xl">ID</th>
-                        <th class="bg-slate-700/50">Name</th>
-                        <th class="bg-slate-700/50">Extension</th>
-                        <th class="bg-slate-700/50">Compile Command</th>
-                        <th class="bg-slate-700/50">Run Command</th>
-                        <th class="bg-slate-700/50">Active</th>
-                        <th class="bg-slate-700/50 rounded-tr-xl">Actions</th>
+                    <tr class="text-center admin-muted">
+                        <th class="bg-base-200 rounded-tl-xl">ID</th>
+                        <th class="bg-base-200">Name</th>
+                        <th class="bg-base-200">Extension</th>
+                        <th class="bg-base-200">Compile Command</th>
+                        <th class="bg-base-200">Run Command</th>
+                        <th class="bg-base-200">Active</th>
+                        <th class="bg-base-200 rounded-tr-xl">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($languages as $lang)
+                    @forelse ($languages as $lang)
                         <tr class="text-center">
                             <th>{{ $lang->id }}</th>
                             <td>{{ $lang->name }}</td>
@@ -92,7 +92,9 @@
                                 </form>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                            <tr><td colspan="7" class="admin-muted">No languages yet. Add a programming language to get started.</td></tr>
+                        @endforelse
                 </tbody>
             </table>
         </div>
@@ -100,22 +102,22 @@
 
     {{-- Edit Modal --}}
     <dialog id="edit_language_modal" class="modal">
-        <div class="modal-box w-[600px]">
+        <div class="modal-box w-11/12 max-w-xl">
             <h3 class="text-lg font-bold">Edit Language</h3>
             <form method="POST" action="{{ url('/admin/programming-languages/update') }}">
                 @csrf
                 <input type="hidden" name="id" id="edit_id">
                 <fieldset class="fieldset">
-                    <legend class="fieldset-legend">Name</legend>
+                    <label class="fieldset-legend" for="edit_name">Name</label>
                     <input type="text" class="input w-full" name="name" id="edit_name" required />
 
-                    <legend class="fieldset-legend">File Extension</legend>
+                    <label class="fieldset-legend" for="edit_file_extension">File Extension</label>
                     <input type="text" class="input w-full" name="file_extension" id="edit_file_extension" required />
 
-                    <legend class="fieldset-legend">Compile Command</legend>
+                    <label class="fieldset-legend" for="edit_compile_command">Compile Command</label>
                     <input type="text" class="input w-full" name="compile_command" id="edit_compile_command" />
 
-                    <legend class="fieldset-legend">Run Command</legend>
+                    <label class="fieldset-legend" for="edit_run_command">Run Command</label>
                     <input type="text" class="input w-full" name="run_command" id="edit_run_command" required />
 
                     <div class="modal-action">

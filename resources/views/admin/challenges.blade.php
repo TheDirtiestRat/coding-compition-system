@@ -34,42 +34,42 @@
     @endif
 
     <div class="space-y-4">
-        <div class="flex flex-row gap-3 w-full">
+        <div class="grid min-w-0 items-start gap-6 xl:grid-cols-2">
             {{-- forms --}}
-            <div class="basis-full h-fit bg-base-100 rounded-xl p-3">
+            <div class="basis-full h-fit admin-card p-5 sm:p-6">
                 <form method="POST" action="{{ url('/admin/save-challenge') }}" id="challenge_form"
                     enctype="multipart/form-data">
                     @csrf
                     {{-- form --}}
                     <fieldset class="fieldset">
-                        <legend class="fieldset-legend">Challenge ID</legend>
+                        <label class="fieldset-legend" for="challenge_id">Challenge ID</label>
                         <input type="text" class="input" name="challenge_id" id="challenge_id"
                             value="{{ old('challenge_id') }}" placeholder="Assigned when created" readonly />
 
-                        <legend class="fieldset-legend">for waht Event?</legend>
+                        <label class="fieldset-legend" for="event_id">Event</label>
                         <select class="select" name="event_id" id="event_id">
                             @forelse  ($events as $event)
                                 <option value="{{ $event->id }}" @selected((string) old('event_id', $events->firstWhere('isActive', true)?->id) === (string) $event->id)>{{ $event->title }}</option>
                             @empty
-                                <option disabled selected>Pick a Event</option>
+                                <option disabled selected>Choose an event</option>
                             @endforelse
                         </select>
 
-                        <legend class="fieldset-legend">Challenge Title</legend>
+                        <label class="fieldset-legend" for="title">Challenge Title</label>
                         <input type="text" class="input w-full" name="title" id="title" value="{{ old('title') }}" placeholder="Type here" />
-                        <legend class="fieldset-legend">Description</legend>
+                        <label class="fieldset-legend" for="description">Description</label>
                         <textarea class="textarea h-[200px] w-full" name="description" id="description" required
                             placeholder="What is the Challenge about?">{{ old('description') }}</textarea>
                         <p class="label">Required</p>
 
-                        <div class="flex flex-row gap-3">
+                        <div class="grid min-w-0 grid-cols-1 sm:grid-cols-3 gap-3">
                             <fieldset class="fieldset w-full">
-                                <legend class="fieldset-legend">Equivalent Points</legend>
+                                <label class="fieldset-legend" for="points">Equivalent Points</label>
                                 <input type="number" class="input w-full" name="points" id="points" value="{{ old('points') }}"
                                     placeholder="Type here" />
                             </fieldset>
                             <fieldset class="fieldset basis-full">
-                                <legend class="fieldset-legend">Difficulty</legend>
+                                <label class="fieldset-legend" for="difficulty">Difficulty</label>
                                 <select class="select" id="difficulty" name="difficulty">
                                     <option value="easy" @selected(old('difficulty', 'easy') === 'easy')>Easy</option>
                                     <option value="medium" @selected(old('difficulty', 'easy') === 'medium')>Medium</option>
@@ -79,7 +79,7 @@
                             </fieldset>
 
                             <fieldset class="fieldset basis-full">
-                                <legend class="fieldset-legend">Language</legend>
+                                <label class="fieldset-legend" for="language">Language</label>
                                 <select class="select" id="language" name="language">
                                     @foreach ($languages as $lang)
                                         <option value="{{ $lang->name }}" data-lang-id="{{ $lang->id }}" @selected(old('language', $languages->first()?->name) === $lang->name)>{{ ucfirst($lang->name) }}</option>
@@ -93,7 +93,7 @@
 
                         {{-- Multiple Photos --}}
                         <fieldset class="fieldset">
-                            <legend class="fieldset-legend">Challenge Photos (optional, multiple)</legend>
+                            <label class="fieldset-legend" for="photos">Challenge Photos (optional, multiple)</label>
                             <input type="file" class="file-input file-input-bordered w-full" name="photos[]" id="photos" accept="image/*" multiple />
                             @if (session()->hasOldInput())
                                 <p class="label">If you selected new photos, please select them again before saving.</p>
@@ -104,8 +104,8 @@
 
                         {{-- Test Cases --}}
                         <fieldset class="fieldset">
-                            <legend class="fieldset-legend">Test Cases (for auto-grading)</legend>
-                            <input type="hidden" name="test_cases_present" value="1" />
+                            <label class="fieldset-legend" for="challenges-field-1">Test Cases (for auto-grading)</label>
+                            <input id="challenges-field-1" type="hidden" name="test_cases_present" value="1" />
                             <div id="test_cases_container"></div>
                             <button type="button" id="add_test_case" class="btn btn-sm btn-ghost mt-1">+ Add Test Case</button>
                         </fieldset>
@@ -117,20 +117,20 @@
             </div>
 
             {{-- Code Solution --}}
-            <div id="submissionDisplayContainer" class="basis-full flex flex-col h-full shadow rounded-xl">
-                <div class="basis-full bg-base-100 p-2 flex flex-row gap-3 w-full items-center rounded-t-xl px-3">
-                    <span class="text-xl basis-full">Challenge Code Solution</span>
-                    <p id="codeLanguage" class="text-gray-400 font-mono">Java</p>
+            <div id="submissionDisplayContainer" class="admin-card min-w-0 flex flex-col overflow-hidden">
+                <div class="basis-full bg-base-100 p-5 flex flex-wrap gap-3 w-full items-center rounded-t-xl px-3">
+                    <span class="text-base font-semibold basis-full">Challenge Code Solution</span>
+                    <p id="codeLanguage" class="admin-muted font-mono">Java</p>
                     <button onclick="copyCode()" class="btn btn-sm btn-base-100 btn-ghost rounded-xl">Copy Code</button>
                 </div>
                 <div id="monacoEditorContainer" class="w-full h-[480px]"></div>
                 <div class="basis-auto bg-base-100 p-3 flex gap-3 flex-col px-3 h-full rounded-b-3xl">
-                    <div class="flex gap-3">
-                        <p class="text-gray-400 w-full">Edit the code here ma Rigga!</p>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <p class="admin-muted min-w-0 flex-1">Edit the reference solution, then test its output.</p>
                         <button id="testCodeBtn" class="btn btn-sm btn-primary basis-2/4">Test Code</button>
                     </div>
                     <div id="code_output_area"
-                        class="basis-full bg-gray-400 p-3 rounded-xl w-full whitespace-pre-wrap break-all font-mono">Code
+                        class="basis-full bg-base-200 p-3 rounded-xl w-full whitespace-pre-wrap break-all font-mono">Code
                         Output:
                     </div>
                 </div>
@@ -233,7 +233,9 @@
                         <img class="h-24 w-24 object-cover rounded-xl" />
                         <label class="absolute top-0 right-0 bg-red-600 text-white text-xs p-1 rounded cursor-pointer opacity-0 group-hover:opacity-100 transition">
                             <input type="checkbox" name="delete_photos[]" class="hidden" />
-                            âœ•
+
+                            Remove
+
                         </label>
                     `;
                     wrapper.querySelector('img').src = photo.url;
@@ -255,21 +257,21 @@
             const idx = index !== null ? index : testCaseIndex;
             const container = document.getElementById('test_cases_container');
             const div = document.createElement('div');
-            div.className = 'test-case-entry flex flex-row gap-2 items-end mb-2';
+            div.className = 'test-case-entry grid min-w-0 gap-3 sm:grid-cols-2 items-end mb-4';
             div.innerHTML = `
                 <div class="basis-1/4">
-                    <label class="label-text text-xs">Input</label>
-                    <textarea class="textarea textarea-bordered w-full text-sm" name="test_cases[${idx}][input]" placeholder="stdin input"></textarea>
+                    <label for="test-case-${idx}-input" class="label-text text-xs">Input</label>
+                    <textarea class="textarea textarea-bordered w-full text-sm" id="test-case-${idx}-input" name="test_cases[${idx}][input]" placeholder="stdin input"></textarea>
                 </div>
                 <div class="basis-1/3">
-                    <label class="label-text text-xs">Expected Output</label>
-                    <textarea class="textarea textarea-bordered w-full text-sm" name="test_cases[${idx}][expected_output]" placeholder="Expected output" required></textarea>
+                    <label for="test-case-${idx}-expected_output" class="label-text text-xs">Expected Output</label>
+                    <textarea class="textarea textarea-bordered w-full text-sm" id="test-case-${idx}-expected_output" name="test_cases[${idx}][expected_output]" placeholder="Expected output" required></textarea>
                 </div>
                 <div class="basis-1/6">
-                    <label class="label-text text-xs">Points</label>
-                    <input type="number" class="input input-bordered w-full input-sm" name="test_cases[${idx}][points]" value="0" min="0" step="0.5" required />
+                    <label for="test-case-${idx}-points" class="label-text text-xs">Points</label>
+                    <input type="number" class="input input-bordered w-full input-sm" id="test-case-${idx}-points" name="test_cases[${idx}][points]" value="0" min="0" step="0.5" required />
                 </div>
-                <button type="button" class="btn btn-sm btn-error remove-test-case">-</button>
+                <button type="button" class="btn btn-sm btn-error remove-test-case" aria-label="Remove test case">Remove</button>
             `;
             div.querySelector('[name$="[input]"]').value = data?.input ?? '';
             div.querySelector('[name$="[expected_output]"]').value = data?.expected_output ?? '';

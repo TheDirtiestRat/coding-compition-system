@@ -54,5 +54,18 @@ const submission = id => ({
     assert.match(result.textContent, /Input: 0/);
     assert.equal(result.innerHTML, undefined);
     assert.equal(document.getElementById('scoreInput').value, '');
+
+    const queueStart = source.indexOf('            function getSubmissionList(');
+    const queueEnd = source.indexOf('            // -----------------------------', queueStart);
+    const queueContext = { ...context, submissions: { submission: [] } };
+    vm.runInNewContext(source.slice(queueStart, queueEnd) + '\ngetSubmissionList(submissions);', queueContext);
+    const queue = document.getElementById('codeSubmissionListElem');
+    assert.equal(queue.children.length, 1);
+    assert.equal(queue.children[0].textContent, 'No submissions awaiting review.');
+    queueContext.submissions.submission.push({ id: 3, candidate_name: '<img src=x>', challenge_title: 'Sum' });
+    vm.runInNewContext(source.slice(queueStart, queueEnd) + '\ngetSubmissionList(submissions);', queueContext);
+    assert.equal(queue.children.length, 1, 'A populated refresh replaces the empty message.');
+    assert.equal(queue.children[0].type, 'button');
+    assert.equal(queue.children[0].children[0].textContent, '<img src=x>');
     console.log('Admin selection and text rendering checks passed.');
 })();

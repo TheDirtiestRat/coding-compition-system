@@ -1,11 +1,11 @@
-<div
+<button type="button"
     onclick="view_submission('{{ $submission->id }}')"
-    class="bg-base-300 h-fit rounded-2xl p-4 hover:bg-base-200 hover:cursor-grab"
+    class="admin-submission h-fit"
 >
-    <div class="flex flex-row justify-between items-center">
-        <p class="text-sm">{{ $submission->candidate_name }}</p>
-        <p class="badge badge-xs badge-primary">{{ $submission->challenge_difficulty }}</p>
-    </div>
-    <p class="">{{ $submission->challenge_title }}</p>
-    <p class="mt-2 text-xs"> {{ $submission->submitted_at }}</p>
-</div>
+    <span class="flex flex-row justify-between items-center">
+        <span class="text-sm">{{ $submission->candidate_name }}</span>
+        <span class="badge badge-xs badge-primary">{{ $submission->challenge_difficulty }}</span>
+    </span>
+    <span class="mt-2 block font-medium">{{ $submission->challenge_title }}</span>
+    <span class="mt-2 block text-xs admin-muted"> {{ $submission->submitted_at }}</span>
+</button>

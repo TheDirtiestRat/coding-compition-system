@@ -1,20 +1,20 @@
 @props(["challenges"])
 
-<div class="basis-full bg-base-100 rounded-xl overflow-hidden p-3">
+<div class="admin-card overflow-x-auto">
     <table class="table table-zebra">
         <!-- head -->
         <thead class="">
-            <tr class="text-center text-neutral-200">
-                <th class="bg-slate-700/50 rounded-tl-xl">ID</th>
-                <th class="bg-slate-700/50">Title</th>
-                <th class="bg-slate-700/50">Difficulty</th>
-                <th class="bg-slate-700/50">Language</th>
-                <th class="bg-slate-700/50">Points</th>
-                <th class="bg-slate-700/50 rounded-tr-xl">Actions</th>
+            <tr class="text-center admin-muted">
+                <th class="bg-base-200 rounded-tl-xl">ID</th>
+                <th class="bg-base-200">Title</th>
+                <th class="bg-base-200">Difficulty</th>
+                <th class="bg-base-200">Language</th>
+                <th class="bg-base-200">Points</th>
+                <th class="bg-base-200 rounded-tr-xl">Actions</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($challenges as $challenge)
+            @forelse ($challenges as $challenge)
                 <tr class="text-center">
                     <th>{{ $challenge->id }}</th>
                     <td>{{ $challenge->title }}</td>
@@ -31,7 +31,9 @@
                         </form>
                     </td>
                 </tr>
-            @endforeach
+            @empty
+                <tr><td colspan="6" class="admin-muted">No challenges yet. Add a coding problem to get started.</td></tr>
+            @endforelse
         </tbody>
     </table>
 </div>
