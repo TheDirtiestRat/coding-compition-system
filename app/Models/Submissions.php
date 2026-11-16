@@ -16,6 +16,7 @@ class Submissions extends Model
         'is_score_submitted',
         'test_case_results',
         'is_auto_reviewed',
+        'scored_at',
     ];
 
     protected function casts(): array
@@ -23,6 +24,7 @@ class Submissions extends Model
         return [
             'is_score_submitted' => 'boolean',
             'is_auto_reviewed' => 'boolean',
+            'scored_at' => 'datetime',
             'test_case_results' => 'array',
         ];
     }

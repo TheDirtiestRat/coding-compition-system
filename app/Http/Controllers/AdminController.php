@@ -32,12 +32,54 @@ class AdminController extends Controller
         $active_event = Events::where('isActive', true)->first();
 
         if (! $active_event) {
-            return view('pages.results', ['candidates' => collect()]);
+            return view('pages.results', ['candidates' => collect(), 'scoreTimeline' => collect()]);
         }
 
         $candidates = $this->ranked_candidates()->where('event_id', $active_event->id)->get();
 
-        return view('pages.results', compact('candidates'));
+        $chartCandidates = $candidates->load([
+            'submissions' => fn ($query) => $query
+                ->where('is_score_submitted', true)
+                ->whereNotNull('scored_at')
+                ->whereHas('challenge', fn ($query) => $query->where('event_id', $active_event->id))
+                ->with('challenge:id,title')
+                ->orderBy('scored_at')->orderBy('id'),
+        ]);
+        $scoreTimeline = $chartCandidates->map(fn ($candidate) => [
+            'name' => $candidate->fullname,
+            'awards' => $candidate->submissions->map(fn ($award) => [
+                'time' => $award->scored_at->toIso8601String(),
+                'points' => (float) $award->score,
+                'challenge' => $award->challenge->title,
+                'source' => $award->is_auto_reviewed ? 'Automatic' : 'Organizer',
+            ])->values(),
+        ])->values();
+
+        return view('pages.results', compact('candidates', 'scoreTimeline'));
+    }
+
+    public function certificates(Request $request)
+    {
+        $event = Events::where('isActive', true)->first();
+        $candidates = $event
+            ? $this->ranked_candidates()->where('event_id', $event->id)->get()
+            : collect();
+        $validated = $request->validate([
+            'type' => ['nullable', Rule::in(['participation', 'winner'])],
+            'candidate_id' => ['nullable', 'integer', Rule::in($candidates->pluck('id')->all())],
+            'date' => ['nullable', 'date_format:Y-m-d'],
+        ]);
+        $type = $validated['type'] ?? 'participation';
+        $date = $validated['date'] ?? now()->toDateString();
+        $selectedCandidate = $validated['candidate_id'] ?? null;
+        $certificates = $candidates
+            ->map(fn ($candidate, $index) => ['candidate' => $candidate, 'rank' => $index + 1])
+            ->filter(fn ($certificate) => $type === 'participation'
+                || ($certificate['rank'] <= 3 && $certificate['candidate']->total_score > 0))
+            ->filter(fn ($certificate) => ! $selectedCandidate
+                || (int) $certificate['candidate']->id === (int) $selectedCandidate);
+
+        return view('admin.certificates', compact('event', 'candidates', 'certificates', 'type', 'date', 'selectedCandidate'));
     }
 
     private function ranked_candidates()

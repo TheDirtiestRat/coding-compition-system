@@ -58,6 +58,7 @@ class CompleteAutoGradingTest extends TestCase
         $submission = Submissions::firstOrFail();
         $this->assertSame($autoReviewed, $submission->is_score_submitted);
         $this->assertSame($autoReviewed, $submission->is_auto_reviewed);
+        $this->assertSame($autoReviewed, $submission->scored_at !== null);
         $this->assertSame((float) ($autoReviewed ? $maximum : 0), (float) $submission->score);
         $this->assertCount($runs, $submission->test_case_results);
         foreach ($submission->test_case_results as $result) {
@@ -73,6 +74,7 @@ class CompleteAutoGradingTest extends TestCase
                 ])->assertOk();
             $this->assertEquals($maximum, $submission->fresh()->score);
             $this->assertTrue($submission->fresh()->is_score_submitted);
+            $this->assertNotNull($submission->fresh()->scored_at);
         }
     }
 

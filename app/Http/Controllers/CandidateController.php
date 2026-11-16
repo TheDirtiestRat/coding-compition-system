@@ -269,6 +269,7 @@ class CandidateController extends Controller
             $submissionData['score'] = $totalAutoScore;
             $submissionData['is_score_submitted'] = true;
             $submissionData['is_auto_reviewed'] = true;
+            $submissionData['scored_at'] = now();
         } else {
             $submissionData['score'] = 0;
             $submissionData['is_score_submitted'] = false;

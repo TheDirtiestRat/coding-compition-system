@@ -75,6 +75,7 @@ class SubmissionsController extends Controller
                     ->update([
                         'score' => $validated['score'],
                         'is_score_submitted' => true,
+                        'scored_at' => now(),
                     ]);
             });
 

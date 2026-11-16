@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('admin-title', 'Overview')
-@section('admin-description', 'Control the competition timer, registration and standings.')
+@section('admin-description', 'Control the competition timer and standings.')
 
 @section('admin-content')
     @if (session('success'))
@@ -92,24 +92,6 @@
         </section>
     </div>
 
-    @php
-        $regOpen = DB::table('options')->where('option_name', 'registration_open')->value('option_value');
-    @endphp
-    <section aria-labelledby="registration-title" class="admin-card mt-6 flex flex-wrap items-center justify-between gap-5 p-5 sm:p-6">
-        <div>
-            <h2 id="registration-title" class="text-base font-semibold">Registration</h2>
-            <p class="mt-2 text-sm admin-muted">Allow competitors to create accounts for the active event.</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-3">
-            <span class="badge">{{ $regOpen === '1' ? 'Open' : 'Closed' }}</span>
-            <form method="POST" action="{{ url('/admin/toggle-registration') }}">
-                @csrf
-                <button type="submit" class="btn {{ $regOpen === '1' ? 'btn-outline' : 'btn-primary' }}">
-                    {{ $regOpen === '1' ? 'Close registration' : 'Open registration' }}
-                </button>
-            </form>
-        </div>
-    </section>
 @endsection
 
 @section('admin-scripts')

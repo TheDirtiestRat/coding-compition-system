@@ -75,7 +75,7 @@ b = <span class="text-violet-300">int</span>(input())
                 <li class="motion-reveal rounded-3xl bg-neutral-100/80 p-7 sm:p-8">
                     <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white text-sm font-medium text-neutral-800" aria-hidden="true">01</span>
                     <h3 class="text-xl font-medium tracking-tight mt-6 mb-3">Log in</h3>
-                    <p class="text-sm leading-relaxed text-neutral-600">Use your competition account. Need one? <a href="{{ url('/register') }}" class="rounded-sm font-medium text-neutral-900 underline underline-offset-4">Register</a> when your organizer opens sign-ups.</p>
+                    <p class="text-sm leading-relaxed text-neutral-600">Use the competition account provided by your organizer.</p>
                 </li>
                 <li class="motion-reveal rounded-3xl bg-neutral-100/80 p-7 sm:p-8" style="--motion-delay: 60ms">
                     <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white text-sm font-medium text-neutral-800" aria-hidden="true">02</span>
