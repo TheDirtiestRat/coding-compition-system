@@ -7,6 +7,7 @@ use App\Models\Challenges;
 use App\Models\Events;
 use App\Models\Submissions;
 use App\Services\CodeRunner;
+use App\Support\OutputChecker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -236,7 +237,7 @@ class CandidateController extends Controller
                     $output = $this->runCodeWithInput($code, $language, $tc->input, $executionTimeout);
                     $result['actual_output'] = $output;
 
-                    if (trim($output) === trim($tc->expected_output)) {
+                    if (OutputChecker::matches($output, $tc->expected_output, $challenge->output_mode, $challenge->output_tolerance)) {
                         $result['passed'] = true;
                         $totalAutoScore += $tc->points;
                     }

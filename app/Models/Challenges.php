@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Challenges extends Model
 {
@@ -18,6 +18,12 @@ class Challenges extends Model
         'language_id',
         'points',
         'code_solution',
+        'output_mode',
+        'output_tolerance',
+    ];
+
+    protected $casts = [
+        'output_tolerance' => 'float',
     ];
 
     public function submissions()

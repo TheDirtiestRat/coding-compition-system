@@ -10,6 +10,7 @@ use App\Models\ProgrammingLanguage;
 use App\Models\Submissions;
 use App\Models\User;
 use App\Services\CodeRunner;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class ChallengeRubricLockTest extends TestCase
@@ -46,6 +47,8 @@ class ChallengeRubricLockTest extends TestCase
                     'language_id' => $replacementLanguage->id,
                     'points' => 10,
                     'code_solution' => 'replacement',
+                    'output_mode' => 'numeric',
+                    'output_tolerance' => 0.5,
                     'test_cases' => [['input' => '', 'expected_output' => 'replacement', 'points' => 10]],
                 ])
                 ->assertUnprocessable()
@@ -57,12 +60,17 @@ class ChallengeRubricLockTest extends TestCase
         }
     }
 
-    public function test_rubric_changed_during_execution_requires_a_new_submission(): void
+    #[DataProvider('rubricChanges')]
+    public function test_rubric_changed_during_execution_requires_a_new_submission(bool $changeSettings): void
     {
         [$candidate, $challenge] = $this->fixture();
-        $this->mock(CodeRunner::class)->shouldReceive('run')->once()->andReturnUsing(function () use ($challenge) {
-            $challenge->testCases()->delete();
-            $challenge->testCases()->create(['expected_output' => 'different', 'points' => 10]);
+        $this->mock(CodeRunner::class)->shouldReceive('run')->once()->andReturnUsing(function () use ($challenge, $changeSettings) {
+            if ($changeSettings) {
+                $challenge->update(['output_mode' => 'numeric', 'output_tolerance' => 0.5]);
+            } else {
+                $challenge->testCases()->delete();
+                $challenge->testCases()->create(['expected_output' => 'different', 'points' => 10]);
+            }
 
             return 'hello';
         });
@@ -72,6 +80,11 @@ class ChallengeRubricLockTest extends TestCase
             ->assertConflict();
 
         $this->assertDatabaseCount('submissions', 0);
+    }
+
+    public static function rubricChanges(): array
+    {
+        return ['cases' => [false], 'output settings' => [true]];
     }
 
     private function fixture(): array

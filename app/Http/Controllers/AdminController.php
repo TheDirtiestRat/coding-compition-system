@@ -319,9 +319,10 @@ class AdminController extends Controller
                 ->latest()->get();
         }
 
-        $draftPhotos = Challenges::find(session()->getOldInput('challenge_id'))?->photos ?? collect();
+        $draftChallenge = Challenges::find(session()->getOldInput('challenge_id'));
+        $draftPhotos = $draftChallenge?->photos ?? collect();
 
-        return view('admin.challenges', compact('challenges', 'events', 'languages', 'draftPhotos'));
+        return view('admin.challenges', compact('challenges', 'events', 'languages', 'draftPhotos', 'draftChallenge'));
     }
 
     public function get_challenge_details($id)
@@ -361,6 +362,12 @@ class AdminController extends Controller
             'language_id' => 'nullable|exists:programming_languages,id',
             'points' => 'required|integer|min:1',
             'code_solution' => 'required|string',
+            'output_mode' => 'sometimes|required|in:exact,tokens,numeric',
+            'output_tolerance' => ['sometimes', 'required', 'numeric', 'between:0,1', function ($attribute, $value, $fail) {
+                if (! is_numeric($value) || ! is_finite((float) $value)) {
+                    $fail('The output tolerance must be a finite number between 0 and 1.');
+                }
+            }],
             'photos' => 'nullable|array',
             'photos.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'delete_photos' => 'nullable|array',
@@ -371,6 +378,12 @@ class AdminController extends Controller
             'test_cases.*.expected_output' => 'required_with:test_cases|string',
             'test_cases.*.points' => 'required_with:test_cases|numeric|min:0',
         ]);
+
+        if (($validatedData['output_mode'] ?? 'exact') === 'numeric'
+            && ! array_key_exists('output_tolerance', $validatedData)
+            && empty($validatedData['challenge_id'])) {
+            throw ValidationException::withMessages(['output_tolerance' => 'The output tolerance is required for numeric checking.']);
+        }
 
         $language = ProgrammingLanguage::where('is_active', true)->find($validatedData['language_id'] ?? null);
         if (! $language || $language->name !== $validatedData['language']) {
@@ -406,6 +419,8 @@ class AdminController extends Controller
                     'language_id' => $validatedData['language_id'],
                     'points' => $validatedData['points'],
                     'code_solution' => $validatedData['code_solution'],
+                    'output_mode' => $validatedData['output_mode'] ?? $challenge->output_mode ?? 'exact',
+                    'output_tolerance' => $validatedData['output_tolerance'] ?? $challenge->output_tolerance ?? 0.000001,
                 ]);
                 $challenge->save();
 
