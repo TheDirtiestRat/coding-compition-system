@@ -32,10 +32,6 @@ Route::get('/login', [AuthenticationController::class, 'showLoginForm'])->name('
 Route::post('/login', [AuthenticationController::class, 'loginUser']);
 Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logout');
 
-// Registration Routes
-Route::get('/register', [AuthenticationController::class, 'showRegistrationForm']);
-Route::post('/register', [AuthenticationController::class, 'register']);
-
 // Countdown
 Route::get('/countdown', [CountdownController::class, 'show']);
 
@@ -46,6 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('is.admin')->group(function () {
         Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
         Route::get('/admin/results', [AdminController::class, 'results']);
+        Route::get('/admin/certificates', [AdminController::class, 'certificates']);
         Route::get('/admin/events', [AdminController::class, 'events']);
         Route::get('/admin/candidates', [AdminController::class, 'candidates']);
         Route::get('/admin/challenges', [AdminController::class, 'challenges']);
@@ -84,8 +81,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin/programming-languages/store', [ProgrammingLanguageController::class, 'store']);
         Route::post('/admin/programming-languages/update', [ProgrammingLanguageController::class, 'update']);
         Route::delete('/admin/programming-languages/delete/{id}', [ProgrammingLanguageController::class, 'destroy']);
-
-        Route::post('/admin/toggle-registration', [AdminController::class, 'toggle_registration']);
 
         Route::get('/admin/countdown', function () {
             return view('pages.countdown');

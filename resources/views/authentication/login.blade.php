@@ -48,7 +48,7 @@
             </form>
 
             <p class="mt-8 border-t border-neutral-200 pt-6 text-sm text-neutral-600">
-                Need an account? <a href="{{ url('/register') }}" class="rounded-sm font-semibold text-neutral-900 underline underline-offset-4">Register</a>
+                Need an account? Contact your competition organizer.
             </p>
         </div>
     </section>

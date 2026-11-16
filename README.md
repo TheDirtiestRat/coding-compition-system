@@ -65,3 +65,10 @@ $env:RUN_SANDBOX_TESTS = '1'
 php artisan test --filter=CodeRunnerSandboxTest
 Remove-Item Env:RUN_SANDBOX_TESTS
 ```
+
+## Score timeline
+
+The results page plots cumulative points for all competitors. Automatic grading
+and organizer scoring record `scored_at` when a submission receives its final score.
+Run the migrations before enabling this version. Existing scores retain their standings
+but are excluded from the timeline because their award times were not recorded.

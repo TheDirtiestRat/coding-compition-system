@@ -35,13 +35,28 @@
         </div>
     @endif
 
+    {{-- Submissions --}}
+    <div class="admin-card mb-6 p-5 sm:p-6">
+        <h2 class="text-lg font-semibold">Submissions awaiting review</h2>
+        <p class="admin-muted mt-1 mb-4 text-sm">Select a submission to inspect its code and results.</p>
+        <div class="max-h-[400px] overflow-y-auto">
+            <div id="codeSubmissionListElem" class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-3">
+                @forelse ($submissions as $submission)
+                    @include('components.submission', ['submission' => $submission])
+                @empty
+                    <p class="admin-muted p-3 text-sm">No submissions awaiting review.</p>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
     {{-- Main Content --}}
     <div class="flex gap-3 w-full">
         <div class="flex flex-col w-full gap-3">
             {{-- Code Instruction --}}
-            <div class="basis-auto bg-base-100 px-3 p-2 flex flex-col gap-2 rounded-xl">
+            <div class="admin-card p-5 flex flex-col gap-2">
                 <p class="text-base font-semibold basis-full">Challenge Description</p>
-                <p id="solutionInstruction" class="admin-muted w-full whitespace-pre-wrap break-all"></p>
+                <p id="solutionInstruction" class="admin-muted w-full whitespace-pre-wrap wrap-anywhere"></p>
             </div>
 
             <div class="grid min-w-0 gap-6 xl:grid-cols-2">
@@ -53,13 +68,13 @@
 
 
                     <div class="basis-auto bg-base-100 px-3 p-5 flex flex-wrap gap-2 rounded-t-xl">
-                        <p class="text-base font-semibold basis-full">Challenge Code Solution</p>
+                        <p class="text-base font-semibold basis-full">Reference solution</p>
                         <p id="solutionLanguage" class="admin-muted font-mono"></p>
                     </div>
                     <div id="solutionEditor" class="h-[500px]"></div>
                     <div class="basis-auto bg-base-100 px-3 p-2 flex gap-2 rounded-b-xl">
                         <span class="admin-muted mb-2">
-                            the challenge solution code will appear here...
+                            Reference code for comparison.
                         </span>
                     </div>
                 </div>
@@ -70,9 +85,9 @@
 
     </div>
 
-    {{-- Test Case Results --}}
+    {{-- Test case results --}}
     <div id="test_case_results_container" hidden class="bg-base-100 rounded-xl mt-3 p-3 flex flex-col gap-2">
-        <p class="text-lg font-medium">Test Case Results</p>
+        <p class="text-lg font-medium">Test case results</p>
         <div id="test_case_results_list" class="flex flex-col gap-2"></div>
     </div>
 
@@ -96,29 +111,16 @@
     <div id="scoreSection" hidden class="bg-base-100 rounded-xl mt-3 p-5 flex flex-col gap-3">
         <form id="scoreForm" class="flex flex-wrap items-center gap-3 ">
             @csrf
-            <label for="scoreInput" class="font-semibold">Score</label>
+            <label for="scoreInput" class="font-semibold">Official score</label>
             <input id="scoreInput" type="number" class="input input-sm max-w-32" required />
             <span id="maxPointsLabel" class="ml-2 text-sm admin-muted w-[90px]"></span>
-            <button class="btn btn-sm btn-primary ml-4">Submit</button>
+            <button class="btn btn-sm btn-primary ml-4">Submit score</button>
         </form>
 
         <div id="code_output_area"
             class="basis-full bg-base-200 p-3 rounded-xl w-full font-mono whitespace-pre-wrap break-all">Code Output:</div>
     </div>
 
-    {{-- Submissions --}}
-    <div class="bg-base-100 rounded-xl mt-3 p-3">
-        <p class="text-lg font-semibold text-center mb-2">Submissions</p>
-        <div class="max-h-[400px] overflow-y-auto">
-            <div id="codeSubmissionListElem" class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-3">
-                @forelse ($submissions as $submission)
-                    @include('components.submission', ['submission' => $submission])
-                @empty
-                    <p class="admin-muted p-3 text-sm">No submissions awaiting review.</p>
-                @endforelse
-            </div>
-        </div>
-    </div>
 @endsection
 
 @section('admin-scripts')
