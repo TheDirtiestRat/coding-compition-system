@@ -1,610 +1,165 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>@include('components.title')</title>
 
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @vite(['resources/css/app.css'])
     @endif
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #121215d0 0%, #96979b 100%);
-            min-height: 100vh;
+        a:focus-visible {
+            outline: 3px solid #171717;
+            outline-offset: 4px;
         }
 
-        /* Custom animations */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
+        section[id],
+        main[id] {
+            scroll-margin-top: 11rem;
+        }
+
+        @media (min-width: 640px) {
+            section[id],
+            main[id] {
+                scroll-margin-top: 7rem;
             }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(-20px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-
-        .animate-fade-in {
-            animation: fadeIn 0.6s ease-out forwards;
-        }
-
-        .animate-slide-in {
-            animation: slideIn 0.5s ease-out forwards;
-        }
-
-        .animate-float {
-            animation: float 3s ease-in-out infinite;
-        }
-
-        .gradient-text {
-            background: linear-gradient(135deg, #1d1d25 0%, #96979b 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .plain-text {
-            color: #090404;
-            /* solid color */
-            background: none;
-            /* remove any background gradients */
-            -webkit-background-clip: unset;
-            -webkit-text-fill-color: unset;
-        }
-
-        .h2 {
-            color: white;
-        }
-
-        .features h3 {
-            color: black;
-        }
-
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
         }
     </style>
 </head>
 
-<body>
-    <!-- Navigation Bar -->
-    <nav class="sticky top-0 z-50 glass-effect shadow-lg">
-        <div class="container mx-auto px-6 py-4">
-            <div class="flex items-center justify-between">
-                <!-- Logo/Brand -->
-                <div class="flex items-center space-x-3 animate-slide-in">
-                    <div
-                        class="w-10 h-10 rounded-lg bg-gradient-to-r from-black to-gray-600 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-bold plain-text">@include('components.title')</h1>
-                        <p class="text-xs text-gray-500 plain-text">Coding Competition</p>
-                    </div>
-                </div>
+<body class="min-h-screen bg-white text-neutral-900 font-sans">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:block focus:bg-white focus:p-4">Skip to content</a>
 
-                <!-- Navigation Links -->
-                <div class="hidden md:flex items-center space-x-8 animate-slide-in" style="animation-delay: 0.1s">
-                    <a href="#home"
-                        class="text-gray-700 hover:text-gray-600 font-medium transition duration-200 hover:-translate-y-0.5">Home</a>
-                    <a href="#about"
-                        class="text-gray-700 hover:text-gray-600 font-medium transition duration-200 hover:-translate-y-0.5">About</a>
-                    <a href="{{ url('login') }}"
-                        class="px-6 py-2 bg-gradient-to-r from-black to-gray-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition duration-200 transform hover:-translate-y-0.5 hover:from-gray-700 hover:to-black">
-                        Login
+    <header class="sticky top-0 z-20 border-b border-neutral-200 bg-white">
+        <nav aria-label="Main navigation" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-4 flex flex-wrap items-center justify-between gap-4">
+            <a href="#home" class="flex min-w-0 items-center gap-3 rounded-lg">
+                <span class="w-9 h-9 shrink-0 rounded-xl bg-black flex items-center justify-center" aria-hidden="true">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                    </svg>
+                </span>
+                <span class="text-base font-semibold">Coding competition</span>
+            </a>
+            <div class="flex flex-wrap items-center gap-2 sm:gap-4">
+                <a href="#home" class="rounded-lg px-3 py-3 text-sm font-medium hover:bg-neutral-100">Home</a>
+                <a href="#about" class="rounded-lg px-3 py-3 text-sm font-medium hover:bg-neutral-100">How it works</a>
+                <a href="{{ url('/login') }}" class="rounded-full bg-black px-5 py-3 text-sm font-semibold text-white hover:bg-neutral-800">Log in</a>
+            </div>
+        </nav>
+    </header>
+
+    <main id="main-content" tabindex="-1">
+        <section id="home" aria-labelledby="hero-title" class="px-4 sm:px-6 pt-10 sm:pt-14 pb-10">
+            <div class="max-w-5xl mx-auto text-center">
+                <p class="mb-5 text-sm font-medium text-neutral-600 wrap-anywhere">@include('components.title')</p>
+                <h1 id="hero-title" class="text-4xl sm:text-5xl lg:text-[64px] font-medium tracking-tight leading-tight">
+                    Code. Compete. Conquer.
+                </h1>
+                <p class="max-w-2xl mx-auto mt-5 text-base sm:text-lg leading-relaxed text-neutral-600">
+                    Solve coding challenges, test your code, and submit your best solution.
+                </p>
+
+                <div class="mt-7 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
+                    <a href="{{ url('/login') }}" class="rounded-full bg-black px-7 py-3 font-semibold text-white hover:bg-neutral-800">
+                        Log in to compete <span aria-hidden="true" class="ml-2">&rarr;</span>
+                    </a>
+                    <a href="#about" class="rounded-full border border-neutral-300 bg-white px-7 py-3 font-medium hover:bg-neutral-100">
+                        How it works
                     </a>
                 </div>
 
-                <!-- Mobile Menu Button -->
-                <button id="mobileMenuBtn" class="md:hidden text-gray-700">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Mobile Menu -->
-            <div id="mobileMenu" class="hidden md:hidden mt-4 space-y-3 animate-fade-in">
-                <a href="#home"
-                    class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition duration-200">Home</a>
-                <a href="#about"
-                    class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition duration-200">About</a>
-                <a href="{{ url('login') }}"
-                    class="block px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg text-center">Login</a>
-            </div>
-        </div>
-    </nav>
-
-
-    <!-- Hero Content -->
-    <div class="container mx-auto max-w-7xl px-8 md:px-12 py-12">
-        <!-- Hero Section -->
-        <section id="home" class="mb-16 animate-fade-in">
-            <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-3xl overflow-hidden shadow-2xl">
-
-                <div class="grid md:grid-cols-2 gap-12 items-center">
-
-                    <!-- LEFT: Hero Content -->
-                    <div class="p-10 md:p-16">
-                        <div
-                            class="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-black to-gray-500 text-white font-medium mb-6 animate-slide-in">
-                            <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                            Annual Coding Competition
+                <div class="max-w-3xl mx-auto mt-10 overflow-hidden rounded-3xl border border-neutral-200 bg-white text-left shadow-sm">
+                    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 px-6 py-4">
+                        <h2 class="text-sm font-semibold">Inside a coding challenge</h2>
+                        <span class="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-600">Example only</span>
+                    </div>
+                    <div class="grid md:grid-cols-2">
+                        <div class="p-6 sm:p-8">
+                            <h3 class="text-2xl font-medium tracking-tight">Add two numbers.</h3>
+                            <p class="mt-3 text-sm leading-relaxed text-neutral-600">Read two numbers and print their sum.</p>
+                            <dl class="mt-5 flex gap-10 text-sm">
+                                <div>
+                                    <dt class="mb-2 text-neutral-600">Input</dt>
+                                    <dd class="font-mono whitespace-pre-line">7
+5</dd>
+                                </div>
+                                <div>
+                                    <dt class="mb-2 text-neutral-600">Output</dt>
+                                    <dd class="font-mono">12</dd>
+                                </div>
+                            </dl>
                         </div>
+                        <div class="m-4 mt-0 md:mt-4 flex min-w-0 flex-col justify-center rounded-2xl bg-neutral-900 p-6 sm:p-8 text-neutral-100">
+                            <p class="mb-5 font-mono text-xs text-neutral-400">solution.py</p>
+                            <pre class="font-mono text-sm leading-relaxed whitespace-pre-wrap wrap-anywhere"><code>a = <span class="text-violet-300">int</span>(input())
+b = <span class="text-violet-300">int</span>(input())
+<span class="text-violet-300">print</span>(a + b)</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-                        <h1 class="text-5xl md:text-6xl font-bold mb-6 gradient-text animate-slide-in"
-                            style="animation-delay: 0.1s">
-                            Code. Compete. Conquer.
-                        </h1>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+            <section id="about" aria-labelledby="steps-title" class="py-10 sm:py-14">
+                <div class="mb-8 text-center">
+                    <h2 id="steps-title" class="text-3xl sm:text-4xl font-medium tracking-tight">Three steps to compete</h2>
+                    <p class="mt-3 text-neutral-600">From your first login to your final submission.</p>
+                </div>
 
-                        <p class="text-gray-800 text-lg mb-8 animate-slide-in" style="animation-delay: 0.2s">
-                            Apil mo sa Hunger games kit awon nato inyoha utok kong ma kaya ninyo og solve ning ge himo
-                            namo
-                            na mga Coding problems.
+                <ol class="grid md:grid-cols-3 gap-5">
+                    <li class="rounded-3xl bg-neutral-100 p-6 sm:p-8">
+                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white font-mono text-sm" aria-hidden="true">01</span>
+                        <h3 class="mt-6 text-xl font-medium tracking-tight">Log in</h3>
+                        <p class="mt-3 text-sm leading-relaxed text-neutral-600">
+                            Use your competition account. Need one?
+                            <a href="{{ url('/register') }}" class="rounded-sm font-medium text-neutral-900 underline underline-offset-4">Register</a>
+                            when your organizer opens sign-ups.
                         </p>
+                    </li>
+                    <li class="rounded-3xl bg-neutral-100 p-6 sm:p-8">
+                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white font-mono text-sm" aria-hidden="true">02</span>
+                        <h3 class="mt-6 text-xl font-medium tracking-tight">Solve a problem</h3>
+                        <p class="mt-3 text-sm leading-relaxed text-neutral-600">Choose a challenge, read the instructions, and write your solution. Use program input to test your code before submitting.</p>
+                    </li>
+                    <li class="rounded-3xl bg-neutral-100 p-6 sm:p-8">
+                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white font-mono text-sm" aria-hidden="true">03</span>
+                        <h3 class="mt-6 text-xl font-medium tracking-tight">Submit your solution</h3>
+                        <p class="mt-3 text-sm leading-relaxed text-neutral-600">Send your solution for scoring and track your progress through the competition. Keep an eye on the timer while you work.</p>
+                    </li>
+                </ol>
+            </section>
 
-                        <div class="flex flex-col sm:flex-row gap-4 animate-slide-in" style="animation-delay: 0.3s">
-                            <a href="{{ url('login') }}"
-                                class="px-8 py-4 bg-gradient-to-r from-black to-gray-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition duration-200 transform hover:-translate-y-1">
-                                Join Competition
-                            </a>
-                            <a href="#about"
-                                class="px-8 py-4 bg-white text-gray-700 font-semibold rounded-xl shadow-md hover:shadow-lg transition duration-200 transform hover:-translate-y-1 border border-gray-200">
-                                Learn More
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="relative p-8 md:p-12 flex justify-center">
-                        <div class="relative animate-float max-w-md w-full">
-
-                            <!-- floating blobs -->
-                            <div
-                                class="absolute -top-6 -left-6 w-24 h-24 bg-gradient-to-r from-black to-gray-600 rounded-2xl opacity-20 animate-pulse">
-                            </div>
-                            <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-gradient-to-r from-black to-gray-600 rounded-2xl opacity-20 animate-pulse"
-                                style="animation-delay: 1s">
-                            </div>
-
-                            <!-- code card -->
-                            <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden">
-                                <div class="bg-gradient-to-r from-black to-gray-600 p-6 text-white">
-                                    <div class="flex items-center justify-between">
-                                        <h3 class="font-bold text-lg">Live Coding Arena</h3>
-                                        <div class="flex items-center">
-                                            <div class="w-3 h-3 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-                                            <span class="text-sm">Live</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="p-6 bg-gray-900 text-green-400 font-mono">
-                                    <div class="text-sm space-y-1">
-                                        <div>
-                                            <span class="text-purple-400">public static void</span>
-                                            <span class="text-blue-400">solveAkoaProblema</span>() &#123;
-                                        </div>
-                                        <div class="ml-4">
-                                            <span class="text-yellow-400">return</span>
-                                            <span class="text-green-400">"Way kuwarta"</span>;
-                                        </div>
-                                        <div>&#125;</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
+            <section aria-labelledby="team-title" class="my-6 sm:my-10 rounded-3xl border border-neutral-200 px-6 py-8 sm:p-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div class="max-w-2xl">
+                    <p class="mb-3 text-sm text-neutral-600">ACLC Programmers' Guild</p>
+                    <h2 id="team-title" class="text-2xl sm:text-3xl font-medium tracking-tight">Meet the team behind the competition.</h2>
+                    <p class="mt-3 text-sm leading-relaxed text-neutral-600">Get to know the guild members who built the platform.</p>
                 </div>
-            </div>
-    </div>
-    </div>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="mb-16 animate-fade-in" style="animation-delay: 0.2s">
-        <div class="max-w-7xl mx-auto px-6 lg:px-12">
-            <div class="text-center mb-12">
-                <h2 class="h2 text-4xl font-bold mb-4">Why Compete With Us?</h2>
-                <p class="text-white max-w-2xl mx-auto">
-                    Wa lang to test kong kinsay welling mo test sa ilaha ka utokan especially sa mga Bright diha og
-                    minds.
-                </p>
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-8 mb-12">
-                <!-- Feature 1 -->
-                <div
-                    class="bg-white rounded-2xl shadow-lg p-8 transition duration-300 transform hover:-translate-y-2 hover:shadow-xl">
-                    <div
-                        class="w-16 h-16 rounded-xl bg-gradient-to-r from-gray-600 to-gray-400 flex items-center justify-center mb-6 mx-auto">
-                        <svg class="w-8 h-8 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                        </svg>
-                    </div>
-                    <section class="features">
-                        <h3 class="text-xl font-bold mb-4 text-center">Real-time Challenges</h3>
-                    </section>
-                    <p class="text-gray-800 text-center">Tackle live coding problems with increasing difficulty levels
-                        and real-time leaderboard updates.</p>
-                </div>
-
-                <!-- Feature 2 -->
-                <div
-                    class="bg-white rounded-2xl shadow-lg p-8 transition duration-300 transform hover:-translate-y-2 hover:shadow-xl">
-                    <div
-                        class="w-16 h-16 rounded-xl bg-gradient-to-r from-gray-600 to-gray-400 flex items-center justify-center mb-6 mx-auto">
-                        <svg class="w-8 h-8 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                    </div>
-                    <section class="features">
-                        <h3 class="text-xl font-bold mb-4 text-center">Di mo ka gawas hantod di mo ma tima</h3>
-                    </section>
-                    <p class="text-gray-800 text-center">
-                        E make sure namo na ma hunger sa mo before mo maka games.
-                    </p>
-                </div>
-
-                <!-- Feature 3 -->
-                <div
-                    class="bg-white rounded-2xl shadow-lg p-8 transition duration-300 transform hover:-translate-y-2 hover:shadow-xl">
-                    <div
-                        class="w-16 h-16 rounded-xl bg-gradient-to-r from-gray-600 to-gray-400 flex items-center justify-center mb-6 mx-auto">
-                        <svg class="w-8 h-8 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                    </div>
-                    <section class="features">
-                        <h3 class="text-xl font-bold mb-4 text-center">Community Network</h3>
-                    </section>
-                    <p class="text-gray-800 text-center">
-                        Maka kita ka sa imo katapad na naka solved na sa problems niya ikaw wala pa.
-                    </p>
-                </div>
-            </div>
+                <a href="{{ url('/credits') }}" class="shrink-0 self-start rounded-full border border-neutral-300 px-6 py-3 text-sm font-semibold hover:bg-neutral-100 md:self-center">
+                    Meet the team <span aria-hidden="true" class="ml-2">&rarr;</span>
+                </a>
+            </section>
         </div>
-    </section>
-
-    {{-- Members --}}
-    @php
-        $roleOrder = ['Guild Adviser', 'President', 'Vice President', 'Secretary', 'Guild Member'];
-
-        $members = [
-            [
-                'name' => 'Dunhill Leal',
-                'role' => 'Guild Elder',
-                'age' => 'Secret',
-                'github' => 'https://github.com/TheDirtiestRat',
-                'photo' => 'images/guild/dunhill.png',
-            ],
-            [
-                'name' => 'Miko Carlo A. Arar',
-                'role' => 'President',
-                'age' => 23,
-                'github' => 'https://github.com/mekowkowwe',
-                'photo' => 'images/guild/miko.jpg',
-            ],
-            [
-                'name' => 'Mark James V. Felecio',
-                'role' => 'Vice President',
-                'age' => 19,
-                'github' => 'https://github.com/mjfelecio',
-                'photo' => 'images/guild/mark.png',
-            ],
-            [
-                'name' => 'Avelino Magallanes',
-                'role' => 'Secretary',
-                'age' => 20,
-                'github' => 'https://github.com/The-Grim-Reaper110011101',
-                'photo' => 'images/guild/ave.png',
-            ],
-            [
-                'name' => 'Dj Lynn Marie J. Lanuza',
-                'role' => 'Guild Member',
-                'age' => 22,
-                'github' => 'https://github.com/dejayy27',
-                'photo' => 'images/guild/dj.png',
-            ],
-            [
-                'name' => 'Justine Dorae L. Suralta',
-                'role' => 'Guild Member',
-                'age' => 20,
-                'github' => 'https://github.com/Coffleatea',
-                'photo' => 'images/guild/justine.png',
-            ],
-            [
-                'name' => 'Jeson Beltran',
-                'role' => 'Guild Member',
-                'age' => 20,
-                'github' => 'https://github.com/Katsura6',
-                'photo' => 'images/guild/jeson.png',
-            ],
-            [
-                'name' => 'John Kenneth D. Dignos',
-                'role' => 'Guild Member',
-                'age' => 21,
-                'github' => 'https://github.com/IceNinja2017',
-                'photo' => 'images/guild/kenneth.png',
-            ],
-            [
-                'name' => 'John Ashly O. Gasacao',
-                'role' => 'Guild Member',
-                'age' => 20,
-                'github' => 'https://github.com/OfficialSage26',
-                'photo' => 'images/guild/ashly.png',
-            ],
-        ];
-
-        $members = collect($members)
-            ->sortBy(function ($member) use ($roleOrder) {
-                return array_search($member['role'], $roleOrder, true);
-            })
-            ->values();
-
-        $tiers = [
-            [
-                'title' => 'Guild Elder',
-                'members' => $members->where('role', 'Guild Elder')->values(),
-                'grid' => 'max-w-sm grid-cols-1',
-            ],
-            [
-                'title' => 'Officers',
-                'members' => $members->whereIn('role', ['President', 'Vice President', 'Secretary'])->values(),
-                'grid' => 'max-w-5xl grid-cols-1 md:grid-cols-3',
-            ],
-            [
-                'title' => 'Guild Members',
-                'members' => $members->where('role', 'Guild Member')->values(),
-                'grid' => 'max-w-5xl grid-cols-1 sm:grid-cols-2',
-            ],
-        ];
-    @endphp
-
-    <main class="mb-16 container max-w-[800px] mx-auto flex flex-col gap-4">
-        <section class="max-w-[800px] mx-auto bg-base-300 rounded-2xl grid p-8 place-items-center text-center">
-            <h1 class="text-4xl font-bold md:text-5xl">Programmers&apos; Guild Credits</h1>
-            <p class="mx-auto mt-4 max-w-3xl text-lg text-base-content/80">
-                Meet the team behind the platform.
-            </p>
-        </section>
-
-        <section class="space-y-4">
-            @foreach ($tiers as $tier)
-                <div>
-                    <p class="text-center text-xs font-semibold uppercase tracking-widest text-base-content/70 mb-2">
-                        {{ $tier['title'] }}
-                    </p>
-
-                    <div class="flex justify-center">
-                        <div class="grid gap-3 w-full {{ $tier['grid'] }}">
-                            @foreach ($tier['members'] as $member)
-                                @php
-                                    $isLastOddMember =
-                                        $tier['title'] === 'Guild Members' &&
-                                        $tier['members']->count() % 2 === 1 &&
-                                        $loop->last;
-
-                                    $initials = collect(explode(' ', $member['name']))
-                                        ->filter()
-                                        ->map(function ($part) {
-                                            return strtoupper(substr($part, 0, 1));
-                                        })
-                                        ->take(2)
-                                        ->implode('');
-                                @endphp
-
-                                <article @class([
-                                    'rounded-2xl bg-base-100 p-6 shadow border border-base-300',
-                                    'sm:col-span-2 sm:justify-self-center sm:w-1/2' => $isLastOddMember,
-                                ])>
-                                    @if (!empty($member['photo']) && file_exists(public_path($member['photo'])))
-                                        <img src="{{ asset($member['photo']) }}" alt="{{ $member['name'] }}"
-                                            class="mx-auto mb-4 h-24 w-24 rounded-3xl object-cover border border-base-300 shadow">
-                                    @else
-                                        <div
-                                            class="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-3xl bg-neutral text-3xl font-extrabold text-neutral-content shadow">
-                                            {{ $initials }}
-                                        </div>
-                                    @endif
-
-                                    <h2 class="text-center text-2xl font-bold">{{ $member['name'] }}</h2>
-
-                                    <div class="mt-4 flex items-center justify-center gap-2">
-                                        <span class="badge badge-primary badge-soft">{{ $member['role'] }}</span>
-                                        <span class="badge badge-ghost">Age {{ $member['age'] }}</span>
-                                    </div>
-
-                                    @if (!empty($member['github']))
-                                        <a href="{{ $member['github'] }}" target="_blank" rel="noopener noreferrer"
-                                            class="btn btn-neutral mt-5 w-full rounded-xl">
-                                            GitHub
-                                        </a>
-                                    @endif
-                                </article>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </section>
     </main>
 
-    <!-- Footer -->
-    <div class="px-4 sm:px-6 lg:px-8">
-        <footer class="bg-gradient-to-r from-gray-900 to-black text-white rounded-3xl overflow-hidden shadow-2xl">
-            <div class="p-12">
-                <div class="grid md:grid-cols-3 gap-8">
-                    <!-- Brand Info -->
-                    <div class="animate-slide-in">
-                        <div class="flex items-center space-x-3 mb-6">
-                            <div
-                                class="w-12 h-12 rounded-xl bg-gradient-to-r from-black to-gray-800 flex items-center justify-center">
-                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold">The Hunger Games</h3>
-                                <p class="text-gray-400 text-sm">Coding Competition</p>
-                            </div>
-                        </div>
-                        <p class="text-gray-400 mb-6">
-                            ACLC Programmers Guild.
-                            <br />
-                            Providing un-reliable tech since 2022 but most trusted
-                        </p>
-                        <p class="text-gray-500 text-sm">Copyright © {{ date('Y') }} - All rights reserved</p>
-                    </div>
-
-                    <!-- Quick Links -->
-                    <div class="animate-slide-in" style="animation-delay: 0.1s">
-                        <h4 class="text-lg font-bold mb-6">Quick Links</h4>
-                        <ul class="space-y-3">
-                            <li><a href="#home"
-                                    class="text-gray-400 hover:text-white transition duration-200">Home</a>
-                            </li>
-                            <li><a href="#about"
-                                    class="text-gray-400 hover:text-white transition duration-200">About</a>
-                            </li>
-                            <li><a href="{{ url('login') }}"
-                                    class="text-gray-400 hover:text-white transition duration-200">Login</a></li>
-                        </ul>
-                    </div>
-
-                    <!-- Social Media -->
-                    <div class="animate-slide-in" style="animation-delay: 0.2s">
-                        <h4 class="text-lg font-bold mb-6">Connect With Us</h4>
-                        <div class="flex space-x-4">
-                            <a href="#"
-                                class="w-12 h-12 rounded-full bg-gray-800 hover:bg-blue-600 flex items-center justify-center transition duration-300 transform hover:-translate-y-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30"
-                                    viewBox="0 0 24 24" class="fill-current">
-                                    <path
-                                        d="M15 8.8V6.9c0-.6.4-.9 1-.9h2V3h-2.8c-2.8 0-4.2 1.7-4.2 4.1v1.7H9v3h2v9h3v-9h2.7l.4-3H14z" />
-                                </svg>
-
-
-
-
-                            </a>
-                            <a href="/credits"
-                                class="w-12 h-12 rounded-full bg-gray-800 hover:bg-gray-600
-           flex items-center justify-center transition duration-300
-           transform hover:-translate-y-1">
-                                <img src="{{ asset('images/officialLogo.png') }}" class="w-12 h-12 object-contain" />
-                            </a>
-                        </div>
-                        <p class="text-gray-400 mt-6">Follow us to know more about the ACLC Programmers Guild.</p>
-                    </div>
-                </div>
+    <footer class="mt-12 border-t border-neutral-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 flex flex-wrap items-center justify-between gap-5">
+            <div>
+                <p class="font-semibold">Coding competition</p>
+                <p class="mt-2 text-sm text-neutral-600">ACLC Programmers' Guild &middot; &copy; {{ date('Y') }}</p>
             </div>
-        </footer>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Mobile menu toggle
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const mobileMenu = document.getElementById('mobileMenu');
-
-            mobileMenuBtn.addEventListener('click', function() {
-                mobileMenu.classList.toggle('hidden');
-            });
-
-            // Close mobile menu when clicking outside
-            document.addEventListener('click', function(event) {
-                if (!mobileMenuBtn.contains(event.target) && !mobileMenu.contains(event.target)) {
-                    mobileMenu.classList.add('hidden');
-                }
-            });
-
-            // Smooth scrolling for anchor links
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const targetId = this.getAttribute('href');
-                    if (targetId === '#') return;
-
-                    const targetElement = document.querySelector(targetId);
-                    if (targetElement) {
-                        // Close mobile menu if open
-                        mobileMenu.classList.add('hidden');
-
-                        window.scrollTo({
-                            top: targetElement.offsetTop - 80,
-                            behavior: 'smooth'
-                        });
-                    }
-                });
-            });
-
-            // Add animation on scroll
-            const observerOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            };
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('animate-fade-in');
-                    }
-                });
-            }, observerOptions);
-
-            // Observe all sections for animation
-            document.querySelectorAll('section').forEach(section => {
-                observer.observe(section);
-            });
-        });
-    </script>
+            <nav aria-label="Footer navigation" class="flex flex-wrap gap-2 text-sm">
+                <a href="#home" class="rounded-lg px-3 py-3 hover:bg-neutral-100">Home</a>
+                <a href="#about" class="rounded-lg px-3 py-3 hover:bg-neutral-100">How it works</a>
+                <a href="{{ url('/login') }}" class="rounded-lg px-3 py-3 hover:bg-neutral-100">Log in</a>
+            </nav>
+        </div>
+    </footer>
 </body>
 
 </html>
